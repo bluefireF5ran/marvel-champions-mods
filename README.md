@@ -27,6 +27,7 @@ intellectual property of Fantasy Flight Games and Marvel.
      evidence: <a link to where permission was given>
      date: YYYY-MM-DD
    tags: [hero]
+   summary: One line for the store list. # optional; defaults to the first line of the pack's description
    ```
 
 4. **CI checks it.** It builds the pack from `commit`, validates it, plays the smoke games and comments the pack's
@@ -50,3 +51,15 @@ adds it. Ask in the game's
 The full design is in
 [docs/custom-content-packs.md](https://github.com/quincarter/marvel-champions-digital-game/blob/feature/custom-content-packs/docs/custom-content-packs.md)
 §11 in the game's repo.
+
+## Maintainer setup
+
+- `check.yml` runs on every submission pull request. It rebuilds the pack from `commit` with no secrets (a
+  submission's pack code runs in that job) and puts its summary on the run's page.
+- `publish.yml` runs on a merge to `main`. A job without secrets builds the changed packs. A second job, in the
+  `store` environment, uploads them to R2, makes a release here as the fallback download, and regenerates
+  `index.json`. Published versions are immutable: a version already in the bucket fails the run.
+- Before the first publish, set these on this repo:
+  - Actions secrets: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`;
+  - Actions variable `PACKS_BASE_URL`, for example `https://packs.<domain>`;
+  - optionally, the variable `R2_BUCKET`, which defaults to `mc-packs`.

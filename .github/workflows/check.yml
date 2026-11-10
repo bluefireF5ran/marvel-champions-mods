@@ -1,0 +1,51 @@
+# Checks a submission: rebuilds each added or changed pack from its `commit`, validates it and plays its smoke games,
+# then comments what it found. No secrets: a submission's pack code runs here, so this job gets a read-only token.
+name: Check submission
+
+on:
+  pull_request:
+    paths: ["packs/*.yaml"]
+
+permissions:
+  contents: read
+
+jobs:
+  changed:
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.list.outputs.files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: list
+        run: |
+          files=$(git diff --name-only --diff-filter=AM "origin/${{ github.base_ref }}...HEAD" -- 'packs/*.yaml' | jq -R . | jq -sc .)
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+
+  check:
+    needs: changed
+    if: needs.changed.outputs.files != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file: ${{ fromJson(needs.changed.outputs.files) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build and check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/build-entry.sh "${{ matrix.file }}" "$RUNNER_TEMP/pack"
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/pack/summary.md" ]; then cat "$RUNNER_TEMP/pack/summary.md" >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: summary-${{ strategy.job-index }}
+          path: ${{ runner.temp }}/pack/summary.md

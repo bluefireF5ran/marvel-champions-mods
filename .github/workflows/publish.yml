@@ -1,0 +1,104 @@
+# Publishes approved packs: on a merge to main, rebuilds each added or changed pack, uploads it to the R2 bucket and
+# to a release of this repo (the fallback), and regenerates the store's index.json. A deleted packs/<id>.yaml drops
+# the pack from the index (withdrawn).
+#
+# The build runs pack code, so it runs in a job without the R2 secrets; only the upload job has them.
+#
+# Secrets: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY. Variables: PACKS_BASE_URL (e.g.
+# https://packs.example.app), R2_BUCKET (default mc-packs).
+name: Publish packs
+
+on:
+  push:
+    branches: [main]
+    paths: ["packs/*.yaml"]
+  workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build changed packs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p published
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            files=$(ls packs/*.yaml 2>/dev/null || true)
+          else
+            files=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- 'packs/*.yaml')
+          fi
+          for file in $files; do
+            id=$(basename "$file" .yaml)
+            work="$RUNNER_TEMP/$id"
+            bash scripts/build-entry.sh "$file" "$work"
+            mkdir -p "published/$id"
+            cp "$work/entry.json" "$work/zip.sha256" "$work/out/pack.json" "$work/out/"*.zip "published/$id/"
+            if [ -f "$work/src/thumb.webp" ]; then cp "$work/src/thumb.webp" "published/$id/"; fi
+          done
+          ls packs/*.yaml 2>/dev/null | xargs -rn1 basename | sed 's/\.yaml$//' > published/ids.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: published
+          path: published
+
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: store
+    permissions:
+      contents: write
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      BUCKET: ${{ vars.R2_BUCKET || 'mc-packs' }}
+      BASE_URL: ${{ vars.PACKS_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: published
+          path: published
+      - name: Upload packs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test -n "$BASE_URL" || { echo "::error::set the PACKS_BASE_URL variable"; exit 1; }
+          for dir in published/*/; do
+            id=$(basename "$dir")
+            version=$(jq -r '.version' "$dir/pack.json")
+            zip="$id-$version.zip"
+            # Published versions are immutable: a version already in the bucket is never overwritten.
+            if aws s3api head-object --endpoint-url "$ENDPOINT" --bucket "$BUCKET" --key "$id/$version/$zip" >/dev/null 2>&1; then
+              echo "::error::$id $version is already published; bump the pack's version"; exit 1
+            fi
+            for file in "$dir"*; do
+              case "$(basename "$file")" in entry.json|zip.sha256) continue ;; esac
+              aws s3 cp "$file" "s3://$BUCKET/$id/$version/$(basename "$file")" --endpoint-url "$ENDPOINT" \
+                --cache-control "public, max-age=31536000, immutable"
+            done
+            gh release create "$id-v$version" "$dir$zip" --title "$id $version" --notes "Approved pack $id $version." \
+              || gh release upload "$id-v$version" "$dir$zip" --clobber
+          done
+      - name: Update index.json
+        run: |
+          aws s3 cp "s3://$BUCKET/index.json" current.json --endpoint-url "$ENDPOINT" || echo '{"schema":2,"packs":[]}' > current.json
+          node scripts/update-index.mjs current.json published published/ids.txt "$BASE_URL" \
+            "https://github.com/${{ github.repository }}/releases/download" > index.json
+          aws s3 cp index.json "s3://$BUCKET/index.json" --endpoint-url "$ENDPOINT" \
+            --content-type application/json --cache-control "public, max-age=300"
