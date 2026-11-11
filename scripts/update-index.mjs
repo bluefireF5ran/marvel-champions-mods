@@ -15,7 +15,11 @@ const current = currentPath !== "-" && existsSync(currentPath) ? read(currentPat
 const liveIds = new Set(readFileSync(idsPath, "utf8").split("\n").filter(Boolean));
 const today = new Date().toISOString().slice(0, 10);
 
-const byId = new Map(current.packs.filter((pack) => liveIds.has(pack.id)).map((pack) => [pack.id, pack]));
+// The game repo publishes its own packs into the same index.json (its publish-packs workflow): only entries this
+// registry published (`source: "registry"`) are withdrawn when their packs/<id>.yaml is gone; the rest are kept.
+const byId = new Map(
+  current.packs.filter((pack) => pack.source !== "registry" || liveIds.has(pack.id)).map((pack) => [pack.id, pack]),
+);
 
 for (const id of existsSync(publishedDir) ? readdirSync(publishedDir) : []) {
   const dir = join(publishedDir, id);
@@ -49,6 +53,7 @@ for (const id of existsSync(publishedDir) ? readdirSync(publishedDir) : []) {
       },
     },
     withdrawn: false,
+    source: "registry",
   });
 }
 
