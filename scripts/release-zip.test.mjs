@@ -1,4 +1,4 @@
-// node --test "scripts/*.test.mjs" (the check workflow). A repo entry's rebuilt zip must match the zip on the
+// node --test "scripts/*.test.mjs" (the script tests workflow). A repo entry's rebuilt zip must match the zip on the
 // creator's release: scripts/fetch-release.sh (gh stubbed on PATH) and scripts/compare-release-zip.mjs.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";

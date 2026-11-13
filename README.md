@@ -97,11 +97,18 @@ The full design is in
 
 ## Maintainer setup
 
-- `check.yml` runs on every pull request. It rebuilds the pack from `commit` with no secrets (a submission's pack
-  code runs in that job) and puts its summary on the run's page. A repo entry's tagged release must carry the zip
-  `mc-pack build` wrote, byte for byte: a missing or different zip fails the check. The read-only GitHub token only
-  reaches the step that downloads that zip, never the step that runs pack code. Its last job, **All checks**, is the
-  one the branch ruleset requires.
+- `check.yml` runs on every pull request, as `pull_request_target`: the workflow and every script it runs come from
+  `main`, never from the pull request, so a pull request that changes `scripts/` or `.github/` can't change what checks
+  it. Its `gate` job reads the pull request through the GitHub API (the changed files, each entry's YAML, the
+  creator's release zip, with a read-only token) and fails a submission from anyone without write access that touches
+  anything but one `packs/<id>.yaml`. It fails closed: a changed entry or pack folder that yields nothing to check
+  fails the gate. Each entry is then rebuilt from `commit` in a job with `permissions: {}`, no checkout and no token
+  (the pack's code runs there), from `main`'s scripts handed on by the gate. A repo entry's tagged release must carry
+  the zip `mc-pack build` wrote, byte for byte. Its last job, **All checks**, is the one the branch ruleset requires;
+  it fails unless the gate passed and every entry it listed was checked.
+- `script-tests.yml` runs a pull request's own copy of the scripts' tests and `check-workflow-secrets.mjs`, with no
+  token. It is not required (a pull request controls it), so read it on a maintainer pull request that changes
+  `scripts/` or `.github/`: those changes only take effect in `check.yml` once merged.
 - `publish.yml` runs on a merge to `main`. A job without secrets builds the changed packs. A second job, in the
   `store` environment, uploads each version to R2 under `<id>/<version>/` (the zip, `pack.json`, and the
   `preview.json`, `thumb.webp` and card pictures the store shows before an install), makes a release here as the
@@ -124,7 +131,14 @@ These are repository settings, not files, and have to be set by the owner:
 - **Branch ruleset on `main`** (Settings > Rules > Rulesets), active, with no bypass list:
   - require a pull request before merging, with review from Code Owners ([`.github/CODEOWNERS`](.github/CODEOWNERS))
     and stale approvals dismissed on a new push;
-  - require the status check **All checks** (`check.yml`), with the branch up to date;
+  - require the status check **All checks** (`check.yml`), with the branch up to date. A pull request can add a
+    workflow with a job of the same name, so the required Code Owners review is what stops a submission that touches
+    `.github/`; the gate fails such a submission, and reviewers check that **All checks** comes from the
+    **Check submission** workflow;
   - block force pushes and deletion.
 - **`store` environment** (Settings > Environments), which holds the R2 secrets: deployment branches limited to
-  `main`, so no other branch's workflow can reach them.
+  `main`, so no other branch's workflow can reach them. Keep the R2 secrets in that environment only, never as
+  repository secrets: `check.yml` runs on `pull_request_target`, where repository secrets would be within reach.
+- **Fork pull requests** (Settings > Actions > General): this repo is private, so allow workflows to run from fork
+  pull requests (without sending write tokens or secrets to them), or submissions from forks get no check. Require
+  approval for outside contributors' runs.

@@ -1,4 +1,4 @@
-// node --test "scripts/*.test.mjs" (the check workflow). The publish workflow's hand-off from the build job to the
+// node --test "scripts/*.test.mjs" (the script tests workflow). The publish workflow's hand-off from the build job to the
 // upload job: scripts/stage-pack.mjs stages what `mc-pack build --out` wrote, and scripts/update-index.mjs (as the
 // workflow runs it) turns the staging folder and the live ids into index.json, including runs that stage no pack.
 import assert from "node:assert/strict";

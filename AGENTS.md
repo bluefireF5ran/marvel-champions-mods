@@ -37,7 +37,9 @@ intellectual property of Fantasy Flight Games and Marvel.
   `build-entry.sh` installs and **runs the pack's code** (`npm ci`, `mc-pack`): run it only on a pack you were asked
   to check, and never in a shell that holds secrets (cloud credentials, tokens in the environment). It never needs a
   GitHub token; keep `GH_TOKEN` out of its environment.
-- **Run this repo's own tests**: `node --test "scripts/*.test.mjs"` and `node scripts/check-workflow-secrets.mjs`.
+- **Run this repo's own tests**: `node --test "scripts/*.test.mjs"` and `node scripts/check-workflow-secrets.mjs`
+  (the Script tests workflow runs both). The Check submission workflow runs `main`'s copies of the scripts, never a
+  pull request's, so a script change is only checked there once merged.
 - **Read a pull request's check** for a creator: `gh pr checks <number> --repo quincarter/marvel-champions-mods`, and
   `gh run view <run id> --repo quincarter/marvel-champions-mods --log-failed` for a failure. The template's
   [Troubleshooting](https://github.com/quincarter/marvel-champions-mod-template/blob/main/SUBMITTING.md#troubleshooting)

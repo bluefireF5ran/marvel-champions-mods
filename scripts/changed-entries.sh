@@ -6,6 +6,10 @@
 # An entry is touched when its .yaml is added or changed, when a file of a pack kept in this repo (packs/<id>/...)
 # changes, or, for every pack kept here, when the repo's own SDK version (package.json, package-lock.json) changes.
 # Deleted entries are not listed (a deletion withdraws the pack; the publish workflow handles that from the ids).
+#
+# Only publish.yml uses this, on a push to main (merged, reviewed code). The pull request check never runs it: a
+# pull request could change it to list nothing, so check.yml lists a pull request's entries with scripts/pr-gate.mjs
+# from the base branch, through the GitHub API.
 set -euo pipefail
 base="$1"
 changed=$(git diff --name-only "$base" HEAD)

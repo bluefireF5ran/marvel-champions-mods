@@ -77,7 +77,9 @@ it covers, and the checklist.
 
 ## What the check does
 
-Every pull request runs the **Check submission** workflow. For each added or changed entry it:
+Every pull request runs the **Check submission** workflow. It runs `main`'s copy of this repo's scripts, never
+your pull request's, and fails if your pull request changes anything but your one `packs/<id>.yaml`. For each added
+or changed entry it:
 
 1. checks the file: the name matches `id`, the fields above are present and well-formed;
 2. checks that `tag` points at `commit` in your repo, and downloads `<id>-<version>.zip` from that tag's release;
@@ -89,7 +91,7 @@ Every pull request runs the **Check submission** workflow. For each added or cha
 4. compares the zip it built with your release's zip, byte for byte. They must match, so what players install is
    what you published.
 
-The job runs your pack's code, so it has no secrets and a read-only token.
+The job that builds your pack runs its code, so it has no secrets, no token and no checkout of this repo.
 
 **Reading the result.** On the pull request, click **Details** next to the check, then **Summary**. For a passing
 entry it shows the version, the zip's size and sha256, the oldest game version that can load it ("Needs app"), the

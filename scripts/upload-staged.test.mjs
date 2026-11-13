@@ -1,4 +1,4 @@
-// node --test "scripts/*.test.mjs" (the check workflow). The publish workflow's upload step: immutable versions,
+// node --test "scripts/*.test.mjs" (the script tests workflow). The publish workflow's upload step: immutable versions,
 // and re-running it after a failure part way, with the bucket and the releases faked.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";

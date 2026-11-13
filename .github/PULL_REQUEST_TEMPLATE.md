@@ -24,7 +24,7 @@ Packs without permission evidence are never approved.
 
 ## Checklist
 
-The registry's check repeats the first five; tick them once you have checked them yourself.
+The registry's check repeats the first six; tick them once you have checked them yourself.
 
 - [ ] The file is `packs/<id>.yaml`, and `id` is the `id` in the pack's `pack.json`.
 - [ ] `commit` is the full 40-character sha the tag points at (`git rev-parse <tag>^{commit}`).

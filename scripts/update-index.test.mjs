@@ -1,4 +1,4 @@
-// node --test "scripts/*.test.mjs" (the check workflow). The registry's upsert into the store's index.json.
+// node --test "scripts/*.test.mjs" (the script tests workflow). The registry's upsert into the store's index.json.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { compareVersions, ownershipProblems, updateIndex } from "./update-index.mjs";

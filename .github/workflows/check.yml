@@ -1,104 +1,155 @@
 # Checks a submission: rebuilds each added or changed pack (from its `commit`, or its folder for a pack kept here),
-# validates it and plays its smoke games, then comments what it found. No secrets: a submission's pack code runs here,
-# so this job gets a read-only token.
+# validates it and plays its smoke games, and puts what it found on the run's Summary page.
 #
-# The read-only GitHub token is only handed to the step that downloads the creator's release zip
-# (scripts/fetch-release.sh), which runs before and apart from the step that installs and runs the pack's code
-# (scripts/build-entry.sh). No checkout keeps its token, since every job runs scripts the pull request can change.
+# Runs on `pull_request_target`, so this file and every script it runs come from the base branch (this workflow's own
+# commit, `github.sha`), never from the pull request: a pull request can change scripts/ or this file, and none of its
+# changes run here until a maintainer merges them. The pull request is read only as data, through the GitHub API:
 #
-# Runs on every pull request, so "All checks" (the check main's ruleset requires, README "Repository settings") always
-# reports.
+#   - `gate` (base branch's scripts, a read-only token, no pack code): lists the changed files through the API,
+#     refuses a submission from a non-maintainer that touches anything but packs/<id>.yaml (scripts/pr-gate.mjs),
+#     fails closed when a pack changed but no entry was found, fetches each entry's YAML and the creator's release zip
+#     (scripts/fetch-release.sh), and hands those and the base branch's scripts on as the `trusted` artifact;
+#   - `check` (one per entry, `permissions: {}`, no checkout, no token anywhere): runs the handed-on build-entry.sh,
+#     which installs and runs the pack's code;
+#   - `All checks`: the check main's ruleset requires. It passes only when the gate passed and every entry it listed
+#     was checked.
+#
+# Never add a checkout of the pull request's head or merge commit to this workflow, and never run a script from one in
+# a job that holds a token: scripts/check-workflow-secrets.mjs fails if either happens. The pull request's own script
+# changes are tested by script-tests.yml, which runs on `pull_request` with no token.
 name: Check submission
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
+concurrency:
+  group: check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
-  # This repo's own scripts: their tests, and the check that no job running pack code holds a secret (publish.yml).
-  scripts:
+  gate:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
+    outputs:
+      ids: ${{ steps.gate.outputs.ids }}
     steps:
+      # The base branch's scripts: this workflow's own commit, never the pull request's.
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test "scripts/*.test.mjs"
-      - run: node scripts/check-workflow-secrets.mjs
-
-  changed:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      files: ${{ steps.list.outputs.files }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - id: list
+      - name: List and gate the pull request's changes
+        id: gate
         env:
-          BASE_REF: ${{ github.base_ref }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          SENDER: ${{ github.event.sender.login }}
+          CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
+        run: node scripts/pr-gate.mjs "$RUNNER_TEMP/trusted"
+      # Downloads only; runs nothing it downloads.
+      - name: Fetch the creators' release zips
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          files=$(bash scripts/changed-entries.sh "$(git merge-base "origin/$BASE_REF" HEAD)" | jq -R . | jq -sc .)
-          echo "files=$files" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          shopt -s nullglob
+          for entry in "$RUNNER_TEMP"/trusted/entries/*.yaml; do
+            bash scripts/fetch-release.sh "$entry" "$RUNNER_TEMP/trusted/work/$(basename "$entry" .yaml)"
+          done
+      # A pack kept here is built from the pull request's folder, read as data from the head's tarball (with the root
+      # package.json / package-lock.json that pin its SDK).
+      - name: Fetch the folders of packs kept here
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          trusted="$RUNNER_TEMP/trusted"
+          if [ ! -s "$trusted/kept-ids.txt" ]; then echo "No pack kept here changed."; exit 0; fi
+          mkdir -p "$RUNNER_TEMP/head" "$trusted/source/packs"
+          gh api "repos/$REPO/tarball/$HEAD_SHA" > "$RUNNER_TEMP/head.tar.gz"
+          tar -xzf "$RUNNER_TEMP/head.tar.gz" -C "$RUNNER_TEMP/head" --strip-components=1
+          while read -r id; do
+            if [ -d "$RUNNER_TEMP/head/packs/$id" ]; then cp -r "$RUNNER_TEMP/head/packs/$id" "$trusted/source/packs/"; fi
+          done < "$trusted/kept-ids.txt"
+          for file in package.json package-lock.json; do
+            if [ -f "$RUNNER_TEMP/head/$file" ]; then cp "$RUNNER_TEMP/head/$file" "$trusted/source/"; fi
+          done
+      - name: Hand on the base branch's scripts
+        run: |
+          mkdir -p "$RUNNER_TEMP/trusted"
+          cp -r scripts "$RUNNER_TEMP/trusted/scripts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trusted
+          path: ${{ runner.temp }}/trusted
+          if-no-files-found: error
 
   check:
-    needs: changed
-    if: needs.changed.outputs.files != '[]'
+    needs: gate
+    if: needs.gate.outputs.ids != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        file: ${{ fromJson(needs.changed.outputs.files) }}
-    permissions:
-      contents: read
+        id: ${{ fromJson(needs.gate.outputs.ids) }}
+    # The pack's code runs here: no token, no checkout, nothing but the gate's artifact.
+    permissions: {}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # The only step with the token: it downloads, and runs no pack code.
-      - name: Fetch the creator's release zip
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ENTRY: ${{ matrix.file }}
-        run: bash scripts/fetch-release.sh "$ENTRY" "$RUNNER_TEMP/pack"
+      - uses: actions/download-artifact@v4
+        with:
+          name: trusted
+          path: ${{ runner.temp }}/trusted
       - name: Build and check
         env:
-          ENTRY: ${{ matrix.file }}
-        run: bash scripts/build-entry.sh "$ENTRY" "$RUNNER_TEMP/pack"
+          ID: ${{ matrix.id }}
+          SOURCE_ROOT: ${{ runner.temp }}/trusted/source
+        run: |
+          trusted="$RUNNER_TEMP/trusted"
+          bash "$trusted/scripts/build-entry.sh" "$trusted/entries/$ID.yaml" "$trusted/work/$ID"
       - name: Summary
         if: always()
+        env:
+          ID: ${{ matrix.id }}
         run: |
-          summary="$RUNNER_TEMP/pack/summary.md"
+          summary="$RUNNER_TEMP/trusted/work/$ID/summary.md"
           if [ -f "$summary" ]; then cat "$summary" >> "$GITHUB_STEP_SUMMARY"; fi
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: summary-${{ strategy.job-index }}
-          path: ${{ runner.temp }}/pack/summary.md
 
-  # The one check main's ruleset requires: it fails when any job above failed or was cancelled (a skipped `check`, on a
-  # pull request that touches no entry, passes).
+  # The one check main's ruleset requires. Fails unless the gate passed, and every entry it listed was checked (`check`
+  # may be skipped only when the gate listed none, which it does only when no pack file changed).
   all-checks:
     name: All checks
-    needs: [scripts, changed, check]
+    needs: [gate, check]
     if: always()
     runs-on: ubuntu-latest
     permissions: {}
     steps:
       - env:
-          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+          GATE: ${{ needs.gate.result }}
+          CHECK: ${{ needs.check.result }}
+          IDS: ${{ needs.gate.outputs.ids }}
         run: |
-          if [ "$FAILED" = "true" ]; then echo "::error::a required job failed or was cancelled"; exit 1; fi
-          echo "All checks passed."
+          if [ "$GATE" != "success" ]; then echo "::error::the gate did not pass ($GATE)"; exit 1; fi
+          if [ "$IDS" = "[]" ]; then
+            if [ "$CHECK" != "skipped" ]; then echo "::error::no entry was listed but the check ran ($CHECK)"; exit 1; fi
+            echo "No pack entry changed: nothing to check."
+            exit 0
+          fi
+          if [ -z "$IDS" ]; then echo "::error::the gate listed no entries"; exit 1; fi
+          if [ "$CHECK" != "success" ]; then echo "::error::checking the entries $IDS did not pass ($CHECK)"; exit 1; fi
+          echo "All checks passed for $IDS."

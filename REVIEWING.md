@@ -8,16 +8,20 @@ Copy this list into your review.
 
 ## 1. The pull request itself
 
-- [ ] It touches only `packs/<id>.yaml` (one pack). A submission that changes `scripts/`, `.github/`, `package.json`,
-      `package-lock.json` or another pack's file is closed: the check runs this repo's scripts from the pull request,
-      and only the maintainer changes them.
+- [ ] It touches only `packs/<id>.yaml` (one pack). The check's gate fails a submission from someone without write
+      access that changes anything else (`scripts/`, `.github/`, `package.json`, `package-lock.json`, a pack folder or
+      another entry), and the check always runs `main`'s scripts, never the pull request's. Close such a submission:
+      only the maintainer changes them.
 - [ ] It is not a `path:` entry or a change under `packs/<id>/`, unless the maintainer made it (packs kept here are
       maintainer-curated).
 - [ ] The pull request template is filled in.
 
 ## 2. The check
 
-- [ ] **All checks** is green on the latest push.
+- [ ] **All checks** from the **Check submission** workflow is green on the latest push (a pull request could add a
+      workflow with a job of the same name; it can't change Check submission, which runs from `main`).
+- [ ] On your own pull request that changes `scripts/` or `.github/`, **Script tests** is green too: Check submission
+      keeps running `main`'s scripts until the change is merged.
 - [ ] Open the **Check submission** run's **Summary** and note: version, zip size, "Needs app", "Needs packs", card
       pictures, and the engine features list. The items below use them.
 

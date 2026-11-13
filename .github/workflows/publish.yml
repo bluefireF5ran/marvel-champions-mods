@@ -6,7 +6,7 @@
 # The build runs pack code, so it runs in a job without secrets, with a read-only token and a checkout that keeps no
 # credentials. Even that token is only handed to the step that downloads the creators' release zips
 # (scripts/fetch-release.sh), before and apart from the step that installs and runs pack code. Only the upload job has
-# the R2 secrets, and it runs no pack code and installs nothing. scripts/check-workflow-secrets.mjs (run by check.yml)
+# the R2 secrets, and it runs no pack code and installs nothing. scripts/check-workflow-secrets.mjs (run by script-tests.yml)
 # fails if that changes.
 #
 # Each staged version is uploaded to <id>/<version>/: pack.json, preview.json, thumb.webp, the card pictures

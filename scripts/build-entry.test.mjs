@@ -1,4 +1,4 @@
-// node --test "scripts/*.test.mjs" (the check workflow). scripts/build-entry.sh refuses what the registry can't build
+// node --test "scripts/*.test.mjs" (the script tests workflow). scripts/build-entry.sh refuses what the registry can't build
 // yet before any pack code runs: `path` entries without the root SDK manifest, and packs that require other packs.
 // Needs bash, jq and yq on the PATH (the workflow's runner has them).
 import assert from "node:assert/strict";
