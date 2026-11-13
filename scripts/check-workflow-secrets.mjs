@@ -13,8 +13,17 @@
  * workflow that runs pack code sets `persist-credentials: false`, since its later steps run scripts a pull request
  * can change.
  *
+ * And whatever a workflow runs, the pull request's code never runs with a token:
+ *
+ *   - a `pull_request_target` workflow runs with the base repo's token, so none of its checkouts may take the pull
+ *     request's head or merge commit (`ref:` naming `pull_request.head`, `head_ref`, `refs/pull/`, the merge sha), no
+ *     step may `gh pr checkout` or fetch `refs/pull/`, a job in it that runs pack code must have `permissions: {}`, and
+ *     no job in it may use a cache (pack code could poison the base branch's cache);
+ *   - a `pull_request` workflow checks out the pull request's code, so no step there that holds a token may run one
+ *     of the repo's scripts (`bash scripts/...`, `node scripts/...`, `./scripts/...`): a pull request can change them.
+ *
  * The game repo (quincarter/marvel-champions-digital-game) has the original of this file, which its tests run; this
- * copy runs in the check workflow: keep the two the same.
+ * copy runs in the script tests workflow: keep the two the same.
  *
  * Usage: node scripts/check-workflow-secrets.mjs [workflows dir]   (exit 1 with the problems listed)
  */
@@ -27,6 +36,68 @@ export const PACK_CODE = /\bmc-pack\b|\bsmoke:dist\b|\bbuild-entry\.sh\b/;
 const INSTALL = /\b(pnpm|npm|yarn)\s+(install|ci|i)\b/;
 /** A GitHub token handed to a step or job. */
 const TOKEN = /\bGH_TOKEN\b|\bGITHUB_TOKEN\b|\bgithub\.token\b|\bsecrets\.GITHUB_TOKEN\b/;
+/** A checkout `ref:` / `repository:` naming the pull request's code. */
+const PR_CODE_REF = /\bpull_request\.head\b|\bhead_ref\b|refs\/pull\/|\bmerge_commit_sha\b|\bpull_request\.merge/;
+/** A run step that fetches the pull request's code as a checkout. */
+const PR_CODE_RUN = /\bgh\s+pr\s+checkout\b|refs\/pull\//;
+/** A run step running one of the repo's own scripts. */
+const REPO_SCRIPT = /(?:^|[\s;&|(])(?:(?:bash|sh|node|python3?)\s+(?:\.\/)?scripts\/|\.\/scripts\/)/m;
+const CACHE = /uses:\s*actions\/cache(?:\/\w+)?@|^\s+cache:/m;
+const CHECKOUT = /uses: actions\/checkout@/;
+
+/** The workflow's triggers, from its top-level `on:` block (comments dropped). */
+export function triggers(text) {
+  const lines = text.split(/\r?\n/).filter((line) => !/^\s*#/.test(line));
+  const start = lines.findIndex((line) => /^["']?on["']?:/.test(line));
+  if (start < 0) return { pullRequestTarget: false, pullRequest: false };
+  const end = lines.findIndex((line, i) => i > start && /^\S/.test(line));
+  const on = lines
+    .slice(start, end < 0 ? undefined : end)
+    .join("\n")
+    .replace(/^["']?on["']?:/, "");
+  const has = (event) => new RegExp(`(?:^|[\\s,[])${event}(?=[\\s,\\]:]|$)`, "m").test(on);
+  return { pullRequestTarget: has("pull_request_target"), pullRequest: has("pull_request") };
+}
+
+/** The problems with how a workflow treats the pull request's code, as `<job>: <problem>` lines. */
+export function checkPullRequestCode(text, { packCode = PACK_CODE } = {}) {
+  const { pullRequestTarget, pullRequest } = triggers(text);
+  const jobs = splitJobs(text);
+  const problems = [];
+  if (pullRequestTarget) {
+    const runsPackCode = jobs.some((job) => packCode.test(job.body));
+    for (const job of jobs) {
+      const { head, steps } = splitSteps(job.body);
+      for (const step of steps) {
+        const where = `${job.name}: step "${step.name}"`;
+        if (CHECKOUT.test(step.body) && PR_CODE_REF.test(step.body)) {
+          problems.push(`${where} checks out the pull request's code in a pull_request_target workflow`);
+        } else if (PR_CODE_RUN.test(step.body)) {
+          problems.push(`${where} fetches the pull request's code in a pull_request_target workflow`);
+        }
+      }
+      if (packCode.test(job.body) && !/^\s+permissions:\s*\{\s*\}\s*$/m.test(head)) {
+        problems.push(`${job.name}: runs pack code in a pull_request_target workflow without permissions: {}`);
+      }
+      if (runsPackCode && CACHE.test(job.body)) {
+        problems.push(`${job.name}: uses a cache in a pull_request_target workflow that runs pack code`);
+      }
+    }
+  }
+  if (pullRequest) {
+    for (const job of jobs) {
+      if (!CHECKOUT.test(job.body)) continue;
+      const { head, steps } = splitSteps(job.body);
+      const jobToken = TOKEN.test(head);
+      for (const step of steps) {
+        if ((jobToken || TOKEN.test(step.body)) && REPO_SCRIPT.test(step.body)) {
+          problems.push(`${job.name}: step "${step.name}" runs the pull request's scripts with a GitHub token`);
+        }
+      }
+    }
+  }
+  return problems;
+}
 
 /**
  * Splits a workflow's `jobs:` block into jobs by indentation, which is all this check needs (no YAML parser: the
@@ -88,8 +159,8 @@ export function splitSteps(body) {
 export function checkWorkflow(text, { packCode = PACK_CODE } = {}) {
   const jobs = splitJobs(text);
   const runsPackCode = (job) => packCode.test(job.body);
-  if (!jobs.some(runsPackCode)) return [];
-  const problems = [];
+  const problems = checkPullRequestCode(text, { packCode });
+  if (!jobs.some(runsPackCode)) return problems;
   for (const job of jobs) {
     if (runsPackCode(job)) {
       if (/\bsecrets\./.test(job.body)) problems.push(`${job.name}: runs pack code and references secrets`);
@@ -153,5 +224,5 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     for (const problem of problems) console.error(`::error::${problem}`);
     process.exit(1);
   }
-  console.log("No job that runs pack code holds a secret.");
+  console.log("No job that runs pack code holds a secret, and no pull request code runs with a token.");
 }
