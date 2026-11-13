@@ -32,24 +32,41 @@ function staged(id = "fan-gwenpool", version = "1.0.0", zipBody = "zip bytes") {
   return dir;
 }
 
-/** An in-memory bucket; `failOn(key)` makes the put of that key throw once, like a dropped connection. */
-function fakeStore() {
-  const objects = new Map();
+/**
+ * An in-memory bucket, honouring If-None-Match like R2; `failOn(key)` makes the put of that key throw once, like a
+ * dropped connection. Two stores over one `objects` map are two publishers writing the same bucket; `afterCheck`
+ * runs after each zipSha256 (a hook to line two publishers up).
+ */
+function fakeStore(objects = new Map(), { afterCheck = async () => {} } = {}) {
   let failKey;
   return {
     objects,
     failOn: (key) => (failKey = key),
     async zipSha256(key) {
       const object = objects.get(key);
+      await afterCheck();
       return object ? object.sha256 : null;
     },
-    async put(file, { sha256 } = {}) {
+    async put(file, { sha256, ifNoneMatch = false } = {}) {
       if (file.key === failKey) {
         failKey = undefined;
         throw new Error(`upload of ${file.key} failed`);
       }
+      if (ifNoneMatch && objects.has(file.key)) return "exists";
       objects.set(file.key, { body: readFileSync(file.path), sha256 });
+      return "written";
     },
+  };
+}
+
+/** Resolves once `count` callers are waiting on it: both publishers have checked the bucket before either uploads. */
+function barrier(count) {
+  let waiting = 0;
+  let release;
+  const all = new Promise((resolve) => (release = resolve));
+  return async () => {
+    if (++waiting === count) release();
+    await all;
   };
 }
 
@@ -155,6 +172,47 @@ describe("publishStaged", () => {
   });
 });
 
+describe("two publishers of one new version at once (this registry and the game repo)", () => {
+  const zipKey = "fan-gwenpool/1.0.0/fan-gwenpool-1.0.0.zip";
+
+  it("keeps the first zip and fails the other publisher when the zips differ", async () => {
+    const objects = new Map();
+    const afterCheck = barrier(2);
+    const results = await Promise.allSettled([
+      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "registry zip")), {
+        store: fakeStore(objects, { afterCheck }),
+        release: fakeReleases(),
+      }),
+      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "game repo zip")), {
+        store: fakeStore(objects, { afterCheck }),
+        release: fakeReleases(),
+      }),
+    ]);
+    assert.deepEqual(
+      results.map((r) => r.status),
+      ["fulfilled", "rejected"],
+    );
+    assert.match(results[1].reason.message, /published by someone else .* with a different zip/);
+    const zip = objects.get(zipKey);
+    assert.equal(zip.sha256, sha("registry zip"));
+    assert.equal(sha(zip.body), zip.sha256, "the bucket's zip is the bytes its sha256 names");
+  });
+
+  it("lets both finish when they upload the same zip", async () => {
+    const objects = new Map();
+    const afterCheck = barrier(2);
+    const publish = () =>
+      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "same zip")), {
+        store: fakeStore(objects, { afterCheck }),
+        release: fakeReleases(),
+      });
+    const [first, second] = await Promise.all([publish(), publish()]);
+    assert.equal(first[0].action, "upload");
+    assert.equal(second[0].action, "upload");
+    assert.equal(objects.get(zipKey).sha256, sha("same zip"));
+  });
+});
+
 describe("ensureRelease", () => {
   const pack = { id: "p", version: "1.0.0", zipName: "p-1.0.0.zip", zipSha: sha("built zip"), zipBytes: 9 };
   const releaseWith = (asset, bytes) => ({
@@ -236,6 +294,27 @@ describe("awsStore", () => {
       }),
     });
     assert.equal(await store.zipSha256("k"), sha("old zip"));
+  });
+
+  it("puts the zip with If-None-Match: *, and reads a 412 as a zip already there", async () => {
+    const calls = [];
+    const store = awsStore({
+      endpoint: "e",
+      bucket: "b",
+      dir: root,
+      exec: async (_file, args) => {
+        calls.push(args);
+        return calls.length === 1
+          ? { code: 0, stdout: "{}", stderr: "" }
+          : { code: 254, stdout: "", stderr: "An error occurred (PreconditionFailed) when calling the PutObject operation" };
+      },
+    });
+    const zip = { path: "z.zip", key: "p/1.0.0/p-1.0.0.zip", contentType: "application/zip" };
+    assert.equal(await store.put(zip, { sha256: "d".repeat(64), ifNoneMatch: true }), "written");
+    assert.equal(await store.put(zip, { sha256: "d".repeat(64), ifNoneMatch: true }), "exists");
+    assert.deepEqual(calls[0].slice(0, 2), ["s3api", "put-object"]);
+    assert.ok(calls[0].join(" ").includes("--if-none-match *"));
+    assert.ok(calls[0].join(" ").includes(`--metadata sha256=${"d".repeat(64)}`));
   });
 
   it("fails on any other head-object error", async () => {

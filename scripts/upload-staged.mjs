@@ -9,6 +9,10 @@
  *     went through) is skipped; one whose zip differs fails the run ("bump the version").
  *   - The zip goes up last, with its sha256 as object metadata, so its presence marks the version complete and a
  *     retry can compare without downloading it (a zip uploaded without the metadata is downloaded and hashed).
+ *   - The zip's put is conditional (If-None-Match: *), so it never overwrites a zip already there. The game repo's
+ *     publisher writes the same bucket: if both publish a new <id>/<version> at once, both pass the check above and
+ *     only one zip put succeeds; the other gets a 412, hashes the zip that won and goes on only when it is the same
+ *     bytes, so index.json never lists a sha256 that the bucket's zip does not have.
  *   - The release is ensured, not created blindly: missing, it is created with the zip; present without the zip, the
  *     zip is attached; present with the zip, its sha256 must match: the asset's digest when GitHub reports one,
  *     otherwise the asset is downloaded and hashed (a same-size zip with other bytes is refused).
@@ -134,7 +138,21 @@ export async function publishStaged(packs, { store, release, log = () => {} }) {
   for (const { pack, action } of plan) {
     if (action === "upload") {
       for (const file of pack.files) {
-        await store.put(file, file.path === pack.zipPath ? { sha256: pack.zipSha } : {});
+        if (file.path !== pack.zipPath) {
+          await store.put(file);
+          continue;
+        }
+        if ((await store.put(file, { sha256: pack.zipSha, ifNoneMatch: true })) === "exists") {
+          // Another publisher's zip got there first (between the check above and now): keep it only if it is ours.
+          const published = await store.zipSha256(file.key);
+          if (published !== pack.zipSha) {
+            throw new Error(
+              `${pack.id} ${pack.version} was published by someone else while this run uploaded it, with a different ` +
+                `zip (${published}, built ${pack.zipSha}): the bucket keeps theirs; bump the pack's version`,
+            );
+          }
+          log(`${pack.id} ${pack.version}: the same zip was uploaded by another publisher meanwhile.`);
+        }
       }
       log(`Uploaded ${pack.id} ${pack.version} (${pack.files.length} files).`);
     } else {
@@ -173,12 +191,27 @@ export function awsStore({ endpoint, bucket, dir, exec = run }) {
       fs.rmSync(file, { force: true });
       return sha;
     },
-    async put(file, { sha256 } = {}) {
+    /**
+     * Uploads one file. With `ifNoneMatch`, the put is conditional on there being no object at the key yet (R2
+     * evaluates it atomically; `s3api put-object --if-none-match` needs aws cli 2.22+): resolves "exists" on a 412 or
+     * a 409 (a put that raced ours), "written" otherwise.
+     */
+    async put(file, { sha256, ifNoneMatch = false } = {}) {
+      if (ifNoneMatch) {
+        const args = ["s3api", "put-object", "--bucket", bucket, "--key", file.key, "--body", file.path];
+        args.push("--content-type", file.contentType, "--cache-control", IMMUTABLE, "--if-none-match", "*");
+        if (sha256) args.push("--metadata", `sha256=${sha256}`);
+        const { code, stderr } = await aws(args);
+        if (code === 0) return "written";
+        if (/PreconditionFailed|\(412\)|ConditionalRequestConflict|\(409\)/i.test(stderr)) return "exists";
+        throw new Error(`aws s3api put-object ${file.key} failed: ${stderr.trim()}`);
+      }
       const args = ["s3", "cp", "--only-show-errors", file.path, `s3://${bucket}/${file.key}`];
       args.push("--content-type", file.contentType, "--cache-control", IMMUTABLE);
       if (sha256) args.push("--metadata", `sha256=${sha256}`);
       const { code, stderr } = await aws(args);
       if (code !== 0) throw new Error(`aws s3 cp ${file.key} failed: ${stderr.trim()}`);
+      return "written";
     },
   };
 }
