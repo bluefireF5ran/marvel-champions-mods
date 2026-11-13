@@ -77,12 +77,34 @@ The full design is in
 
 ## Maintainer setup
 
-- `check.yml` runs on every submission pull request. It rebuilds the pack from `commit` with no secrets (a
-  submission's pack code runs in that job) and puts its summary on the run's page.
+- `check.yml` runs on every pull request. It rebuilds the pack from `commit` with no secrets (a submission's pack
+  code runs in that job) and puts its summary on the run's page. A repo entry's tagged release must carry the zip
+  `mc-pack build` wrote, byte for byte: a missing or different zip fails the check. The read-only GitHub token only
+  reaches the step that downloads that zip, never the step that runs pack code. Its last job, **All checks**, is the
+  one the branch ruleset requires.
 - `publish.yml` runs on a merge to `main`. A job without secrets builds the changed packs. A second job, in the
-  `store` environment, uploads them to R2, makes a release here as the fallback download, and regenerates
-  `index.json`. Published versions are immutable: a version already in the bucket fails the run.
+  `store` environment, uploads each version to R2 under `<id>/<version>/` (the zip, `pack.json`, and the
+  `preview.json`, `thumb.webp` and card pictures the store shows before an install), makes a release here as the
+  fallback download, and regenerates `index.json`. Published versions are immutable: a version already in the bucket
+  with a different zip fails the run, while one with the same zip is skipped, so a failed run can simply be re-run. A
+  push that only deletes entries still updates `index.json`.
+- A pack id is published either here or by the game repo's own publish, never both. Entries this repo publishes carry
+  `source: "registry"` in `index.json`; an id already listed by the game repo is refused before anything is uploaded,
+  and deleting a `packs/<id>.yaml` only withdraws this repo's own entries.
 - Before the first publish, set these on this repo:
   - Actions secrets: `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`;
   - Actions variable `PACKS_BASE_URL`, for example `https://packs.<domain>`;
   - optionally, the variable `R2_BUCKET`, which defaults to `mc-packs`.
+
+## Repository settings
+
+Merging to `main` approves a pack and publishes it, so `main` takes changes only through a reviewed pull request.
+These are repository settings, not files, and have to be set by the owner:
+
+- **Branch ruleset on `main`** (Settings > Rules > Rulesets), active, with no bypass list:
+  - require a pull request before merging, with review from Code Owners ([`.github/CODEOWNERS`](.github/CODEOWNERS))
+    and stale approvals dismissed on a new push;
+  - require the status check **All checks** (`check.yml`), with the branch up to date;
+  - block force pushes and deletion.
+- **`store` environment** (Settings > Environments), which holds the R2 secrets: deployment branches limited to
+  `main`, so no other branch's workflow can reach them.
