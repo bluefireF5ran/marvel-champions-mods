@@ -37,7 +37,9 @@ export function stagePack(work, publishedDir) {
     for (const lang of readdirSync(cards).sort()) {
       const from = join(cards, lang);
       if (!statSync(from).isDirectory()) continue;
-      const pictures = readdirSync(from).filter((name) => name.endsWith(".webp") && statSync(join(from, name)).isFile());
+      const pictures = readdirSync(from).filter(
+        (name) => name.endsWith(".webp") && statSync(join(from, name)).isFile(),
+      );
       if (pictures.length === 0) continue;
       mkdirSync(join(target, "cards", lang), { recursive: true });
       for (const name of pictures) copyFileSync(join(from, name), join(target, "cards", lang, name));
