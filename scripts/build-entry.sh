@@ -8,10 +8,14 @@
 #   - `path: packs/<pack-id>`: the pack's source is kept in this repo (packs curated here). It builds with this repo's
 #     own SDK version (the root package.json and package-lock.json).
 #
-# Writes <work dir>/entry.json (the entry as JSON), <work dir>/src (the pack's source), <work dir>/out (the built
-# pack.json and zip) and <work dir>/summary.md (what the check comments on the pull request). Fails if the entry is
-# malformed, a repo entry's tag doesn't point at `commit`, the pack fails `mc-pack validate` or `mc-pack test`, or a
-# repo entry's built zip differs from the zip on the pack's own release.
+# Writes <work dir>/entry.json (the entry as JSON), <work dir>/src (the pack's source), <work dir>/out (what
+# `mc-pack build --out` writes: pack.json, the zip, preview.json, thumb.webp, the data files and card pictures) and
+# <work dir>/summary.md (what the check comments on the pull request). Fails if the entry is malformed, a repo entry's
+# tag doesn't point at `commit`, the pack fails `mc-pack validate` or `mc-pack test`, or a repo entry's built zip is
+# missing from, or differs from the zip on, the pack's own release.
+#
+# This script runs pack code (npm ci, mc-pack) and must run without a GitHub token: a repo entry's release zip is
+# fetched beforehand, in its own step, by scripts/fetch-release.sh into <work dir>/release/.
 set -euo pipefail
 
 entry_file="$1"
@@ -76,16 +80,13 @@ sha=$(sha256sum "$zip" | awk '{print $1}')
 if [[ -n "$path" ]]; then
   release_note="built here"
 else
-  # The creator's own release must carry the same bytes, so what players get is what the creator published.
-  owner_repo="${repo#https://github.com/}"
-  mkdir -p "$work/release"
-  if gh release download "$tag" --repo "$owner_repo" --pattern "$id-$version.zip" --dir "$work/release" 2>/dev/null; then
-    release_sha=$(sha256sum "$work/release/$id-$version.zip" | awk '{print $1}')
-    [[ "$release_sha" == "$sha" ]] || { echo "::error file=$entry_file::the release's zip ($release_sha) differs from the rebuilt one ($sha)"; exit 1; }
-    release_note="matches the release's zip"
-  else
-    release_note="no zip on the release to compare"
+  # The creator's own release must carry the same bytes, so what players get is what the creator published
+  # (scripts/fetch-release.sh downloaded it; a missing zip fails here too).
+  if ! problem=$(node "$root/scripts/compare-release-zip.mjs" "$zip" "$work/release/$id-$version.zip" 2>&1); then
+    echo "::error file=$entry_file::$problem"
+    exit 1
   fi
+  release_note="matches the release's zip"
 fi
 
 {

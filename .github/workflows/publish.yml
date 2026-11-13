@@ -1,10 +1,21 @@
 # Publishes approved packs: on a merge to main, rebuilds each added or changed pack, uploads it to the R2 bucket and
 # to a release of this repo (the fallback), and regenerates the store's index.json. A deleted packs/<id>.yaml drops
-# the pack from the index (withdrawn).
+# the pack from the index (withdrawn), including on a push that only deletes entries, or deletes the last one: the
+# `packs/**` path filter matches deleted files too, and the index update runs whether or not anything was built.
 #
 # The build runs pack code, so it runs in a job without secrets, with a read-only token and a checkout that keeps no
-# credentials; only the upload job has the R2 secrets, and it runs no pack code and installs nothing.
-# scripts/check-workflow-secrets.mjs (run by check.yml) fails if that changes.
+# credentials. Even that token is only handed to the step that downloads the creators' release zips
+# (scripts/fetch-release.sh), before and apart from the step that installs and runs pack code. Only the upload job has
+# the R2 secrets, and it runs no pack code and installs nothing. scripts/check-workflow-secrets.mjs (run by check.yml)
+# fails if that changes.
+#
+# Each staged version is uploaded to <id>/<version>/: pack.json, preview.json, thumb.webp, the card pictures
+# (cards/<lang>/*.webp, for the store's pre-install gallery) and the zip last, as the game repo's publish-packs does.
+# Re-running after a failure is safe (scripts/upload-staged.mjs): a version already in the bucket with the same zip is
+# skipped and its release completed; one with a different zip fails the run before anything is uploaded.
+#
+# A pack id is published by this registry or by the game repo, never both: the build job checks the public index.json
+# and the upload job the bucket's copy before uploading (scripts/check-ownership.mjs), and update-index.mjs refuses too.
 #
 # index.json is also written by the game repo's publish-packs workflow, so the write is conditional
 # (scripts/r2-conditional-update.mjs): If-Match on the ETag read (If-None-Match when there is none yet), and on a 412
@@ -32,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      BASE_URL: ${{ vars.PACKS_BASE_URL }}
+      EVENT: ${{ github.event_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,25 +54,61 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Build changed packs
+      - name: List the entries to build
+        run: |
+          set -euo pipefail
+          mkdir -p published
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            find packs -maxdepth 1 -name '*.yaml' | sort > "$RUNNER_TEMP/entries.txt"
+          else
+            bash scripts/changed-entries.sh HEAD~1 > "$RUNNER_TEMP/entries.txt"
+          fi
+          # Every id that still has a packs/<id>.yaml: update-index.mjs withdraws the registry's packs missing from it.
+          # The comment line keeps the artifact non-empty when the last entry was deleted.
+          {
+            echo "# ids with a packs/<id>.yaml at $GITHUB_SHA"
+            find packs -maxdepth 1 -name '*.yaml' -printf '%f\n' | sed 's/\.yaml$//' | sort
+          } > published/ids.txt
+          echo "Entries to build:"
+          cat "$RUNNER_TEMP/entries.txt"
+      # Before any pack code runs: an id the game repo already publishes is refused here (the upload job checks again).
+      - name: Check who publishes these ids
+        run: |
+          set -euo pipefail
+          mapfile -t ids < <(xargs -rn1 basename < "$RUNNER_TEMP/entries.txt" | sed 's/\.yaml$//')
+          if [ "${#ids[@]}" -eq 0 ]; then echo "No packs to build."; exit 0; fi
+          current="$RUNNER_TEMP/public-index.json"
+          rm -f "$current"
+          if [ -n "$BASE_URL" ]; then
+            code=$(curl -sS -o "$current" -w '%{http_code}' "$BASE_URL/index.json")
+            case "$code" in
+              200) ;;
+              404) rm -f "$current"; echo "No index.json published yet." ;;
+              *) echo "::error::reading $BASE_URL/index.json returned HTTP $code"; exit 1 ;;
+            esac
+          else
+            echo "::warning::PACKS_BASE_URL is not set: the upload job checks the bucket's index.json instead."
+          fi
+          node scripts/check-ownership.mjs "$current" "${ids[@]}"
+      # The only step with the token: it downloads the creators' release zips and runs no pack code.
+      - name: Fetch the creators' release zips
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p published
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            files=$(ls packs/*.yaml 2>/dev/null || true)
-          else
-            files=$(bash scripts/changed-entries.sh HEAD~1)
-          fi
-          for file in $files; do
-            id=$(basename "$file" .yaml)
-            work="$RUNNER_TEMP/$id"
-            bash scripts/build-entry.sh "$file" "$work"
-            mkdir -p "published/$id"
-            cp "$work/entry.json" "$work/zip.sha256" "$work/out/pack.json" "$work/out/"*.zip "published/$id/"
-            if [ -f "$work/src/thumb.webp" ]; then cp "$work/src/thumb.webp" "published/$id/"; fi
+          set -euo pipefail
+          mapfile -t files < "$RUNNER_TEMP/entries.txt"
+          for file in "${files[@]}"; do
+            bash scripts/fetch-release.sh "$file" "$RUNNER_TEMP/work/$(basename "$file" .yaml)"
           done
-          ls packs/*.yaml 2>/dev/null | xargs -rn1 basename | sed 's/\.yaml$//' > published/ids.txt
+      - name: Build changed packs
+        run: |
+          set -euo pipefail
+          mapfile -t files < "$RUNNER_TEMP/entries.txt"
+          for file in "${files[@]}"; do
+            work="$RUNNER_TEMP/work/$(basename "$file" .yaml)"
+            bash scripts/build-entry.sh "$file" "$work" < /dev/null
+            node scripts/stage-pack.mjs "$work" published
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: published
@@ -91,27 +141,24 @@ jobs:
         with:
           name: published
           path: published
+      - name: Check who publishes these ids
+        run: |
+          set -euo pipefail
+          test -n "$BASE_URL" || { echo "::error::set the PACKS_BASE_URL variable"; exit 1; }
+          mapfile -t ids < <(find published -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
+          if [ "${#ids[@]}" -eq 0 ]; then echo "No packs staged: this run only updates the listing."; exit 0; fi
+          current="$RUNNER_TEMP/index.json"
+          if ! aws s3api get-object --endpoint-url "$ENDPOINT" --bucket "$BUCKET" --key index.json "$current" \
+            > /dev/null 2> "$RUNNER_TEMP/get.err"; then
+            grep -qE 'NoSuchKey|\(404\)|Not Found' "$RUNNER_TEMP/get.err" || { cat "$RUNNER_TEMP/get.err" >&2; exit 1; }
+            rm -f "$current"
+          fi
+          node scripts/check-ownership.mjs "$current" "${ids[@]}"
+      # Uploads nothing (and succeeds) when no pack was staged, so the index update below always runs.
       - name: Upload packs
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          test -n "$BASE_URL" || { echo "::error::set the PACKS_BASE_URL variable"; exit 1; }
-          for dir in published/*/; do
-            id=$(basename "$dir")
-            version=$(jq -r '.version' "$dir/pack.json")
-            zip="$id-$version.zip"
-            # Published versions are immutable: a version already in the bucket is never overwritten.
-            if aws s3api head-object --endpoint-url "$ENDPOINT" --bucket "$BUCKET" --key "$id/$version/$zip" >/dev/null 2>&1; then
-              echo "::error::$id $version is already published; bump the pack's version"; exit 1
-            fi
-            for file in "$dir"*; do
-              case "$(basename "$file")" in entry.json|zip.sha256) continue ;; esac
-              aws s3 cp "$file" "s3://$BUCKET/$id/$version/$(basename "$file")" --endpoint-url "$ENDPOINT" \
-                --cache-control "public, max-age=31536000, immutable"
-            done
-            gh release create "$id-v$version" "$dir$zip" --title "$id $version" --notes "Approved pack $id $version." \
-              || gh release upload "$id-v$version" "$dir$zip" --clobber
-          done
+        run: node scripts/upload-staged.mjs published
       - name: Update index.json
         run: |
           node scripts/r2-conditional-update.mjs --endpoint "$ENDPOINT" --bucket "$BUCKET" --key index.json \

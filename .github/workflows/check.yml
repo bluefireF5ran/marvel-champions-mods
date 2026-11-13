@@ -1,10 +1,17 @@
-# Checks a submission: rebuilds each added or changed pack (from its `commit`, or its folder for a pack kept here), validates it and plays its smoke games,
-# then comments what it found. No secrets: a submission's pack code runs here, so this job gets a read-only token.
+# Checks a submission: rebuilds each added or changed pack (from its `commit`, or its folder for a pack kept here),
+# validates it and plays its smoke games, then comments what it found. No secrets: a submission's pack code runs here,
+# so this job gets a read-only token.
+#
+# The read-only GitHub token is only handed to the step that downloads the creator's release zip
+# (scripts/fetch-release.sh), which runs before and apart from the step that installs and runs the pack's code
+# (scripts/build-entry.sh). No checkout keeps its token, since every job runs scripts the pull request can change.
+#
+# Runs on every pull request, so "All checks" (the check main's ruleset requires, README "Repository settings") always
+# reports.
 name: Check submission
 
 on:
   pull_request:
-    paths: ["packs/**", "package.json", "package-lock.json", "scripts/**", ".github/workflows/**"]
 
 permissions:
   contents: read
@@ -27,15 +34,20 @@ jobs:
 
   changed:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       files: ${{ steps.list.outputs.files }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - id: list
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          files=$(bash scripts/changed-entries.sh "$(git merge-base "origin/${{ github.base_ref }}" HEAD)" | jq -R . | jq -sc .)
+          files=$(bash scripts/changed-entries.sh "$(git merge-base "origin/$BASE_REF" HEAD)" | jq -R . | jq -sc .)
           echo "files=$files" >> "$GITHUB_OUTPUT"
 
   check:
@@ -55,16 +67,38 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Build and check
+      # The only step with the token: it downloads, and runs no pack code.
+      - name: Fetch the creator's release zip
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/build-entry.sh "${{ matrix.file }}" "$RUNNER_TEMP/pack"
+          ENTRY: ${{ matrix.file }}
+        run: bash scripts/fetch-release.sh "$ENTRY" "$RUNNER_TEMP/pack"
+      - name: Build and check
+        env:
+          ENTRY: ${{ matrix.file }}
+        run: bash scripts/build-entry.sh "$ENTRY" "$RUNNER_TEMP/pack"
       - name: Summary
         if: always()
         run: |
-          if [ -f "$RUNNER_TEMP/pack/summary.md" ]; then cat "$RUNNER_TEMP/pack/summary.md" >> "$GITHUB_STEP_SUMMARY"; fi
+          summary="$RUNNER_TEMP/pack/summary.md"
+          if [ -f "$summary" ]; then cat "$summary" >> "$GITHUB_STEP_SUMMARY"; fi
       - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: summary-${{ strategy.job-index }}
           path: ${{ runner.temp }}/pack/summary.md
+
+  # The one check main's ruleset requires: it fails when any job above failed or was cancelled (a skipped `check`, on a
+  # pull request that touches no entry, passes).
+  all-checks:
+    name: All checks
+    needs: [scripts, changed, check]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [ "$FAILED" = "true" ]; then echo "::error::a required job failed or was cancelled"; exit 1; fi
+          echo "All checks passed."
