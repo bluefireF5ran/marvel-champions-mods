@@ -24,7 +24,7 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$work"
 yq -o=json '.' "$entry_file" > "$work/entry.json"
 
-field() { jq -er "$1" "$work/entry.json"; }
+field() { jq -er "$1" "$work/entry.json" || { echo "::error file=$entry_file::$1 is missing" >&2; exit 1; }; }
 id=$(field '.id')
 field '.creator' > /dev/null
 field '.permission.by' > /dev/null
