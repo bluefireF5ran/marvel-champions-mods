@@ -41,6 +41,29 @@ saved with them still load.
 To **withdraw** a pack, open a pull request that deletes its file. Players who already installed it keep their copy,
 but the store stops offering it.
 
+## Packs kept in this repo
+
+Some packs are curated here rather than in a creator's own repo: community packs the maintainer brought in with
+their authors' permission. Their source is a folder in this repo, `packs/<pack-id>/` (the same layout as the pack
+template: `pack.json`, `cards/`, `abilities/index.ts`, `decks/`, the pictures, `CREDITS.md`, `PERMISSION.md`), and
+their entry gives `path` instead of `repo`, `tag` and `commit`:
+
+```yaml
+id: carnage-nep
+path: packs/carnage-nep
+creator: Neptune
+permission:
+  by: Neptune
+  evidence: <a link, or where the message is kept>
+  date: 2026-11-05
+tags: [hero]
+```
+
+They build with this repo's own SDK version (the root `package.json` and `package-lock.json`), so bumping the SDK
+there rebuilds and re-checks every pack kept here. A change to a pack's folder is checked and, once merged,
+published like any other entry: bump the pack's `version` in its `pack.json`, since published versions are
+immutable. A folder with a `DRAFT` file in it is not built or published; leave its entry out until it is ready.
+
 ## What a pack can and can't do
 
 Packs are data: card records, abilities written with the game's ability DSL, scenarios, decks and images. A pack

@@ -11,7 +11,7 @@ name: Publish packs
 on:
   push:
     branches: [main]
-    paths: ["packs/*.yaml"]
+    paths: ["packs/**", "package.json", "package-lock.json"]
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +39,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             files=$(ls packs/*.yaml 2>/dev/null || true)
           else
-            files=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- 'packs/*.yaml')
+            files=$(bash scripts/changed-entries.sh HEAD~1)
           fi
           for file in $files; do
             id=$(basename "$file" .yaml)

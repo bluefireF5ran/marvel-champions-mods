@@ -1,10 +1,10 @@
-# Checks a submission: rebuilds each added or changed pack from its `commit`, validates it and plays its smoke games,
+# Checks a submission: rebuilds each added or changed pack (from its `commit`, or its folder for a pack kept here), validates it and plays its smoke games,
 # then comments what it found. No secrets: a submission's pack code runs here, so this job gets a read-only token.
 name: Check submission
 
 on:
   pull_request:
-    paths: ["packs/*.yaml"]
+    paths: ["packs/**", "package.json", "package-lock.json"]
 
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
       - id: list
         run: |
-          files=$(git diff --name-only --diff-filter=AM "origin/${{ github.base_ref }}...HEAD" -- 'packs/*.yaml' | jq -R . | jq -sc .)
+          files=$(bash scripts/changed-entries.sh "$(git merge-base "origin/${{ github.base_ref }}" HEAD)" | jq -R . | jq -sc .)
           echo "files=$files" >> "$GITHUB_OUTPUT"
 
   check:
