@@ -9,11 +9,19 @@ intellectual property of Fantasy Flight Games and Marvel.
 
 ## How a pack gets into the store
 
-1. **Make the pack.** Start from the
+**Submitting a pack: read [CONTRIBUTING.md](CONTRIBUTING.md).** Making one: the pack template's step-by-step guide,
+[SUBMITTING.md](https://github.com/quincarter/marvel-champions-mod-template/blob/main/SUBMITTING.md). Reviewing one:
+[REVIEWING.md](REVIEWING.md). AI assistants: [AGENTS.md](AGENTS.md).
+
+In short:
+
+1. **Make the pack** in your own repo, made from the
    [pack template](https://github.com/quincarter/marvel-champions-mod-template) ("Use this template"). Its CI
-   validates the pack and plays headless smoke games with it. Tag a release (`v1.0.0`) once it passes.
-2. **Get permission.** If you didn't make the pack yourself, you need its creator's permission for the store to
-   distribute it. A post or message where they grant it is enough. Packs without permission are never approved.
+   validates the pack and plays headless smoke games with it; on a `v<version>` tag it attaches the pack's zip to a
+   release.
+2. **Record permission** in the pack's `pack.json`: the creator granted the store permission to distribute it, with
+   the evidence. If you didn't make the pack, you need its creator's permission; a post or message where they grant
+   it is enough. Packs without permission evidence are never approved.
 3. **Open a pull request** here that adds `packs/<pack-id>.yaml`:
 
    ```yaml
@@ -30,13 +38,14 @@ intellectual property of Fantasy Flight Games and Marvel.
    summary: One line for the store list. # optional; defaults to the first line of the pack's description
    ```
 
-4. **CI checks it.** It builds the pack from `commit`, validates it, plays the smoke games and comments the pack's
-   size, the engine features it uses and the oldest game version that can load it.
-5. **Review.** The maintainer reads the cards and plays the pack. Merging the pull request approves it, and the
-   publish workflow uploads it to the store.
+4. **CI checks it.** It builds the pack from `commit`, validates it, plays the smoke games, requires the release's
+   zip to match its build byte for byte, and writes the pack's size, the engine features it uses and the oldest game
+   version that can load it on the run's Summary page.
+5. **Review.** The maintainer checks the permission evidence, reads the cards and plays the pack. Merging the pull
+   request approves it, and the publish workflow uploads it to the store.
 
-To **update** a pack, open a pull request that changes `tag` and `commit`. Older versions stay available, so games
-saved with them still load.
+To **update** a pack, open a pull request that changes `tag` and `commit`. Published versions are immutable, and
+older ones stay available, so games saved with them still load.
 
 To **withdraw** a pack, open a pull request that deletes its file. Players who already installed it keep their copy,
 but the store stops offering it.
