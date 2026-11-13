@@ -2,7 +2,13 @@
 # to a release of this repo (the fallback), and regenerates the store's index.json. A deleted packs/<id>.yaml drops
 # the pack from the index (withdrawn).
 #
-# The build runs pack code, so it runs in a job without the R2 secrets; only the upload job has them.
+# The build runs pack code, so it runs in a job without secrets, with a read-only token and a checkout that keeps no
+# credentials; only the upload job has the R2 secrets, and it runs no pack code and installs nothing.
+# scripts/check-workflow-secrets.mjs (run by check.yml) fails if that changes.
+#
+# index.json is also written by the game repo's publish-packs workflow, so the write is conditional
+# (scripts/r2-conditional-update.mjs): If-Match on the ETag read (If-None-Match when there is none yet), and on a 412
+# it re-reads, re-runs scripts/update-index.mjs and tries again.
 #
 # Secrets: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY. Variables: PACKS_BASE_URL (e.g.
 # https://packs.example.app), R2_BUCKET (default mc-packs).
@@ -24,10 +30,13 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -65,11 +74,19 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: auto
+      # aws cli 2.23+ adds checksum headers R2 doesn't need; send them only where an operation requires one.
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
       ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
       BUCKET: ${{ vars.R2_BUCKET || 'mc-packs' }}
       BASE_URL: ${{ vars.PACKS_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - uses: actions/download-artifact@v4
         with:
           name: published
@@ -97,8 +114,7 @@ jobs:
           done
       - name: Update index.json
         run: |
-          aws s3 cp "s3://$BUCKET/index.json" current.json --endpoint-url "$ENDPOINT" || echo '{"schema":2,"packs":[]}' > current.json
-          node scripts/update-index.mjs current.json published published/ids.txt "$BASE_URL" \
-            "https://github.com/${{ github.repository }}/releases/download" > index.json
-          aws s3 cp index.json "s3://$BUCKET/index.json" --endpoint-url "$ENDPOINT" \
-            --content-type application/json --cache-control "public, max-age=300"
+          node scripts/r2-conditional-update.mjs --endpoint "$ENDPOINT" --bucket "$BUCKET" --key index.json \
+            --content-type application/json --cache-control "public, max-age=300" -- \
+            node scripts/update-index.mjs "{current}" published published/ids.txt "$BASE_URL" \
+            "https://github.com/${{ github.repository }}/releases/download"

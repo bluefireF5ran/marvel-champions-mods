@@ -4,12 +4,27 @@ name: Check submission
 
 on:
   pull_request:
-    paths: ["packs/**", "package.json", "package-lock.json"]
+    paths: ["packs/**", "package.json", "package-lock.json", "scripts/**", ".github/workflows/**"]
 
 permissions:
   contents: read
 
 jobs:
+  # This repo's own scripts: their tests, and the check that no job running pack code holds a secret (publish.yml).
+  scripts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test "scripts/*.test.mjs"
+      - run: node scripts/check-workflow-secrets.mjs
+
   changed:
     runs-on: ubuntu-latest
     outputs:
@@ -31,8 +46,12 @@ jobs:
       fail-fast: false
       matrix:
         file: ${{ fromJson(needs.changed.outputs.files) }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
