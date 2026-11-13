@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Making a pack
+    url: https://github.com/quincarter/marvel-champions-mod-template/blob/main/SUBMITTING.md
+    about: The step-by-step guide, from the pack template to a pull request here.
+  - name: A card needs a rule the game doesn't have
+    url: https://github.com/quincarter/marvel-champions-digital-game/issues/488
+    about: Ask in the game's custom content discussion.
