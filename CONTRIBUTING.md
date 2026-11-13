@@ -81,8 +81,11 @@ Every pull request runs the **Check submission** workflow. For each added or cha
 
 1. checks the file: the name matches `id`, the fields above are present and well-formed;
 2. checks that `tag` points at `commit` in your repo, and downloads `<id>-<version>.zip` from that tag's release;
-3. checks out your repo at `commit` (never the tag, since a tag can move), runs `npm ci` with your lockfile, then
-   `mc-pack validate`, `mc-pack test` (headless smoke games with your precon or scenario) and `mc-pack build`;
+3. checks out your repo at `commit` (never the tag, since a tag can move), refuses a pack with a `DRAFT` file or
+   with other packs in `pack.json`'s `requires.packs` (not supported yet), runs `npm ci` with your lockfile, then
+   `mc-pack validate --publish` (which also requires `pack.json`'s `permission` to record the creator's grant, and
+   `permission.languages` to cover every language the pack ships), `mc-pack test` (headless smoke games with your
+   precon or scenario) and `mc-pack build`;
 4. compares the zip it built with your release's zip, byte for byte. They must match, so what players install is
    what you published.
 
@@ -121,12 +124,19 @@ Open a pull request that deletes `packs/<id>.yaml`, and say why. It must come fr
 person whose permission it was published under. Once merged, the store stops offering the pack; players who
 installed it keep their copy, marked withdrawn, so their saves still load. Adding the file back lists the pack again.
 
+## Packs that need other packs
+
+Not supported yet. If your `pack.json` lists other packs in `requires.packs` (a campaign using another pack's
+scenario, say), the check refuses it before building: the registry can't yet resolve another approved pack's content
+for the build. Make the pack stand alone for now, or ask in the custom content discussion.
+
 ## Packs kept in this repo
 
-Some packs live in this repo, in `packs/<id>/`, with an entry that gives `path` instead of `repo`, `tag` and `commit`
-(README, "Packs kept in this repo"). These are curated by the maintainer, with their creators' permission. **Don't
-open pull requests that add or change them**: if you made one and want a change, open an issue, or move the pack to
-your own repo made from the template and submit it as above.
+Not available yet: packs kept in this repo (`packs/<id>/` with a `path` entry) build with an SDK pinned by this
+repo's root `package.json` and `package-lock.json`, which arrive once the pack SDK is published on npm; until then the
+check refuses a `path` entry. When they arrive they are curated by the maintainer, with their creators' permission
+(README, "Packs kept in this repo"). **Don't open pull requests that add or change them**: submit your pack from your
+own repo made from the template, as above.
 
 ## What a pack can't do
 

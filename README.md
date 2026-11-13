@@ -38,9 +38,10 @@ In short:
    summary: One line for the store list. # optional; defaults to the first line of the pack's description
    ```
 
-4. **CI checks it.** It builds the pack from `commit`, validates it, plays the smoke games, requires the release's
-   zip to match its build byte for byte, and writes the pack's size, the engine features it uses and the oldest game
-   version that can load it on the run's Summary page.
+4. **CI checks it.** It builds the pack from `commit`, validates it with `mc-pack validate --publish` (which also
+   requires `pack.json` to record the creator's grant), plays the smoke games, requires the release's zip to match
+   its build byte for byte, and writes the pack's size, the engine features it uses and the oldest game version that
+   can load it on the run's Summary page.
 5. **Review.** The maintainer checks the permission evidence, reads the cards and plays the pack. Merging the pull
    request approves it, and the publish workflow uploads it to the store.
 
@@ -50,9 +51,19 @@ older ones stay available, so games saved with them still load.
 To **withdraw** a pack, open a pull request that deletes its file. Players who already installed it keep their copy,
 but the store stops offering it.
 
-## Packs kept in this repo
+**Not supported yet: packs that need other packs.** A pack whose `pack.json` lists other packs in `requires.packs`
+(for example a campaign that uses another pack's scenario) can't be submitted yet: the registry's build has no way to
+resolve another approved pack's content, so the check refuses such a pack before building it. Make the pack stand
+alone for now, or ask in the custom content discussion.
 
-Some packs are curated here rather than in a creator's own repo: community packs the maintainer brought in with
+## Packs kept in this repo (not available yet)
+
+**Not usable yet.** A pack kept here builds with an SDK version pinned by this repo's root `package.json` and
+`package-lock.json`, and those arrive once the pack SDK is published on npm. Until then the check refuses a `path`
+entry with a message saying so; keep every pack in its own repo made from the template. The rest of this section
+describes how they will work.
+
+Some packs will be curated here rather than in a creator's own repo: community packs the maintainer brought in with
 their authors' permission. Their source is a folder in this repo, `packs/<pack-id>/` (the same layout as the pack
 template: `pack.json`, `cards/`, `abilities/index.ts`, `decks/`, the pictures, `CREDITS.md`, `PERMISSION.md`), and
 their entry gives `path` instead of `repo`, `tag` and `commit`:

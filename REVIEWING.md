@@ -32,16 +32,13 @@ The evidence is the reason a pack can be distributed at all. A pack without it i
 - [ ] The scope covers distribution through the store (for example `inclusion`), and a translation's language is
       covered by the creator's grant too.
 - [ ] The pack's own `pack.json` agrees: `permission.status` is `granted`, and `permission.languages` covers every
-      language in `languages.available`. The check does not run this gate, so check it, either by reading the
-      `pack.json` on the release:
+      language in `languages.available`. The check enforces this (`mc-pack validate --publish`), so a green check
+      means `pack.json` says so; what you judge is whether the evidence backs it. To read what it records:
 
       ```bash
       gh release download <tag> --repo <owner>/<repo> --pattern pack.json --output - \
         | jq '{languages: .languages.available, permission}'
       ```
-
-      or, in a checkout of the pack at `commit`, with `npm ci --ignore-scripts && npx mc-pack validate . --publish`
-      (on an SDK that has `--publish`; this runs the pack's code, so not on a machine with secrets you care about).
 - [ ] `CREDITS.md` names the creator, the card template and art sources, and translators, and nothing in the pack is
       art the creator has no right to share.
 
@@ -99,6 +96,8 @@ withdrawn. The published versions stay in the bucket, so saves still load.
 
 ## Packs kept in this repo
 
-Only the maintainer adds or changes `packs/<id>/` folders and their `path:` entries. The same checklist applies,
+Not available yet: the check refuses `path:` entries until this repo has a root `package.json` and
+`package-lock.json` pinning the published pack SDK. Once it does, only the maintainer adds or changes `packs/<id>/`
+folders and their `path:` entries. The same checklist applies,
 with the permission evidence recorded in the folder's `PERMISSION.md` and `pack.json`. Bump the pack's `version` for
 every change; a folder with a `DRAFT` file is not built or published, so leave its entry out until it is ready.
