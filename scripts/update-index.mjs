@@ -2,16 +2,22 @@
 //
 //   node scripts/update-index.mjs <current index.json or "-" for none> <published dir> <ids file> <base url> <fallback base>
 //
-// <published dir> holds one folder per pack published in this run: entry.json (the registry entry as JSON),
-// pack.json (the built manifest), zip.sha256, and the zip. <ids file> lists every pack id that still has a
-// packs/<id>.yaml; a pack in the index whose file was deleted is dropped (withdrawn, §11.4). Older versions stay in
-// the index so saves that used them still load. Prints the new index.json.
+// <published dir> holds one folder per pack published in this run (scripts/stage-pack.mjs): entry.json (the registry
+// entry as JSON), pack.json (the built manifest), zip.sha256, the zip, and preview.json, thumb.webp and cards/ when the
+// build wrote them. It may hold no pack folders at all: a run that only deleted entries still rewrites the index.
+// <ids file> lists every pack id that still has a packs/<id>.yaml (lines starting with # are comments); a pack in the
+// index whose file was deleted is dropped (withdrawn, §11.4). Older versions stay in the index so saves that used them
+// still load. Prints the new index.json.
 //
 // The rules the game repo's scripts/lib/pack-index.mjs also follows (§11.5, "Two publishers, one index.json"):
 //   - `latest` is the highest version by SemVer precedence, not the version this run published, and the pack's name,
 //     summary, tags and thumbnail follow it;
 //   - `withdrawn` is kept as it is: a publish never lists a withdrawn pack again (a pack the game repo withdrew stays
 //     withdrawn). Here a pack is withdrawn by deleting its file, which drops it, and adding the file back lists it.
+//   - one publisher per pack id (§11.4): an entry is this registry's when it carries `source: "registry"`. An entry
+//     with `source: "game"`, or with no `source` (the game repo's publish writes none), belongs to the game repo, so
+//     publishing that id here is refused (`ownershipProblems`, which the publish workflow also runs before it uploads
+//     anything), and deleting a packs/<id>.yaml only ever drops a `source: "registry"` entry.
 //
 // The publish workflow runs this inside scripts/r2-conditional-update.mjs, which re-runs it on a fresh read when the
 // game repo wrote index.json in between.
@@ -47,6 +53,25 @@ export function compareVersions(a, b) {
 
 const NUMERIC = /^\d+$/;
 
+/**
+ * Why this registry may not publish `ids` into `current`: one line per id whose entry another publisher owns (the game
+ * repo's entries have `source: "game"` or no `source`). Empty when every id is new or already this registry's.
+ */
+export function ownershipProblems(current, ids) {
+  const byId = new Map((current?.packs ?? []).map((pack) => [pack.id, pack]));
+  const problems = [];
+  for (const id of ids) {
+    const pack = byId.get(id);
+    if (!pack || pack.source === "registry") continue;
+    const owner = pack.source === undefined ? "no source, so the game repo's" : `source "${pack.source}"`;
+    problems.push(
+      `${id} is already in index.json from another publisher (${owner}): a pack id is published by one of the ` +
+        "registry and the game repo only, so pick another id or move the pack's publishing over first",
+    );
+  }
+  return problems;
+}
+
 /** One pre-release identifier against another; `undefined` (that list ran out first) sorts first. */
 function compareIdentifiers(p, q) {
   if (p === q) return 0;
@@ -68,9 +93,15 @@ function compareIdentifiers(p, q) {
 
 /**
  * The new index: `current` (or `{ schema: 2, packs: [] }`) with `published` upserted. Each published pack is
- * `{ id, entry, manifest, sha, zipBytes, hasThumb }`. `liveIds` is the set of ids that still have a packs/<id>.yaml.
+ * `{ id, entry, manifest, sha, zipBytes, hasThumb, hasPreview }`. `liveIds` is the set of ids that still have a
+ * packs/<id>.yaml. Throws when a published id belongs to another publisher (`ownershipProblems`).
  */
 export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase, today, now }) {
+  const problems = ownershipProblems(
+    current,
+    published.map((pack) => pack.id),
+  );
+  if (problems.length > 0) throw new Error(problems.join("\n"));
   // The game repo publishes its own packs into the same index.json (its publish-packs workflow): only entries this
   // registry published (`source: "registry"`) are withdrawn when their packs/<id>.yaml is gone; the rest are kept.
   const byId = new Map(
@@ -78,7 +109,7 @@ export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase
       .filter((pack) => pack.source !== "registry" || liveIds.has(pack.id))
       .map((pack) => [pack.id, pack]),
   );
-  for (const { id, entry, manifest, sha, zipBytes, hasThumb } of published) {
+  for (const { id, entry, manifest, sha, zipBytes, hasThumb, hasPreview } of published) {
     const version = manifest.version;
     const zipName = `${id}-${version}.zip`;
     const base = `${baseUrl}/${id}/${version}/`;
@@ -93,6 +124,9 @@ export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase
         zipBytes,
         zipSha256: sha,
         requires: manifest.requires,
+        // What the store shows before an install (mc-pack build's preview.json, §11.5), listed as the game repo's
+        // scripts/lib/pack-index.mjs lists it.
+        ...(hasPreview ? { preview: `${base}preview.json` } : {}),
       },
     };
     const latest = Object.keys(versions).sort(compareVersions).at(-1);
@@ -132,11 +166,9 @@ export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase
   };
 }
 
-function main() {
-  const [currentPath, publishedDir, idsPath, baseUrl, fallbackBase] = process.argv.slice(2);
+/** The packs staged under `publishedDir`, as `updateIndex` takes them. No folder, or no pack folders, is no packs. */
+export function readPublished(publishedDir) {
   const read = (path) => JSON.parse(readFileSync(path, "utf8"));
-  const current = currentPath !== "-" && existsSync(currentPath) ? read(currentPath) : undefined;
-  const liveIds = new Set(readFileSync(idsPath, "utf8").split("\n").filter(Boolean));
   const published = [];
   for (const id of existsSync(publishedDir) ? readdirSync(publishedDir).sort() : []) {
     const dir = join(publishedDir, id);
@@ -149,12 +181,31 @@ function main() {
       sha: readFileSync(join(dir, "zip.sha256"), "utf8").trim(),
       zipBytes: statSync(join(dir, `${id}-${manifest.version}.zip`)).size,
       hasThumb: existsSync(join(dir, "thumb.webp")),
+      hasPreview: existsSync(join(dir, "preview.json")),
     });
   }
+  return published;
+}
+
+/** The ids in an ids file: one per line, blank lines and `#` comments skipped. A missing file lists none. */
+export function readIds(idsPath) {
+  if (!existsSync(idsPath)) return new Set();
+  return new Set(
+    readFileSync(idsPath, "utf8")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith("#")),
+  );
+}
+
+function main() {
+  const [currentPath, publishedDir, idsPath, baseUrl, fallbackBase] = process.argv.slice(2);
+  const current =
+    currentPath !== "-" && existsSync(currentPath) ? JSON.parse(readFileSync(currentPath, "utf8")) : undefined;
   const now = new Date().toISOString();
   const index = updateIndex(current, {
-    published,
-    liveIds,
+    published: readPublished(publishedDir),
+    liveIds: readIds(idsPath),
     baseUrl,
     fallbackBase,
     today: now.slice(0, 10),
@@ -163,4 +214,11 @@ function main() {
   process.stdout.write(`${JSON.stringify(index, null, 2)}\n`);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    main();
+  } catch (error) {
+    console.error(`::error::${error.message.replaceAll("\n", "%0A")}`);
+    process.exit(1);
+  }
+}
