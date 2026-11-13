@@ -10,7 +10,8 @@
  *   - The zip goes up last, with its sha256 as object metadata, so its presence marks the version complete and a
  *     retry can compare without downloading it (a zip uploaded without the metadata is downloaded and hashed).
  *   - The release is ensured, not created blindly: missing, it is created with the zip; present without the zip, the
- *     zip is attached; present with the zip, its digest (or size) must match.
+ *     zip is attached; present with the zip, its sha256 must match: the asset's digest when GitHub reports one,
+ *     otherwise the asset is downloaded and hashed (a same-size zip with other bytes is refused).
  *
  * No staged pack (a run that only deleted entries) uploads nothing and succeeds, so the index update still runs.
  * Runs in the upload job, which holds the R2 secrets and runs no pack code: Node built-ins, the aws cli and gh only.
@@ -96,7 +97,8 @@ export async function planUploads(packs, store) {
 
 /**
  * Makes sure release `<id>-v<version>` exists and carries the zip. `release.view(tag)` resolves `{ assets: [{ name,
- * size, digest }] }` or null when there is no such release. Resolves "created", "attached" or "present".
+ * size, digest }] }` or null when there is no such release; `release.assetSha256(tag, name)` downloads an asset and
+ * resolves its sha256, for an asset listed without a digest. Resolves "created", "attached" or "present".
  */
 export async function ensureRelease(pack, release) {
   const tag = `${pack.id}-v${pack.version}`;
@@ -110,11 +112,12 @@ export async function ensureRelease(pack, release) {
     await release.upload(tag, pack);
     return "attached";
   }
-  const same = asset.digest ? asset.digest === `sha256:${pack.zipSha}` : asset.size === pack.zipBytes;
-  if (!same) {
+  // Size alone proves nothing: without a digest, the asset's bytes are hashed.
+  const published = asset.digest ?? `sha256:${await release.assetSha256(tag, pack.zipName)}`;
+  if (published !== `sha256:${pack.zipSha}`) {
     throw new Error(
-      `release ${tag} already carries a different ${pack.zipName} (${asset.digest ?? `${asset.size} bytes`}, built ` +
-        `sha256:${pack.zipSha}): bump the pack's version`,
+      `release ${tag} already carries a different ${pack.zipName} (${published}, built sha256:${pack.zipSha}): ` +
+        "bump the pack's version",
     );
   }
   return "present";
@@ -180,8 +183,8 @@ export function awsStore({ endpoint, bucket, dir, exec = run }) {
   };
 }
 
-/** This repo's releases over gh. */
-export function ghRelease({ repo, exec = run }) {
+/** This repo's releases over gh. `dir` is a scratch folder for an asset downloaded to be hashed. */
+export function ghRelease({ repo, dir, exec = run }) {
   const gh = async (args) => {
     const result = await exec("gh", [...args, "--repo", repo]);
     if (result.code !== 0) {
@@ -204,6 +207,15 @@ export function ghRelease({ repo, exec = run }) {
       return gh(["release", "create", tag, pack.zipPath, "--title", title, "--notes", `Approved pack ${title}.`]);
     },
     upload: (tag, pack) => gh(["release", "upload", tag, pack.zipPath]),
+    async assetSha256(tag, name) {
+      const into = fs.mkdtempSync(path.join(dir, "asset-"));
+      try {
+        await gh(["release", "download", tag, "--pattern", name, "--dir", into]);
+        return sha256File(path.join(into, name));
+      } finally {
+        fs.rmSync(into, { recursive: true, force: true });
+      }
+    },
   };
 }
 
@@ -222,7 +234,7 @@ async function main() {
   try {
     await publishStaged(packs, {
       store: awsStore({ endpoint: process.env.ENDPOINT, bucket: process.env.BUCKET, dir }),
-      release: ghRelease({ repo: process.env.GITHUB_REPOSITORY }),
+      release: ghRelease({ repo: process.env.GITHUB_REPOSITORY, dir }),
       log: (line) => console.log(line),
     });
   } finally {

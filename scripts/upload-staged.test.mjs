@@ -6,7 +6,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, it } from "node:test";
-import { awsStore, ensureRelease, publishStaged, readStaged } from "./upload-staged.mjs";
+import { awsStore, ensureRelease, ghRelease, publishStaged, readStaged } from "./upload-staged.mjs";
 
 const root = mkdtempSync(join(tmpdir(), "upload-staged-"));
 after(() => rmSync(root, { recursive: true, force: true }));
@@ -156,17 +156,28 @@ describe("publishStaged", () => {
 });
 
 describe("ensureRelease", () => {
-  const pack = { id: "p", version: "1.0.0", zipName: "p-1.0.0.zip", zipSha: "a".repeat(64), zipBytes: 10 };
-  const releaseWith = (asset) => ({
+  const pack = { id: "p", version: "1.0.0", zipName: "p-1.0.0.zip", zipSha: sha("built zip"), zipBytes: 9 };
+  const releaseWith = (asset, bytes) => ({
     view: async () => ({ assets: [asset] }),
     create: async () => assert.fail("no create"),
     upload: async () => assert.fail("no upload"),
+    assetSha256: async () => (bytes === undefined ? assert.fail("no download") : sha(bytes)),
   });
 
-  it("accepts the same asset by digest, or by size when the release has no digest", async () => {
+  it("accepts the same asset by digest, without downloading it", async () => {
     const digest = `sha256:${pack.zipSha}`;
     assert.equal(await ensureRelease(pack, releaseWith({ name: pack.zipName, digest })), "present");
-    assert.equal(await ensureRelease(pack, releaseWith({ name: pack.zipName, size: 10 })), "present");
+  });
+
+  it("downloads and hashes an asset listed without a digest, and accepts the same bytes", async () => {
+    assert.equal(await ensureRelease(pack, releaseWith({ name: pack.zipName, size: 9 }, "built zip")), "present");
+  });
+
+  it("refuses a digest-less asset of the same size but other bytes", async () => {
+    await assert.rejects(
+      ensureRelease(pack, releaseWith({ name: pack.zipName, size: 9 }, "other zip")),
+      /already carries a different p-1\.0\.0\.zip/,
+    );
   });
 
   it("refuses a release carrying a different zip", async () => {
@@ -174,6 +185,21 @@ describe("ensureRelease", () => {
       ensureRelease(pack, releaseWith({ name: pack.zipName, digest: `sha256:${"b".repeat(64)}` })),
       /different/,
     );
+  });
+});
+
+describe("ghRelease", () => {
+  it("hashes a downloaded asset", async () => {
+    const release = ghRelease({
+      repo: "o/r",
+      dir: root,
+      exec: async (_file, args) => {
+        assert.deepEqual(args.slice(0, 5), ["release", "download", "p-v1.0.0", "--pattern", "p-1.0.0.zip"]);
+        writeFileSync(join(args[6], "p-1.0.0.zip"), "release bytes");
+        return { code: 0, stdout: "", stderr: "" };
+      },
+    });
+    assert.equal(await release.assetSha256("p-v1.0.0", "p-1.0.0.zip"), sha("release bytes"));
   });
 });
 
