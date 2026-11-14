@@ -11,7 +11,8 @@ Copy this list into your review.
 - [ ] It touches only `packs/<id>.yaml` (one pack). The check's gate fails a submission from someone without write
       access that changes anything else (`scripts/`, `.github/`, `package.json`, `package-lock.json`, a pack folder or
       another entry), and the check always runs `main`'s scripts, never the pull request's. Close such a submission:
-      only the maintainer changes them.
+      only the maintainer changes them. Deletions and renames count toward the one pack: one withdrawal on its own
+      passes, two withdrawals or a withdrawal next to a new or changed entry fail.
 - [ ] It is not a `path:` entry or a change under `packs/<id>/`, unless the maintainer made it (packs kept here are
       maintainer-curated).
 - [ ] The pull request template is filled in.

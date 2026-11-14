@@ -5,7 +5,9 @@
  *
  *   - lists the pull request's changed files (the API, not a diff computed by a script the pull request could change);
  *   - refuses a submission from someone who is not a maintainer (write, maintain or admin on this repo) that touches
- *     anything but `packs/<id>.yaml`, more than one entry, or a `path:` entry (packs kept here are maintainer-only);
+ *     anything but `packs/<id>.yaml`, more than one pack (deletions and renames count: one withdrawal on its own is
+ *     allowed, more than one, or one next to a new or changed entry, is not), or a `path:` entry (packs kept here
+ *     are maintainer-only);
  *   - lists the entries to check: every added or changed `packs/<id>.yaml`, the entry of every `packs/<id>/` folder a
  *     maintainer changed, and every `path:` entry when the root package.json / package-lock.json changed;
  *   - fails closed: an entry file or pack folder that changed but whose entry can't be read at the pull request's head
@@ -75,9 +77,7 @@ export async function gate({ files, maintainer, readEntry, listEntries }) {
     }
   }
 
-  if (!maintainer && candidates.size > 1) {
-    errors.push(`a submission adds or changes one pack; this one changes ${[...candidates.keys()].join(", ")}`);
-  }
+  if (!maintainer) errors.push(...onePack(files, candidates));
 
   const entries = [];
   for (const [file, why] of candidates) {
@@ -106,6 +106,38 @@ export async function gate({ files, maintainer, readEntry, listEntries }) {
     errors.push("pack files changed but no entry was found to check");
   }
   return { entries, errors };
+}
+
+/**
+ * A submission's one-pack rule, counting every pack id it touches: entries added, changed, deleted (a deletion
+ * withdraws the pack on merge) or renamed (which withdraws the old id and submits the new one), and the entries it
+ * would check. One pack added or changed passes, and so does one withdrawal on its own; two packs, two withdrawals, or
+ * a withdrawal next to a new or changed entry do not.
+ */
+function onePack(files, candidates) {
+  const withdrawn = new Set();
+  const submitted = new Set();
+  const idOf = (file) => ENTRY_FILE.exec(file)?.[1];
+  for (const f of files) {
+    const id = idOf(f.filename);
+    if (id && f.status === "removed") withdrawn.add(id);
+    else if (id) submitted.add(id);
+    const previous = f.previous_filename && idOf(f.previous_filename);
+    if (previous && previous !== id) withdrawn.add(previous);
+  }
+  for (const file of candidates.keys()) submitted.add(idOf(file));
+  const list = (ids) => [...ids].sort().join(", ");
+  if (withdrawn.size > 0 && submitted.size > 0) {
+    return [
+      `a submission adds, changes or withdraws one pack; this one withdraws ${list(withdrawn)} and adds or changes ` +
+        `${list(submitted)}: open a pull request for each`,
+    ];
+  }
+  if (withdrawn.size > 1) {
+    return [`a submission withdraws one pack at a time; this one withdraws ${list(withdrawn)}`];
+  }
+  if (submitted.size > 1) return [`a submission adds or changes one pack; this one changes ${list(submitted)}`];
+  return [];
 }
 
 const run = (file, args) =>

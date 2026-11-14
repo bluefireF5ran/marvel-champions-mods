@@ -80,17 +80,60 @@ describe("gate: a submission (not a maintainer)", () => {
     assert.deepEqual([entries, errors], [[], []]);
   });
 
-  it("checks the new name of a renamed entry", async () => {
-    const { entries, errors } = await gate({
+  // The one-pack rule counts withdrawals too (deleting an entry withdraws the pack on merge).
+  it("refuses two withdrawals in one pull request", async () => {
+    const { errors } = await gate({
+      files: [
+        { filename: "packs/fan-a.yaml", status: "removed" },
+        { filename: "packs/fan-b.yaml", status: "removed" },
+      ],
+      maintainer: false,
+      ...head({}),
+    });
+    assert.deepEqual(errors, ["a submission withdraws one pack at a time; this one withdraws fan-a, fan-b"]);
+  });
+
+  it("refuses a withdrawal next to a new entry", async () => {
+    const { errors } = await gate({
+      files: [
+        { filename: "packs/fan-a.yaml", status: "removed" },
+        { filename: "packs/fan-b.yaml", status: "added" },
+      ],
+      maintainer: false,
+      ...head({ "packs/fan-b.yaml": repoEntry("fan-b") }),
+    });
+    assert.equal(errors.length, 1);
+    assert.match(errors[0], /one pack; this one withdraws fan-a and adds or changes fan-b/);
+  });
+
+  it("refuses a withdrawal next to a changed entry", async () => {
+    const { errors } = await gate({
+      files: [{ filename: "packs/fan-a.yaml", status: "removed" }, ...changed("packs/fan-b.yaml")],
+      maintainer: false,
+      ...head({ "packs/fan-b.yaml": repoEntry("fan-b") }),
+    });
+    assert.match(errors.join("\n"), /withdraws fan-a and adds or changes fan-b/);
+  });
+
+  it("refuses a rename, which withdraws the old id and submits the new one", async () => {
+    const { errors } = await gate({
       files: [{ filename: "packs/fan-b.yaml", previous_filename: "packs/fan-a.yaml", status: "renamed" }],
       maintainer: false,
       ...head({ "packs/fan-b.yaml": repoEntry("fan-b") }),
     });
-    assert.deepEqual(errors, []);
-    assert.deepEqual(
-      entries.map((e) => e.id),
-      ["fan-b"],
-    );
+    assert.match(errors.join("\n"), /withdraws fan-a and adds or changes fan-b/);
+  });
+
+  it("refuses two withdrawals hidden in renames and deletions", async () => {
+    const { errors } = await gate({
+      files: [
+        { filename: "packs/fan-c.yaml", previous_filename: "packs/fan-a.yaml", status: "renamed" },
+        { filename: "packs/fan-b.yaml", status: "removed" },
+      ],
+      maintainer: false,
+      ...head({ "packs/fan-c.yaml": repoEntry("fan-c") }),
+    });
+    assert.match(errors.join("\n"), /withdraws fan-a, fan-b and adds or changes fan-c/);
   });
 });
 
@@ -117,6 +160,23 @@ describe("gate: a maintainer", () => {
       ...head({ "packs/fan-a.yaml": repoEntry("fan-a") }),
     });
     assert.deepEqual([entries, errors], [[], []]);
+  });
+
+  it("may rename an entry and withdraw others in one pull request; the new name is checked", async () => {
+    const { entries, errors } = await gate({
+      files: [
+        { filename: "packs/fan-b.yaml", previous_filename: "packs/fan-a.yaml", status: "renamed" },
+        { filename: "packs/fan-c.yaml", status: "removed" },
+        { filename: "packs/fan-d.yaml", status: "removed" },
+      ],
+      maintainer: true,
+      ...head({ "packs/fan-b.yaml": repoEntry("fan-b") }),
+    });
+    assert.deepEqual(errors, []);
+    assert.deepEqual(
+      entries.map((e) => e.id),
+      ["fan-b"],
+    );
   });
 
   it("checks the entry of a pack folder they changed", async () => {

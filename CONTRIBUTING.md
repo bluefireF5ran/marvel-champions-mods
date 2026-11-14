@@ -126,6 +126,10 @@ Open a pull request that deletes `packs/<id>.yaml`, and say why. It must come fr
 person whose permission it was published under. Once merged, the store stops offering the pack; players who
 installed it keep their copy, marked withdrawn, so their saves still load. Adding the file back lists the pack again.
 
+A withdrawal goes in a pull request of its own, one pack at a time: the check fails a submission that deletes two
+entries, or deletes one next to a new or changed entry. Renaming an entry file counts as both (it withdraws the old id
+and submits a new one).
+
 ## Packs that need other packs
 
 Not supported yet. If your `pack.json` lists other packs in `requires.packs` (a campaign using another pack's
