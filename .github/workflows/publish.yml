@@ -11,8 +11,10 @@
 #
 # Each staged version is uploaded to <id>/<version>/: pack.json, preview.json, thumb.webp, the card pictures
 # (cards/<lang>/*.webp, for the store's pre-install gallery) and the zip last, as the game repo's publish-packs does.
-# Re-running after a failure is safe (scripts/upload-staged.mjs): a version already in the bucket with the same zip is
-# skipped and its release completed; one with a different zip fails the run before anything is uploaded.
+# Re-running after a failure is safe (scripts/upload-staged.mjs): a version already in the bucket with the same files
+# is skipped and its release completed; one with any file there with other bytes fails the run before anything is
+# uploaded. Every put is conditional (If-None-Match: *), so a publisher racing the game repo's for the same new
+# version never overwrites one of its files: it goes on past a file the other wrote only when it is the same bytes.
 #
 # A pack id is published by this registry or by the game repo, never both: the build job checks the public index.json
 # and the upload job the bucket's copy before uploading (scripts/check-ownership.mjs), and update-index.mjs refuses too.

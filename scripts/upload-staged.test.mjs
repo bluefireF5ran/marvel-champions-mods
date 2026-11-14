@@ -17,49 +17,52 @@ const write = (path, body) => {
 };
 
 let n = 0;
-/** A staging folder (scripts/stage-pack.mjs) with one pack. */
-function staged(id = "fan-gwenpool", version = "1.0.0", zipBody = "zip bytes") {
+/** A staging folder (scripts/stage-pack.mjs) with one pack; `other` overrides the non-zip files' bytes. */
+function staged(id = "fan-gwenpool", version = "1.0.0", zipBody = "zip bytes", other = {}) {
   const dir = join(root, `published-${n++}`);
   const at = join(dir, id);
-  write(join(at, "pack.json"), JSON.stringify({ id, version }));
+  write(join(at, "pack.json"), other.manifest ?? JSON.stringify({ id, version }));
   write(join(at, "entry.json"), JSON.stringify({ id }));
   write(join(at, "zip.sha256"), sha(zipBody));
   write(join(at, `${id}-${version}.zip`), zipBody);
-  write(join(at, "preview.json"), "{}");
-  write(join(at, "thumb.webp"), "thumb");
-  write(join(at, "cards", "en", "01a.webp"), "a");
+  write(join(at, "preview.json"), other.preview ?? "{}");
+  write(join(at, "thumb.webp"), other.thumb ?? "thumb");
+  write(join(at, "cards", "en", "01a.webp"), other.card ?? "a");
   writeFileSync(join(dir, "ids.txt"), `${id}\n`);
   return dir;
 }
 
 /**
- * An in-memory bucket, honouring If-None-Match like R2; `failOn(key)` makes the put of that key throw once, like a
- * dropped connection. Two stores over one `objects` map are two publishers writing the same bucket; `afterCheck`
- * runs after each zipSha256 (a hook to line two publishers up).
+ * An in-memory bucket whose every put honours If-None-Match like R2; `failOn(key)` makes the put of that key throw
+ * once, like a dropped connection. Two stores over one `objects` map are two publishers writing the same bucket;
+ * `beforePut` runs before each put (a hook to line two publishers up after both have planned).
  */
-function fakeStore(objects = new Map(), { afterCheck = async () => {} } = {}) {
+function fakeStore(objects = new Map(), { beforePut = async () => {} } = {}) {
   let failKey;
+  const puts = [];
   return {
     objects,
+    puts,
     failOn: (key) => (failKey = key),
-    async zipSha256(key) {
+    async sha256(key) {
       const object = objects.get(key);
-      await afterCheck();
       return object ? object.sha256 : null;
     },
-    async put(file, { sha256, ifNoneMatch = false } = {}) {
+    async put(file) {
+      await beforePut();
+      puts.push(file.key);
       if (file.key === failKey) {
         failKey = undefined;
         throw new Error(`upload of ${file.key} failed`);
       }
-      if (ifNoneMatch && objects.has(file.key)) return "exists";
-      objects.set(file.key, { body: readFileSync(file.path), sha256 });
+      if (objects.has(file.key)) return "exists";
+      objects.set(file.key, { body: readFileSync(file.path), sha256: file.sha256 });
       return "written";
     },
   };
 }
 
-/** Resolves once `count` callers are waiting on it: both publishers have checked the bucket before either uploads. */
+/** Resolves once `count` callers are waiting on it: both publishers have planned before either uploads. */
 function barrier(count) {
   let waiting = 0;
   let release;
@@ -108,6 +111,8 @@ describe("readStaged", () => {
       ],
     );
     assert.equal(pack.zipSha, sha("zip bytes"));
+    assert.equal(pack.files[2].sha256, sha("thumb"));
+    assert.equal(pack.files[3].name, "cards/en/01a.webp");
   });
 
   it("finds no packs in a staging folder holding only ids.txt, or no folder", () => {
@@ -170,24 +175,72 @@ describe("publishStaged", () => {
     await assert.rejects(publishStaged(changed, { store, release }), /already published with a different zip/);
     assert.equal(store.objects.size, before, "fan-a was not uploaded either");
   });
+
+  it("refuses a version whose zip never made it but whose other files are there with other bytes", async () => {
+    // Another build's pack.json and thumbnail, left by a run that stopped before its zip.
+    const store = fakeStore();
+    const theirs = readStaged(staged("fan-gwenpool", "1.0.0", "zip", { thumb: "their thumb" }))[0];
+    for (const file of theirs.files.filter((f) => f.name !== theirs.zipName)) await store.put(file);
+    const before = store.objects.size;
+    await assert.rejects(
+      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "zip", { thumb: "our thumb" })), {
+        store,
+        release: fakeReleases(),
+      }),
+      /already published with a different thumb\.webp/,
+    );
+    assert.equal(store.objects.size, before, "nothing was uploaded");
+  });
+
+  it("refuses a version whose zip matches but whose card picture differs", async () => {
+    const store = fakeStore();
+    await publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "zip", { card: "one" })), {
+      store,
+      release: fakeReleases(),
+    });
+    await assert.rejects(
+      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "zip", { card: "two" })), {
+        store,
+        release: fakeReleases(),
+      }),
+      /already published with a different cards\/en\/01a\.webp/,
+    );
+  });
+
+  it("uploads only the files a stopped run left out, keeping the ones it wrote", async () => {
+    const store = fakeStore();
+    const packs = readStaged(staged());
+    store.failOn("fan-gwenpool/1.0.0/thumb.webp");
+    await assert.rejects(publishStaged(packs, { store, release: fakeReleases() }), /upload of .* failed/);
+    store.puts.length = 0;
+    await publishStaged(packs, { store, release: fakeReleases() });
+    assert.deepEqual(store.puts, [
+      "fan-gwenpool/1.0.0/thumb.webp",
+      "fan-gwenpool/1.0.0/cards/en/01a.webp",
+      "fan-gwenpool/1.0.0/fan-gwenpool-1.0.0.zip",
+    ]);
+  });
 });
 
 describe("two publishers of one new version at once (this registry and the game repo)", () => {
   const zipKey = "fan-gwenpool/1.0.0/fan-gwenpool-1.0.0.zip";
 
-  it("keeps the first zip and fails the other publisher when the zips differ", async () => {
+  /** Both publishers plan against an empty bucket, then upload side by side. */
+  const race = (...stagingDirs) => {
     const objects = new Map();
-    const afterCheck = barrier(2);
-    const results = await Promise.allSettled([
-      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "registry zip")), {
-        store: fakeStore(objects, { afterCheck }),
-        release: fakeReleases(),
-      }),
-      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "game repo zip")), {
-        store: fakeStore(objects, { afterCheck }),
-        release: fakeReleases(),
-      }),
-    ]);
+    const beforePut = barrier(stagingDirs.length);
+    return Promise.allSettled(
+      stagingDirs.map((dir) =>
+        publishStaged(readStaged(dir), { store: fakeStore(objects, { beforePut }), release: fakeReleases() }),
+      ),
+    ).then((results) => ({ objects, results }));
+  };
+
+  it("keeps the first zip and fails the other publisher when the zips differ", async () => {
+    const { objects, results } = await race(
+      staged("fan-gwenpool", "1.0.0", "registry zip"),
+      staged("fan-gwenpool", "1.0.0", "game repo zip"),
+    );
     assert.deepEqual(
       results.map((r) => r.status),
       ["fulfilled", "rejected"],
@@ -198,17 +251,48 @@ describe("two publishers of one new version at once (this registry and the game 
     assert.equal(sha(zip.body), zip.sha256, "the bucket's zip is the bytes its sha256 names");
   });
 
-  it("lets both finish when they upload the same zip", async () => {
-    const objects = new Map();
-    const afterCheck = barrier(2);
-    const publish = () =>
-      publishStaged(readStaged(staged("fan-gwenpool", "1.0.0", "same zip")), {
-        store: fakeStore(objects, { afterCheck }),
-        release: fakeReleases(),
-      });
-    const [first, second] = await Promise.all([publish(), publish()]);
-    assert.equal(first[0].action, "upload");
-    assert.equal(second[0].action, "upload");
+  it("lets both finish when they upload the same files", async () => {
+    const { objects, results } = await race(
+      staged("fan-gwenpool", "1.0.0", "same zip"),
+      staged("fan-gwenpool", "1.0.0", "same zip"),
+    );
+    assert.deepEqual(
+      results.map((r) => r.status === "fulfilled" && r.value[0].action),
+      ["upload", "upload"],
+    );
+    assert.equal(objects.get(zipKey).sha256, sha("same zip"));
+  });
+
+  it("never mixes their files when the same zip comes with different pictures and preview", async () => {
+    const ours = { preview: '{"cards":1}', thumb: "registry thumb", card: "registry card" };
+    const theirs = { preview: '{"cards":2}', thumb: "game repo thumb", card: "game repo card" };
+    const { objects, results } = await race(
+      staged("fan-gwenpool", "1.0.0", "same zip", ours),
+      staged("fan-gwenpool", "1.0.0", "same zip", theirs),
+    );
+    assert.deepEqual(
+      results.map((r) => r.status),
+      ["fulfilled", "rejected"],
+    );
+    assert.match(results[1].reason.message, /published by someone else .* with a different preview\.json/);
+    const body = (name) => String(objects.get(`fan-gwenpool/1.0.0/${name}`).body);
+    assert.equal(body("preview.json"), ours.preview);
+    assert.equal(body("thumb.webp"), ours.thumb);
+    assert.equal(body("cards/en/01a.webp"), ours.card);
+    for (const [key, object] of objects) assert.equal(sha(object.body), object.sha256, `${key} matches its sha256`);
+  });
+
+  it("never mixes their files when only a card picture differs, and only one finishes", async () => {
+    const { objects, results } = await race(
+      staged("fan-gwenpool", "1.0.0", "same zip", { card: "registry card" }),
+      staged("fan-gwenpool", "1.0.0", "same zip", { card: "game repo card" }),
+    );
+    assert.deepEqual(
+      results.map((r) => r.status),
+      ["fulfilled", "rejected"],
+    );
+    assert.match(results[1].reason.message, /with a different cards\/en\/01a\.webp/);
+    assert.equal(String(objects.get("fan-gwenpool/1.0.0/cards/en/01a.webp").body), "registry card");
     assert.equal(objects.get(zipKey).sha256, sha("same zip"));
   });
 });
@@ -276,8 +360,8 @@ describe("awsStore", () => {
             : { code: 0, stdout: JSON.stringify({ Metadata: { sha256: "c".repeat(64) } }), stderr: "" },
       }),
     });
-    assert.equal(await store.zipSha256("missing"), null);
-    assert.equal(await store.zipSha256("there"), "c".repeat(64));
+    assert.equal(await store.sha256("missing"), null);
+    assert.equal(await store.sha256("there"), "c".repeat(64));
   });
 
   it("downloads and hashes a zip uploaded without the metadata", async () => {
@@ -293,28 +377,36 @@ describe("awsStore", () => {
         },
       }),
     });
-    assert.equal(await store.zipSha256("k"), sha("old zip"));
+    assert.equal(await store.sha256("k"), sha("old zip"));
   });
 
-  it("puts the zip with If-None-Match: *, and reads a 412 as a zip already there", async () => {
+  it("puts every file with If-None-Match: * and its sha256; a 412 or 409 is an object already there", async () => {
     const calls = [];
+    const failed = (code) => ({ code: 254, stdout: "", stderr: `An error occurred (${code}) when calling PutObject` });
+    const replies = [
+      { code: 0, stdout: "{}", stderr: "" },
+      failed("PreconditionFailed"),
+      failed("ConditionalRequestConflict"),
+      { code: 255, stdout: "", stderr: "An error occurred (AccessDenied)" },
+    ];
     const store = awsStore({
       endpoint: "e",
       bucket: "b",
       dir: root,
       exec: async (_file, args) => {
         calls.push(args);
-        return calls.length === 1
-          ? { code: 0, stdout: "{}", stderr: "" }
-          : { code: 254, stdout: "", stderr: "An error occurred (PreconditionFailed) when calling the PutObject operation" };
+        return replies[calls.length - 1];
       },
     });
-    const zip = { path: "z.zip", key: "p/1.0.0/p-1.0.0.zip", contentType: "application/zip" };
-    assert.equal(await store.put(zip, { sha256: "d".repeat(64), ifNoneMatch: true }), "written");
-    assert.equal(await store.put(zip, { sha256: "d".repeat(64), ifNoneMatch: true }), "exists");
+    const thumb = { path: "t.webp", key: "p/1.0.0/thumb.webp", contentType: "image/webp", sha256: "d".repeat(64) };
+    assert.equal(await store.put(thumb), "written");
+    assert.equal(await store.put(thumb), "exists");
+    assert.equal(await store.put(thumb), "exists");
+    await assert.rejects(store.put(thumb), /AccessDenied/);
     assert.deepEqual(calls[0].slice(0, 2), ["s3api", "put-object"]);
     assert.ok(calls[0].join(" ").includes("--if-none-match *"));
     assert.ok(calls[0].join(" ").includes(`--metadata sha256=${"d".repeat(64)}`));
+    assert.ok(calls[0].join(" ").includes("--content-type image/webp"));
   });
 
   it("fails on any other head-object error", async () => {
@@ -324,6 +416,6 @@ describe("awsStore", () => {
       dir: root,
       exec: exec({ "head-object": () => ({ code: 255, stdout: "", stderr: "An error occurred (403): Forbidden" }) }),
     });
-    await assert.rejects(store.zipSha256("k"), /Forbidden/);
+    await assert.rejects(store.sha256("k"), /Forbidden/);
   });
 });

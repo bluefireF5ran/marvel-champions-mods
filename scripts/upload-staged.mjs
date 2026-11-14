@@ -4,15 +4,20 @@
  * <id>/<version>/, and attaches each zip to a release of this repo (the store's zipFallback). Safe to re-run after a
  * failure part way:
  *
- *   - Published versions are immutable. Every staged pack is checked before anything is uploaded: a version whose
- *     zip is not in the bucket is uploaded; one whose zip is there with the same sha256 (a retry after the upload
- *     went through) is skipped; one whose zip differs fails the run ("bump the version").
- *   - The zip goes up last, with its sha256 as object metadata, so its presence marks the version complete and a
- *     retry can compare without downloading it (a zip uploaded without the metadata is downloaded and hashed).
- *   - The zip's put is conditional (If-None-Match: *), so it never overwrites a zip already there. The game repo's
+ *   - Published versions are immutable. Every object of every staged pack (pack.json, preview.json, thumb.webp, the
+ *     card pictures and the zip) is checked before anything is uploaded: a version whose objects are all there with
+ *     the same sha256 (a retry after the upload went through) is skipped; one with any object there with other bytes
+ *     fails the run ("bump the version"); otherwise the objects not there yet are uploaded.
+ *   - Every object goes up with its sha256 as object metadata, so a retry compares without downloading it (an object
+ *     uploaded without the metadata is downloaded and hashed). The zip goes up last, so its presence marks the
+ *     version complete.
+ *   - Every put is conditional (If-None-Match: *), so it never overwrites an object already there. The game repo's
  *     publisher writes the same bucket: if both publish a new <id>/<version> at once, both pass the check above and
- *     only one zip put succeeds; the other gets a 412, hashes the zip that won and goes on only when it is the same
- *     bytes, so index.json never lists a sha256 that the bucket's zip does not have.
+ *     only one put of each object succeeds; the other gets a 412, hashes the object that won and goes on only when
+ *     it is the same bytes. So a publisher whose files differ stops at the first one the other wrote, and the bucket
+ *     never holds one publisher's zip with the other's pack.json, preview or pictures, nor a zip whose sha256
+ *     index.json does not list. (A publisher that stops may leave objects the winner's pack does not have, such as a
+ *     card picture only it staged; nothing the winner's pack.json or preview.json names is ever another's.)
  *   - The release is ensured, not created blindly: missing, it is created with the zip; present without the zip, the
  *     zip is attached; present with the zip, its sha256 must match: the asset's digest when GitHub reports one,
  *     otherwise the asset is downloaded and hashed (a same-size zip with other bytes is refused).
@@ -37,7 +42,8 @@ const sha256File = (file) => createHash("sha256").update(fs.readFileSync(file)).
 
 /**
  * The staged packs under `dir`: `[{ id, version, zipName, zipPath, zipSha, zipBytes, files }]`, where `files` is
- * `[{ path, key, contentType }]` in upload order, the zip last. A missing folder or one with no pack folders is none.
+ * `[{ path, key, name, contentType, sha256 }]` in upload order, the zip last (`name` is the key under
+ * `<id>/<version>/`). A missing folder or one with no pack folders is none.
  */
 export function readStaged(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -73,28 +79,44 @@ export function readStaged(dir) {
       }
     }
     files.push({ path: zipPath, key: prefix + zipName, contentType: "application/zip" });
-    const zipSha = sha256File(zipPath);
+    for (const file of files) {
+      Object.assign(file, { name: file.key.slice(prefix.length), sha256: sha256File(file.path) });
+    }
+    const zipSha = files.at(-1).sha256;
     packs.push({ id, version, zipName, zipPath, zipSha, zipBytes: fs.statSync(zipPath).size, files });
   }
   return packs;
 }
 
+/** How a file is named in a message: "zip" for the zip, its key under `<id>/<version>/` otherwise. */
+const fileLabel = (pack, file) => (file.path === pack.zipPath ? "zip" : file.name);
+
 /**
- * What to do with each staged pack. `store.zipSha256(key)` resolves the sha256 of the zip already in the bucket, or
- * null when there is none. Resolves `{ plan: [{ pack, action: "upload" | "skip" }], errors }`.
+ * What to do with each staged pack, from every one of its objects. `store.sha256(key)` resolves the sha256 of the
+ * object already in the bucket, or null when there is none. Resolves `{ plan: [{ pack, action: "upload" | "skip",
+ * files }], errors }`: `files` are the ones to upload (the zip last), the ones not in the bucket yet. A pack with any
+ * object already there with other bytes is an error, and nothing of any pack should be uploaded then.
  */
 export async function planUploads(packs, store) {
   const plan = [];
   const errors = [];
   for (const pack of packs) {
-    const published = await store.zipSha256(`${pack.id}/${pack.version}/${pack.zipName}`);
-    if (published == null) plan.push({ pack, action: "upload" });
-    else if (published === pack.zipSha) plan.push({ pack, action: "skip" });
-    else
+    const missing = [];
+    const differ = [];
+    for (const file of pack.files) {
+      const published = await store.sha256(file.key);
+      if (published == null) missing.push(file);
+      else if (published !== file.sha256) differ.push({ file, published });
+    }
+    if (differ.length > 0) {
+      const what = differ
+        .map(({ file, published }) => `${fileLabel(pack, file)} (${published}, built ${file.sha256})`)
+        .join(", ");
       errors.push(
-        `${pack.id} ${pack.version} is already published with a different zip (${published}, built ${pack.zipSha}): ` +
-          "bump the pack's version",
+        `${pack.id} ${pack.version} is already published with a different ${what}: bump the pack's version`,
       );
+    } else if (missing.length === 0) plan.push({ pack, action: "skip", files: [] });
+    else plan.push({ pack, action: "upload", files: missing });
   }
   return { plan, errors };
 }
@@ -128,33 +150,32 @@ export async function ensureRelease(pack, release) {
 }
 
 /**
- * Checks every pack, then uploads the new ones (zip last) and ensures each one's release. Throws before uploading
- * anything when a pack is refused. Resolves `[{ id, version, action, release }]`.
+ * Checks every object of every pack, then uploads the new ones (each put conditional, the zip last) and ensures each
+ * one's release. Throws before uploading anything when a pack is refused. Resolves `[{ id, version, action,
+ * release }]`.
  */
 export async function publishStaged(packs, { store, release, log = () => {} }) {
   const { plan, errors } = await planUploads(packs, store);
   if (errors.length > 0) throw new Error(errors.join("\n"));
   const done = [];
-  for (const { pack, action } of plan) {
+  for (const { pack, action, files } of plan) {
     if (action === "upload") {
-      for (const file of pack.files) {
-        if (file.path !== pack.zipPath) {
-          await store.put(file);
-          continue;
+      for (const file of files) {
+        if ((await store.put(file)) === "written") continue;
+        // Another publisher's object got there first (between the check above and now): keep going only if it is
+        // the same bytes as ours, so this version's objects all come from one build.
+        const published = await store.sha256(file.key);
+        if (published !== file.sha256) {
+          throw new Error(
+            `${pack.id} ${pack.version} was published by someone else while this run uploaded it, with a different ` +
+              `${fileLabel(pack, file)} (${published}, built ${file.sha256}): the bucket keeps theirs; ` +
+              "bump the pack's version",
+          );
         }
-        if ((await store.put(file, { sha256: pack.zipSha, ifNoneMatch: true })) === "exists") {
-          // Another publisher's zip got there first (between the check above and now): keep it only if it is ours.
-          const published = await store.zipSha256(file.key);
-          if (published !== pack.zipSha) {
-            throw new Error(
-              `${pack.id} ${pack.version} was published by someone else while this run uploaded it, with a different ` +
-                `zip (${published}, built ${pack.zipSha}): the bucket keeps theirs; bump the pack's version`,
-            );
-          }
-          log(`${pack.id} ${pack.version}: the same zip was uploaded by another publisher meanwhile.`);
-        }
+        const what = fileLabel(pack, file);
+        log(`${pack.id} ${pack.version}: the same ${what} was uploaded by another publisher meanwhile.`);
       }
-      log(`Uploaded ${pack.id} ${pack.version} (${pack.files.length} files).`);
+      log(`Uploaded ${pack.id} ${pack.version} (${files.length} of ${pack.files.length} files).`);
     } else {
       log(`${pack.id} ${pack.version} is already in the bucket with the same zip; not uploaded again.`);
     }
@@ -176,7 +197,8 @@ const run = (file, args) =>
 export function awsStore({ endpoint, bucket, dir, exec = run }) {
   const aws = (args) => exec("aws", [...args, "--endpoint-url", endpoint]);
   return {
-    async zipSha256(key) {
+    /** The sha256 of the object at `key`: its metadata, or its bytes hashed when it has none; null when none. */
+    async sha256(key) {
       const head = await aws(["s3api", "head-object", "--bucket", bucket, "--key", key]);
       if (head.code !== 0) {
         if (/\(404\)|Not Found|NoSuchKey/i.test(head.stderr)) return null;
@@ -184,7 +206,7 @@ export function awsStore({ endpoint, bucket, dir, exec = run }) {
       }
       const stored = JSON.parse(head.stdout).Metadata?.sha256;
       if (stored) return stored;
-      const file = path.join(dir, "published.zip");
+      const file = path.join(dir, "published-object");
       const get = await aws(["s3", "cp", "--only-show-errors", `s3://${bucket}/${key}`, file]);
       if (get.code !== 0) throw new Error(`aws s3 cp ${key} failed: ${get.stderr.trim()}`);
       const sha = sha256File(file);
@@ -192,26 +214,18 @@ export function awsStore({ endpoint, bucket, dir, exec = run }) {
       return sha;
     },
     /**
-     * Uploads one file. With `ifNoneMatch`, the put is conditional on there being no object at the key yet (R2
-     * evaluates it atomically; `s3api put-object --if-none-match` needs aws cli 2.22+): resolves "exists" on a 412 or
-     * a 409 (a put that raced ours), "written" otherwise.
+     * Uploads one file `{ key, path, contentType, sha256 }`, with its sha256 as metadata, only if there is no object
+     * at the key yet (If-None-Match: *; R2 evaluates it atomically; `s3api put-object --if-none-match` needs aws cli
+     * 2.22+). Resolves "exists" on a 412 or a 409 (a put that raced ours), "written" otherwise.
      */
-    async put(file, { sha256, ifNoneMatch = false } = {}) {
-      if (ifNoneMatch) {
-        const args = ["s3api", "put-object", "--bucket", bucket, "--key", file.key, "--body", file.path];
-        args.push("--content-type", file.contentType, "--cache-control", IMMUTABLE, "--if-none-match", "*");
-        if (sha256) args.push("--metadata", `sha256=${sha256}`);
-        const { code, stderr } = await aws(args);
-        if (code === 0) return "written";
-        if (/PreconditionFailed|\(412\)|ConditionalRequestConflict|\(409\)/i.test(stderr)) return "exists";
-        throw new Error(`aws s3api put-object ${file.key} failed: ${stderr.trim()}`);
-      }
-      const args = ["s3", "cp", "--only-show-errors", file.path, `s3://${bucket}/${file.key}`];
-      args.push("--content-type", file.contentType, "--cache-control", IMMUTABLE);
-      if (sha256) args.push("--metadata", `sha256=${sha256}`);
+    async put(file) {
+      const args = ["s3api", "put-object", "--bucket", bucket, "--key", file.key, "--body", file.path];
+      args.push("--content-type", file.contentType, "--cache-control", IMMUTABLE, "--if-none-match", "*");
+      args.push("--metadata", `sha256=${file.sha256}`);
       const { code, stderr } = await aws(args);
-      if (code !== 0) throw new Error(`aws s3 cp ${file.key} failed: ${stderr.trim()}`);
-      return "written";
+      if (code === 0) return "written";
+      if (/PreconditionFailed|\(412\)|ConditionalRequestConflict|\(409\)/i.test(stderr)) return "exists";
+      throw new Error(`aws s3api put-object ${file.key} failed: ${stderr.trim()}`);
     },
   };
 }

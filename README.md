@@ -113,7 +113,9 @@ The full design is in
   `store` environment, uploads each version to R2 under `<id>/<version>/` (the zip, `pack.json`, and the
   `preview.json`, `thumb.webp` and card pictures the store shows before an install), makes a release here as the
   fallback download, and regenerates `index.json`. Published versions are immutable: a version already in the bucket
-  with a different zip fails the run, while one with the same zip is skipped, so a failed run can simply be re-run. A
+  with any file different (the zip, `pack.json`, the preview or a picture) fails the run, while one with the same
+  files is skipped, so a failed run can simply be re-run. Every upload is conditional, so it never overwrites a file
+  another publisher wrote first. A
   push that only deletes entries still updates `index.json`.
 - A pack id is published either here or by the game repo's own publish, never both. Entries this repo publishes carry
   `source: "registry"` in `index.json`; an id already listed by the game repo is refused before anything is uploaded,
