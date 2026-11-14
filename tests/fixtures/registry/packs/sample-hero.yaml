@@ -1,0 +1,9 @@
+# Test fixture, not a registry entry: the pack template's sample pack, kept as a `path` entry so
+# scripts/build-entry-sdk.test.mjs can run scripts/build-entry.sh on it with a real SDK tarball.
+id: sample-hero
+path: packs/sample-hero
+creator: Marvel Champions Digital contributors
+permission:
+  by: Marvel Champions Digital contributors
+  evidence: https://github.com/quincarter/marvel-champions-mod-template
+  date: 2026-11-13

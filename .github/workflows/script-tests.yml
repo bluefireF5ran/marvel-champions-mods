@@ -1,0 +1,78 @@
+# Tests a pull request's own copy of this repo's scripts and workflows: their unit tests, and the check that no job
+# running pack code holds a secret and no pull_request_target job runs the pull request's code.
+#
+# Runs the pull request's code, so it has a read-only token that no step uses and a checkout that keeps no
+# credentials. It is not the required check (a pull request controls this file and could make it pass): that is
+# "All checks" in check.yml, which runs the base branch's scripts. A maintainer reads this one before merging a change
+# to scripts/ or .github/.
+name: Script tests
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: Script tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test "scripts/*.test.mjs"
+      - run: node scripts/check-workflow-secrets.mjs
+
+  # scripts/build-entry.sh run for real on tests/fixtures/registry/packs/sample-hero (scripts/build-entry-sdk.test.mjs):
+  # npm ci of the SDK, `mc-pack validate . --publish`, `mc-pack test .` and `mc-pack build`, so a change to the script
+  # or to the SDK's command line that breaks the registry's build fails here, not on the first real entry. Runs the
+  # pull request's code and the game repo's install, so it has a read-only token, no secrets and no kept credentials.
+  sdk-entry:
+    name: Build entry with the SDK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # TEMPORARY, until the SDK is on npm: the game repo's feature/custom-content-packs branch (game PR #489), pinned
+      # to a commit so this is reproducible (resolved 2026-11-14 with git ls-remote
+      # https://github.com/quincarter/marvel-champions-digital-game refs/heads/feature/custom-content-packs). Move it
+      # forward to test a newer SDK; once this repo pins a published SDK, install that instead and drop the build.
+      GAME_REPO: quincarter/marvel-champions-digital-game
+      GAME_SHA: 85401eb6bb0f3d927c578e0fcaa193bc40f764db
+      # The version the pack template pins, so the tarball stands in for that npm release.
+      MC_SDK_VERSION: 0.44.0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GAME_REPO }}
+          ref: ${{ env.GAME_SHA }}
+          path: game
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: game/package.json
+      - working-directory: game
+        run: pnpm install --frozen-lockfile
+      - name: Build the SDK tarball
+        working-directory: game
+        run: |
+          pnpm --filter @mc/mod-sdk build:dist
+          mkdir -p "$RUNNER_TEMP/mod-sdk"
+          cp packages/mod-sdk/dist-npm/*.tgz "$RUNNER_TEMP/mod-sdk/"
+      - name: Build the fixture entry
+        run: |
+          MC_SDK_TARBALL=$(ls "$RUNNER_TEMP"/mod-sdk/*.tgz)
+          export MC_SDK_TARBALL
+          node --test scripts/build-entry-sdk.test.mjs
