@@ -17,6 +17,7 @@
 #
 # SOURCE_ROOT, when set, is where a `path` entry's folder and the root package.json / package-lock.json are read from
 # (the check workflow hands them over as data from the pull request); it defaults to this repo's checkout.
+# scripts/build-entry-sdk.test.mjs uses it to run this script, unchanged, on a fixture pack with a real SDK tarball.
 #
 # Writes <work dir>/entry.json (the entry as JSON), <work dir>/src (the pack's source), <work dir>/out (what
 # `mc-pack build --out` writes: pack.json, the zip, preview.json, thumb.webp, the data files and card pictures) and
