@@ -56,14 +56,9 @@ but the store stops offering it.
 resolve another approved pack's content, so the check refuses such a pack before building it. Make the pack stand
 alone for now, or ask in the custom content discussion.
 
-## Packs kept in this repo (not available yet)
+## Packs kept in this repo
 
-**Not usable yet.** A pack kept here builds with an SDK version pinned by this repo's root `package.json` and
-`package-lock.json`, and those arrive once the pack SDK is published on npm. Until then the check refuses a `path`
-entry with a message saying so; keep every pack in its own repo made from the template. The rest of this section
-describes how they will work.
-
-Some packs will be curated here rather than in a creator's own repo: community packs the maintainer brought in with
+Some packs are curated here rather than in a creator's own repo: community packs the maintainer brought in with
 their authors' permission. Their source is a folder in this repo, `packs/<pack-id>/` (the same layout as the pack
 template: `pack.json`, `cards/`, `abilities/index.ts`, `decks/`, the pictures, `CREDITS.md`, `PERMISSION.md`), and
 their entry gives `path` instead of `repo`, `tag` and `commit`:
@@ -83,6 +78,14 @@ They build with this repo's own SDK version (the root `package.json` and `packag
 there rebuilds and re-checks every pack kept here. A change to a pack's folder is checked and, once merged,
 published like any other entry: bump the pack's `version` in its `pack.json`, since published versions are
 immutable. A folder with a `DRAFT` file in it is not built or published; leave its entry out until it is ready.
+
+**Packs the game repo used to publish.** The community packs that started in the game repo (its
+`content-packs/community/` and publish-packs workflow) move here as packs kept in this repo, with the same ids and
+versions. Their entries add `adopt: game`, which takes the id over from the game repo: the publish lets the id
+through, keeps every version the game repo published exactly as it is (it builds and checks a version already listed,
+but doesn't upload it again, so a rebuild with other bytes can't break it), and makes the entry `source: "registry"`.
+Saves and decks that used those versions keep loading. Only a `path` entry may adopt, so only the maintainer can.
+Remove the pack from the game repo in the same release, since the game repo's publish then refuses the id.
 
 ## What a pack can and can't do
 

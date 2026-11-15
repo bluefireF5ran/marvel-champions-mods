@@ -18,6 +18,8 @@
 #
 # A pack id is published by this registry or by the game repo, never both: the build job checks the public index.json
 # and the upload job the bucket's copy before uploading (scripts/check-ownership.mjs), and update-index.mjs refuses too.
+# The exception is a `path` entry with `adopt: game`, which takes an id over from the game repo: the versions the game
+# repo published stay as they are (built and checked here, not uploaded again), and the entry becomes this registry's.
 #
 # index.json is also written by the game repo's publish-packs workflow, so the write is conditional
 # (scripts/r2-conditional-update.mjs): If-Match on the ETag read (If-None-Match when there is none yet), and on a 412
@@ -71,6 +73,15 @@ jobs:
             echo "# ids with a packs/<id>.yaml at $GITHUB_SHA"
             find packs -maxdepth 1 -name '*.yaml' -printf '%f\n' | sed 's/\.yaml$//' | sort
           } > published/ids.txt
+          # The ids whose entry adopts the game repo's (`adopt: game`): check-ownership.mjs lets them through, and
+          # update-index.mjs makes their entries this registry's.
+          {
+            echo "# ids with adopt: game at $GITHUB_SHA"
+            for file in packs/*.yaml; do
+              [ -f "$file" ] || continue
+              if [ "$(yq -r '.adopt // ""' "$file")" = "game" ]; then basename "$file" .yaml; fi
+            done
+          } > published/adopted.txt
           echo "Entries to build:"
           cat "$RUNNER_TEMP/entries.txt"
       # Before any pack code runs: an id the game repo already publishes is refused here (the upload job checks again).
@@ -91,7 +102,7 @@ jobs:
           else
             echo "::warning::PACKS_BASE_URL is not set: the upload job checks the bucket's index.json instead."
           fi
-          node scripts/check-ownership.mjs "$current" "${ids[@]}"
+          node scripts/check-ownership.mjs --adopted published/adopted.txt "$current" "${ids[@]}"
       # The only step with the token: it downloads the creators' release zips and runs no pack code.
       - name: Fetch the creators' release zips
         env:
@@ -109,6 +120,14 @@ jobs:
           for file in "${files[@]}"; do
             work="$RUNNER_TEMP/work/$(basename "$file" .yaml)"
             bash scripts/build-entry.sh "$file" "$work" < /dev/null
+            id=$(basename "$file" .yaml)
+            version=$(cat "$work/version")
+            # An adopted pack's version the game repo already published stays as it published it.
+            if grep -qx "$id" published/adopted.txt \
+              && node scripts/listed-version.mjs "$RUNNER_TEMP/public-index.json" "$id" "$version"; then
+              echo "$id $version is already published (by the game repo): built and checked, not uploaded again."
+              continue
+            fi
             node scripts/stage-pack.mjs "$work" published
           done
       - uses: actions/upload-artifact@v4
@@ -155,7 +174,7 @@ jobs:
             grep -qE 'NoSuchKey|\(404\)|Not Found' "$RUNNER_TEMP/get.err" || { cat "$RUNNER_TEMP/get.err" >&2; exit 1; }
             rm -f "$current"
           fi
-          node scripts/check-ownership.mjs "$current" "${ids[@]}"
+          node scripts/check-ownership.mjs --adopted published/adopted.txt "$current" "${ids[@]}"
       # Uploads nothing (and succeeds) when no pack was staged, so the index update below always runs.
       - name: Upload packs
         env:
@@ -166,4 +185,4 @@ jobs:
           node scripts/r2-conditional-update.mjs --endpoint "$ENDPOINT" --bucket "$BUCKET" --key index.json \
             --content-type application/json --cache-control "public, max-age=300" -- \
             node scripts/update-index.mjs "{current}" published published/ids.txt "$BASE_URL" \
-            "https://github.com/${{ github.repository }}/releases/download"
+            "https://github.com/${{ github.repository }}/releases/download" published/adopted.txt
