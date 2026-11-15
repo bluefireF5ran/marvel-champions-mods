@@ -11,7 +11,8 @@
  *   - lists the entries to check: every added or changed `packs/<id>.yaml`, the entry of every `packs/<id>/` folder a
  *     maintainer changed, and every `path:` entry when the root package.json / package-lock.json changed;
  *   - fails closed: an entry file or pack folder that changed but whose entry can't be read at the pull request's head
- *     fails the gate, so a pack change can never pass with nothing checked.
+ *     fails the gate, so a pack change can never pass with nothing checked. The one exception is a maintainer's pack
+ *     folder with a DRAFT file and no entry yet: a draft is never built or published, so there is nothing to check.
  *
  * It writes each entry's YAML to <out>/entries/<id>.yaml, the ids to check to <out>/ids.json, and the ids of `path:`
  * entries to <out>/kept-ids.txt, and sets the `ids` step output. Deleted entries are not checked (a deletion
@@ -80,6 +81,8 @@ export async function gate({ files, maintainer, readEntry, listEntries }) {
   if (!maintainer) errors.push(...onePack(files, candidates));
 
   const entries = [];
+  // Pack folders kept here as drafts (a DRAFT file at the head, no entry yet): nothing is built, so nothing to check.
+  let drafts = 0;
   for (const [file, why] of candidates) {
     const id = ENTRY_FILE.exec(file)[1];
     if (!ID.test(id)) {
@@ -87,6 +90,10 @@ export async function gate({ files, maintainer, readEntry, listEntries }) {
       continue;
     }
     const text = await readEntry(file);
+    if (text == null && why === "folder" && maintainer && (await readEntry(`packs/${id}/DRAFT`)) != null) {
+      drafts++;
+      continue;
+    }
     if (text == null) {
       errors.push(
         why === "folder"
@@ -102,7 +109,7 @@ export async function gate({ files, maintainer, readEntry, listEntries }) {
 
   // Fail closed: a pack change never passes with an empty check (every candidate above is an entry or an error, so
   // this is the last line of defence, not the usual way a gate fails).
-  if (candidates.size > 0 && entries.length === 0 && errors.length === 0) {
+  if (candidates.size > drafts && entries.length === 0 && errors.length === 0) {
     errors.push("pack files changed but no entry was found to check");
   }
   return { entries, errors };
