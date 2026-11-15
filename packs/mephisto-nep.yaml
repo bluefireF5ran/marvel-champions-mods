@@ -1,0 +1,11 @@
+id: mephisto-nep
+path: packs/mephisto-nep
+# Published by the game repo until it moved here; adopt keeps those versions as they were (README).
+adopt: game
+creator: "Neptune (Typhon00)"
+permission:
+  by: "Neptune (Typhon00)"
+  evidence: "packs/mephisto-nep/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-02"
+tags: [scenario]
+summary: "Fan-made scenario pack by Neptune (Typhon00): a battle for your soul against Mephisto, with the Blackheart, Corruptive Offers, Damned and Mother of Demons encounter sets and new art for the Standard and Expert sets."
