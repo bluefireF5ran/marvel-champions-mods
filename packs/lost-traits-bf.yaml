@@ -1,0 +1,11 @@
+id: lost-traits-bf
+path: packs/lost-traits-bf
+# Published by the game repo until it moved here; adopt keeps those versions as they were (README).
+adopt: game
+creator: "Bluefire"
+permission:
+  by: "Bluefire"
+  evidence: "packs/lost-traits-bf/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-13"
+tags: [house-rule]
+summary: "Optional house rule by Bluefire (idea: Borja): thirteen official heroes and alter-egos gain one trait another card of the same character already has (Web-Warrior, Avenger, Aerial, Defender, Mutant), or Martial Artist for heroes whose lore is built on it. Nothing else changes. Turn it on per game in Table setup; the rebuilt card faces show while it is on."
