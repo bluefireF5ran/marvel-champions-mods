@@ -60,7 +60,6 @@ intellectual property of Fantasy Flight Games and Marvel.
   own pull requests, and must keep `node scripts/check-workflow-secrets.mjs` passing (no job that runs pack code may
   hold a secret or a write token).
 - **Never add or change a pack kept in this repo** (`path:` entries, `packs/<id>/`) unless the maintainer asked you to.
-  They are not available yet anyway: the check refuses a `path` entry until the pack SDK is published on npm.
 - **Never move a creator's tag or replace a release zip**, and never point `commit` at anything but the tag's commit.
 - **Ask before anything that leaves the machine**: forking, pushing a branch, opening or commenting on a pull request
   or issue. Show the human the exact file and text first, and write as them, with no assistant attribution lines.
@@ -72,7 +71,7 @@ intellectual property of Fantasy Flight Games and Marvel.
 - Published versions are immutable. An update is a new version with a new `tag` and `commit`.
 - Deleting `packs/<id>.yaml` withdraws the pack: it leaves the store, installed copies keep working.
 - A pack id has one publisher: this repo (`source: "registry"`) or the game repo (`source: "game"`). An id the game
-  repo publishes is refused here.
+  repo publishes is refused here, unless the maintainer's `path` entry adopts it (`adopt: game`, README).
 - The check runs `mc-pack validate --publish`: `pack.json`'s permission must record the creator's grant. A pack
   with a `DRAFT` file, or with other packs in `requires.packs` (not supported yet), is refused before it builds.
 - A card that needs a rule the engine lacks can't be approved until a game release adds it

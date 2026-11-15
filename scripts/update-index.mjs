@@ -1,6 +1,6 @@
 // Updates the store's index.json (docs/custom-content-packs.md §11.5 in the game's repo) after a publish.
 //
-//   node scripts/update-index.mjs <current index.json or "-" for none> <published dir> <ids file> <base url> <fallback base>
+//   node scripts/update-index.mjs <current index.json or "-" for none> <published dir> <ids file> <base url> <fallback base> [<adopted ids file>]
 //
 // <published dir> holds one folder per pack published in this run (scripts/stage-pack.mjs): entry.json (the registry
 // entry as JSON), pack.json (the built manifest), zip.sha256, the zip, and preview.json, thumb.webp and cards/ when the
@@ -18,6 +18,10 @@
 //     with `source: "game"`, or with no `source` (the game repo's publish writes none), belongs to the game repo, so
 //     publishing that id here is refused (`ownershipProblems`, which the publish workflow also runs before it uploads
 //     anything), and deleting a packs/<id>.yaml only ever drops a `source: "registry"` entry.
+//   - the one exception is adoption: an entry with `adopt: game` (only a `path` entry, so only the maintainer's) takes
+//     over an id the game repo published. Its entry becomes `source: "registry"` with every version the game repo
+//     published kept as it is, so saves that used them still load. <adopted ids file> lists those ids (the same format
+//     as <ids file>); an adopted version the game repo already published is not built into <published dir> again.
 //
 // The publish workflow runs this inside scripts/r2-conditional-update.mjs, which re-runs it on a fresh read when the
 // game repo wrote index.json in between.
@@ -57,12 +61,14 @@ const NUMERIC = /^\d+$/;
  * Why this registry may not publish `ids` into `current`: one line per id whose entry another publisher owns (the game
  * repo's entries have `source: "game"` or no `source`). Empty when every id is new or already this registry's.
  */
-export function ownershipProblems(current, ids) {
+export function ownershipProblems(current, ids, adopted = new Set()) {
   const byId = new Map((current?.packs ?? []).map((pack) => [pack.id, pack]));
   const problems = [];
   for (const id of ids) {
     const pack = byId.get(id);
     if (!pack || pack.source === "registry") continue;
+    // Adoption takes over the game repo's ids only, never another publisher's.
+    if (adopted.has(id) && (pack.source === undefined || pack.source === "game")) continue;
     const owner = pack.source === undefined ? "no source, so the game repo's" : `source "${pack.source}"`;
     problems.push(
       `${id} is already in index.json from another publisher (${owner}): a pack id is published by one of the ` +
@@ -94,12 +100,15 @@ function compareIdentifiers(p, q) {
 /**
  * The new index: `current` (or `{ schema: 2, packs: [] }`) with `published` upserted. Each published pack is
  * `{ id, entry, manifest, sha, zipBytes, hasThumb, hasPreview }`. `liveIds` is the set of ids that still have a
- * packs/<id>.yaml. Throws when a published id belongs to another publisher (`ownershipProblems`).
+ * packs/<id>.yaml, `adopted` the set of ids whose entry adopts the game repo's (`adopt: game`): a live adopted id's
+ * entry becomes this registry's, its versions kept, whether or not this run built a new one. Throws when a published
+ * id belongs to another publisher (`ownershipProblems`).
  */
-export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase, today, now }) {
+export function updateIndex(current, { published, liveIds, adopted = new Set(), baseUrl, fallbackBase, today, now }) {
   const problems = ownershipProblems(
     current,
     published.map((pack) => pack.id),
+    adopted,
   );
   if (problems.length > 0) throw new Error(problems.join("\n"));
   // The game repo publishes its own packs into the same index.json (its publish-packs workflow): only entries this
@@ -109,13 +118,18 @@ export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase
       .filter((pack) => pack.source !== "registry" || liveIds.has(pack.id))
       .map((pack) => [pack.id, pack]),
   );
+  for (const id of adopted) {
+    const pack = byId.get(id);
+    if (pack && liveIds.has(id) && (pack.source === undefined || pack.source === "game")) {
+      byId.set(id, { ...pack, source: "registry" });
+    }
+  }
   for (const { id, entry, manifest, sha, zipBytes, hasThumb, hasPreview } of published) {
     const version = manifest.version;
     const zipName = `${id}-${version}.zip`;
     const base = `${baseUrl}/${id}/${version}/`;
     const previous = byId.get(id);
     const versions = {
-      ...previous?.versions,
       [version]: {
         manifest: `${base}pack.json`,
         base,
@@ -128,6 +142,9 @@ export function updateIndex(current, { published, liveIds, baseUrl, fallbackBase
         // scripts/lib/pack-index.mjs lists it.
         ...(hasPreview ? { preview: `${base}preview.json` } : {}),
       },
+      // A version already listed is never replaced: published versions are immutable, and an adopted pack's versions
+      // stay the game repo's (upload-staged.mjs refuses different bytes for this registry's own).
+      ...previous?.versions,
     };
     const latest = Object.keys(versions).sort(compareVersions).at(-1);
     // The pack's own fields follow its newest version: publishing an older version leaves them alone.
@@ -199,13 +216,14 @@ export function readIds(idsPath) {
 }
 
 function main() {
-  const [currentPath, publishedDir, idsPath, baseUrl, fallbackBase] = process.argv.slice(2);
+  const [currentPath, publishedDir, idsPath, baseUrl, fallbackBase, adoptedPath] = process.argv.slice(2);
   const current =
     currentPath !== "-" && existsSync(currentPath) ? JSON.parse(readFileSync(currentPath, "utf8")) : undefined;
   const now = new Date().toISOString();
   const index = updateIndex(current, {
     published: readPublished(publishedDir),
     liveIds: readIds(idsPath),
+    adopted: adoptedPath ? readIds(adoptedPath) : new Set(),
     baseUrl,
     fallbackBase,
     today: now.slice(0, 10),
