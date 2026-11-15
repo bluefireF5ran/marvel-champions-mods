@@ -1,10 +1,13 @@
 {
   "id": "punisher-pk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "kind": "scenario",
   "name": "The Punisher",
   "authors": ["PermaKarma"],
   "description": "Fan-made scenario pack by PermaKarma: The Punisher wages a one-man war on crime, and the minions in your way are his targets as much as yours.",
+  "tags": ["Street level", "Vigilante", "Minions"],
+  "wave": "cycle11",
+  "unlock": "open",
   "cover": "cover.webp",
   "license": "Fan-made, non-commercial; see CREDITS.md",
   "requires": {
