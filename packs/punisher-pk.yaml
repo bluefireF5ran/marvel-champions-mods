@@ -1,0 +1,11 @@
+id: punisher-pk
+path: packs/punisher-pk
+# Published by the game repo until it moved here; adopt keeps those versions as they were (README).
+adopt: game
+creator: "PermaKarma"
+permission:
+  by: "PermaKarma"
+  evidence: "packs/punisher-pk/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-13"
+tags: [scenario]
+summary: "Fan-made scenario pack by PermaKarma: The Punisher wages a one-man war on crime, and the minions in your way are his targets as much as yours."
