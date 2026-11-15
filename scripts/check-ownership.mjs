@@ -4,22 +4,29 @@
  * (an entry with `source: "game"`, or with no `source`): a pack id is published by one of the two only
  * (docs/custom-content-packs.md §11.4 in the game repo). The publish workflow runs it before anything is uploaded:
  * in the build job against the public index.json, and again in the upload job against the bucket's copy.
- * scripts/update-index.mjs refuses the same ids when it merges, as the last line of defence.
+ * scripts/update-index.mjs refuses the same ids when it merges, as the last line of defence. An id listed in the
+ * `--adopted` file (entries with `adopt: game`, which take the id over from the game repo) passes.
  *
- *   node scripts/check-ownership.mjs <index.json, or a path that does not exist for none> <pack id>...
+ *   node scripts/check-ownership.mjs [--adopted <ids file>] <index.json, or a path that does not exist for none> <pack id>...
  */
 import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { ownershipProblems } from "./update-index.mjs";
+import { ownershipProblems, readIds } from "./update-index.mjs";
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [indexPath, ...ids] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  let adopted = new Set();
+  if (args[0] === "--adopted") {
+    adopted = readIds(args[1]);
+    args.splice(0, 2);
+  }
+  const [indexPath, ...ids] = args;
   if (!indexPath) {
-    console.error("usage: node scripts/check-ownership.mjs <index.json> <pack id>...");
+    console.error("usage: node scripts/check-ownership.mjs [--adopted <ids file>] <index.json> <pack id>...");
     process.exit(2);
   }
   const current = existsSync(indexPath) ? JSON.parse(readFileSync(indexPath, "utf8")) : undefined;
-  const problems = ownershipProblems(current, ids);
+  const problems = ownershipProblems(current, ids, adopted);
   for (const problem of problems) console.error(`::error::${problem}`);
   if (problems.length > 0) process.exit(1);
   console.log(ids.length > 0 ? `This registry may publish ${ids.join(", ")}.` : "No packs to check.");
