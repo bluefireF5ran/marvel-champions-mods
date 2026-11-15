@@ -150,6 +150,19 @@ describe("gate: fails closed", () => {
     const { errors } = await gate({ files: changed("packs/foo/pack.json"), maintainer: true, ...head({}) });
     assert.match(errors.join("\n"), /packs\/foo\/ changed but packs\/foo\.yaml is not in the pull request/);
   });
+
+  it("lets a maintainer keep a draft pack folder with no entry, and checks nothing for it", async () => {
+    const draft = { "packs/foo/DRAFT": "waiting on a co-author" };
+    const { entries, errors } = await gate({ files: changed("packs/foo/pack.json"), maintainer: true, ...head(draft) });
+    assert.deepEqual(errors, []);
+    assert.deepEqual(entries, []);
+  });
+
+  it("still refuses a draft folder from a submission", async () => {
+    const draft = { "packs/foo/DRAFT": "" };
+    const { errors } = await gate({ files: changed("packs/foo/pack.json"), maintainer: false, ...head(draft) });
+    assert.ok(errors.length > 0);
+  });
 });
 
 describe("gate: a maintainer", () => {
