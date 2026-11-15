@@ -18,7 +18,9 @@ changed=$(git diff --name-only "$base" HEAD)
   echo "$changed" | sed -nE 's#^packs/([^/]+)/.*#packs/\1.yaml#p'
   if echo "$changed" | grep -qE '^package(-lock)?\.json$'; then
     for file in packs/*.yaml; do
-      [[ -e "$file" ]] && grep -qE '^path:' "$file" && echo "$file"
+      if [[ -e "$file" ]] && grep -qE '^path:' "$file"; then echo "$file"; fi
     done
   fi
-} | sort -u | while read -r file; do [[ -f "$file" ]] && echo "$file"; done
+# `if`, not `&&`: a last test that fails (no entries at all, or a draft folder with no entry) must not end the script
+# with status 1, which fails the publish under pipefail.
+} | sort -u | while read -r file; do if [[ -f "$file" ]]; then echo "$file"; fi; done
