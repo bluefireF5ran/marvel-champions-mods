@@ -138,10 +138,9 @@ for the build. Make the pack stand alone for now, or ask in the custom content d
 
 ## Packs kept in this repo
 
-Not available yet: packs kept in this repo (`packs/<id>/` with a `path` entry) build with an SDK pinned by this
-repo's root `package.json` and `package-lock.json`, which arrive once the pack SDK is published on npm; until then the
-check refuses a `path` entry. When they arrive they are curated by the maintainer, with their creators' permission
-(README, "Packs kept in this repo"). **Don't open pull requests that add or change them**: submit your pack from your
+Packs kept in this repo (`packs/<id>/` with a `path` entry) build with the SDK pinned by this repo's root
+`package.json` and `package-lock.json`. They are curated by the maintainer, with their creators' permission (README,
+"Packs kept in this repo"). **Don't open pull requests that add or change them**: submit your pack from your
 own repo made from the template, as above.
 
 ## What a pack can't do

@@ -6,8 +6,7 @@
 # An entry names its source one of two ways:
 #   - `repo`, `tag` and `commit`: the pack lives in its creator's own repo (made from the pack template);
 #   - `path: packs/<pack-id>`: the pack's source is kept in this repo (packs curated here). It builds with this repo's
-#     own SDK version (the root package.json and package-lock.json). Not usable yet: those files arrive once the SDK
-#     is published on npm, and until then a `path` entry fails here with a message saying so.
+#     own SDK version (the root package.json and package-lock.json); without those a `path` entry fails here.
 #
 # Not supported yet: a pack whose pack.json `requires.packs` names other packs. `mc-pack` has no way to resolve another
 # approved pack's content in this build yet, so such a pack fails early, before any of its code runs.
@@ -47,6 +46,13 @@ field '.permission.date' > /dev/null
 [[ "$id" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || { echo "::error file=$entry_file::id must be lowercase letters, digits and single dashes"; exit 1; }
 
 path=$(jq -r '.path // empty' "$work/entry.json")
+# `adopt: game` takes an id over from the game repo's own publish (README, "Packs kept in this repo"). Only a `path`
+# entry may adopt, and the gate keeps those to the maintainer, so a submission can never take over another's id.
+adopt=$(jq -r '.adopt // empty' "$work/entry.json")
+if [[ -n "$adopt" ]]; then
+  [[ "$adopt" == "game" ]] || { echo "::error file=$entry_file::adopt can only be game"; exit 1; }
+  [[ -n "$path" ]] || { echo "::error file=$entry_file::only a path entry (a pack kept in this repo) may adopt an id"; exit 1; }
+fi
 if [[ -n "$path" ]]; then
   # A pack kept in this repo.
   [[ "$path" == "packs/$id" ]] || { echo "::error file=$entry_file::path must be packs/$id"; exit 1; }
