@@ -1,6 +1,7 @@
 // node --test "scripts/*.test.mjs" (the script tests workflow). The registry's upsert into the store's index.json.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { isListed } from "./listed-version.mjs";
 import { compareVersions, ownershipProblems, updateIndex } from "./update-index.mjs";
 
 const BASE = "https://packs.example.app";
@@ -133,6 +134,60 @@ describe("one publisher per pack id", () => {
       updateIndex(current, opts([], [])).packs.map((p) => p.id),
       ["game-pack", "legacy-pack"],
     );
+  });
+});
+
+describe("adopting the game repo's ids (adopt: game)", () => {
+  const game = (source) => ({
+    id: "fan-gwenpool",
+    name: "Gwenpool",
+    approved: "2026-11-01",
+    latest: "1.0.0",
+    withdrawn: false,
+    versions: { "1.0.0": { zipSha256: "f".repeat(64) } },
+    ...(source ? { source } : {}),
+  });
+  const adopting = (published, live = ["fan-gwenpool"]) => ({ ...opts(published, live), adopted: new Set(live) });
+
+  it("lets an adopted id through, from the game repo only", () => {
+    const adopted = new Set(["fan-gwenpool"]);
+    for (const source of ["game", undefined]) {
+      assert.deepEqual(ownershipProblems({ packs: [game(source)] }, ["fan-gwenpool"], adopted), []);
+    }
+    assert.equal(ownershipProblems({ packs: [game("elsewhere")] }, ["fan-gwenpool"], adopted).length, 1);
+  });
+
+  it("makes the entry the registry's with the game repo's versions as they were, with nothing built", () => {
+    const gwen = updateIndex({ schema: 2, packs: [game("game")] }, adopting([])).packs[0];
+    assert.equal(gwen.source, "registry");
+    assert.equal(gwen.approved, "2026-11-01");
+    assert.deepEqual(gwen.versions, { "1.0.0": { zipSha256: "f".repeat(64) } });
+  });
+
+  it("keeps an already listed version and adds a new one", () => {
+    const gwen = updateIndex(
+      { schema: 2, packs: [game(undefined)] },
+      adopting([pack("fan-gwenpool", "1.0.0"), pack("fan-gwenpool", "1.1.0", { sha: "b".repeat(64) })]),
+    ).packs[0];
+    assert.equal(gwen.source, "registry");
+    assert.equal(gwen.versions["1.0.0"].zipSha256, "f".repeat(64));
+    assert.equal(gwen.versions["1.1.0"].zipSha256, "b".repeat(64));
+    assert.equal(gwen.latest, "1.1.0");
+  });
+
+  it("leaves the entry the game repo's while the adopting file is not there", () => {
+    const next = updateIndex({ schema: 2, packs: [game("game")] }, { ...opts([], []), adopted: new Set(["fan-gwenpool"]) });
+    assert.equal(next.packs[0].source, "game");
+  });
+});
+
+describe("listed-version", () => {
+  it("says whether index.json lists a pack at a version", () => {
+    const index = { packs: [{ id: "fan-gwenpool", versions: { "1.0.0": {} } }] };
+    assert.equal(isListed(index, "fan-gwenpool", "1.0.0"), true);
+    assert.equal(isListed(index, "fan-gwenpool", "1.0.1"), false);
+    assert.equal(isListed(index, "other", "1.0.0"), false);
+    assert.equal(isListed(undefined, "fan-gwenpool", "1.0.0"), false);
   });
 });
 
