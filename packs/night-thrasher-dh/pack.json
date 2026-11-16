@@ -1,10 +1,12 @@
 {
   "id": "night-thrasher-dh",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "kind": "hero",
   "name": "Night Thrasher",
   "authors": ["DesignHacker"],
   "description": "Fan-made hero pack by DesignHacker: Night Thrasher.",
+  "tags": ["Street level", "Aggression", "New Warriors"],
+  "unlock": "open",
   "cover": "cover.webp",
   "license": "Fan-made, non-commercial; see CREDITS.md",
   "requires": {
