@@ -11,7 +11,7 @@
 //
 // The rules the game repo's scripts/lib/pack-index.mjs also follows (§11.5, "Two publishers, one index.json"):
 //   - `latest` is the highest version by SemVer precedence, not the version this run published, and the pack's name,
-//     summary, tags and thumbnail follow it;
+//     summary, tags and thumbnail follow it (tags: the entry's, then the creator's from pack.json, `catalogTags`);
 //   - `withdrawn` is kept as it is: a publish never lists a withdrawn pack again (a pack the game repo withdrew stays
 //     withdrawn). Here a pack is withdrawn by deleting its file, which drops it, and adding the file back lists it.
 //   - one publisher per pack id (§11.4): an entry is this registry's when it carries `source: "registry"`. An entry
@@ -28,6 +28,40 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+
+/** The most search tags a pack's `pack.json` may carry, and the longest one (the game's `PACK_TAGS_MAX`). */
+const PACK_TAGS_MAX = 8;
+const PACK_TAG_MAX_LENGTH = 24;
+
+/**
+ * The catalog entry's `tags` (game issue #734): the registry entry's own (packs/<id>.yaml `tags`), then the creator's
+ * from the pack's `pack.json` `tags`, read defensively like the game's `parsePackTags` (trimmed, 1 to 24 characters,
+ * at most 8) and unique ignoring case. The game repo's scripts/lib/pack-index.mjs `catalogTags` reads `pack.json` the
+ * same way.
+ */
+export function catalogTags(entryTags, manifest) {
+  const out = [];
+  const seen = new Set();
+  const add = (tag) => {
+    const key = tag.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(tag);
+  };
+  for (const tag of Array.isArray(entryTags) ? entryTags : []) {
+    if (typeof tag === "string" && tag.trim()) add(tag.trim());
+  }
+  let own = 0;
+  for (const entry of Array.isArray(manifest?.tags) ? manifest.tags : []) {
+    if (own >= PACK_TAGS_MAX) break;
+    if (typeof entry !== "string") continue;
+    const tag = entry.trim();
+    if (tag.length < 1 || tag.length > PACK_TAG_MAX_LENGTH) continue;
+    own += 1;
+    add(tag);
+  }
+  return out;
+}
 
 /**
  * Compares two versions by SemVer 2.0.0 precedence (semver.org §11): negative when `a` is older. The same function
@@ -154,14 +188,19 @@ export function updateIndex(current, { published, liveIds, adopted = new Set(), 
             kind: manifest.kind,
             name: manifest.name,
             creator: entry.creator,
+            // Every author the pack credits, for the store's Credits tab (game #734): `creator` may name only the lead.
+            ...(Array.isArray(manifest.authors) && manifest.authors.length > 0
+              ? { authors: manifest.authors.filter((name) => typeof name === "string") }
+              : {}),
             summary: entry.summary ?? String(manifest.description ?? "").split("\n")[0],
-            tags: entry.tags ?? [],
+            tags: catalogTags(entry.tags, manifest),
             ...(hasThumb ? { thumbnail: `${base}thumb.webp` } : {}),
           }
         : {
             kind: previous.kind,
             name: previous.name,
             creator: previous.creator,
+            ...(previous.authors ? { authors: previous.authors } : {}),
             summary: previous.summary,
             tags: previous.tags,
             ...(previous.thumbnail ? { thumbnail: previous.thumbnail } : {}),

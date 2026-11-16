@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { isListed } from "./listed-version.mjs";
-import { compareVersions, ownershipProblems, updateIndex } from "./update-index.mjs";
+import { catalogTags, compareVersions, ownershipProblems, updateIndex } from "./update-index.mjs";
 
 const BASE = "https://packs.example.app";
 const pack = (id, version, extra = {}) => ({
@@ -200,5 +200,36 @@ describe("preview", () => {
     const without = updateIndex(undefined, opts([{ ...pack("fan-gwenpool", "1.0.0"), hasThumb: false }])).packs[0];
     assert.equal(without.versions["1.0.0"].preview, undefined);
     assert.equal(without.thumbnail, undefined);
+  });
+});
+
+describe("catalogTags", () => {
+  it("lists the entry's tags, then the creator's from pack.json, once each ignoring case", () => {
+    assert.deepEqual(catalogTags(["hero"], { tags: [" Symbiote ", "HERO", "symbiote", "Aggression"] }), [
+      "hero",
+      "Symbiote",
+      "Aggression",
+    ]);
+  });
+
+  it("skips bad creator tags and keeps at most eight", () => {
+    const many = ["a", "b", "c", "d", "e", "f", "g", "h", "i"];
+    assert.deepEqual(catalogTags([], { tags: [1, "", "x".repeat(25), ...many] }), many.slice(0, 8));
+    assert.deepEqual(catalogTags(undefined, {}), []);
+  });
+
+  it("is what a published entry carries", () => {
+    const published = [pack("fan-gwenpool", "1.0.0")];
+    published[0].manifest.tags = ["Spider-Verse"];
+    const index = updateIndex(undefined, opts(published));
+    assert.deepEqual(index.packs[0].tags, ["hero", "Spider-Verse"]);
+  });
+
+  it("lists every author the pack credits beside the entry's creator line", () => {
+    const published = [pack("fan-gwenpool", "1.0.0")];
+    published[0].manifest.authors = ["Gideon's Gaming", "Bluefire"];
+    const index = updateIndex(undefined, opts(published));
+    assert.equal(index.packs[0].creator, "Neptune");
+    assert.deepEqual(index.packs[0].authors, ["Gideon's Gaming", "Bluefire"]);
   });
 });
