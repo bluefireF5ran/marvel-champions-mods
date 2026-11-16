@@ -75,10 +75,9 @@ tags: [hero]
 ```
 
 They build with this repo's own SDK version (the root `package.json` and `package-lock.json`), so bumping the SDK
-there rebuilds and re-checks every pack kept here. Dependabot (`.github/dependabot.yml`) opens that bump as a pull
-request once a day when the game has published a new SDK to npm, and moves that same pull request to a newer version
-published before it is merged; the check's gate lets its pull request change the
-root `package.json` and `package-lock.json` and nothing else. Merge it on its own and let its publish finish before
+there rebuilds and re-checks every pack kept here. The game's release workflow opens that bump as a pull request
+(its Registry SDK bump workflow, on the branch `feature/mod-sdk-bump`) as soon as a release has published a new SDK
+to npm, and moves that same pull request to a newer version published before it is merged. Merge it on its own and let its publish finish before
 merging the next change. A change to a pack's folder is checked and, once merged,
 published like any other entry: bump the pack's `version` in its `pack.json`, since published versions are
 immutable. A folder with a `DRAFT` file in it is not built or published; leave its entry out until it is ready.
