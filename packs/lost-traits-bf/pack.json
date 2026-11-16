@@ -1,10 +1,12 @@
 {
   "id": "lost-traits-bf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "kind": "house-rule",
   "name": "Lost Traits",
   "authors": ["Bluefire"],
   "description": "Optional house rule by Bluefire (idea: Borja): thirteen official heroes and alter-egos gain one trait another card of the same character already has (Web-Warrior, Avenger, Aerial, Defender, Mutant), or Martial Artist for heroes whose lore is built on it. Nothing else changes. Turn it on per game in Table setup; the rebuilt card faces show while it is on.",
+  "tags": ["Traits", "Balance"],
+  "unlock": "open",
   "cover": "cover.webp",
   "license": "Fan-made, non-commercial; see CREDITS.md",
   "requires": {
