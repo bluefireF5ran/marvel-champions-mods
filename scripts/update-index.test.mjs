@@ -224,4 +224,12 @@ describe("catalogTags", () => {
     const index = updateIndex(undefined, opts(published));
     assert.deepEqual(index.packs[0].tags, ["hero", "Spider-Verse"]);
   });
+
+  it("lists every author the pack credits beside the entry's creator line", () => {
+    const published = [pack("fan-gwenpool", "1.0.0")];
+    published[0].manifest.authors = ["Gideon's Gaming", "Bluefire"];
+    const index = updateIndex(undefined, opts(published));
+    assert.equal(index.packs[0].creator, "Neptune");
+    assert.deepEqual(index.packs[0].authors, ["Gideon's Gaming", "Bluefire"]);
+  });
 });

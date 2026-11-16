@@ -188,6 +188,10 @@ export function updateIndex(current, { published, liveIds, adopted = new Set(), 
             kind: manifest.kind,
             name: manifest.name,
             creator: entry.creator,
+            // Every author the pack credits, for the store's Credits tab (game #734): `creator` may name only the lead.
+            ...(Array.isArray(manifest.authors) && manifest.authors.length > 0
+              ? { authors: manifest.authors.filter((name) => typeof name === "string") }
+              : {}),
             summary: entry.summary ?? String(manifest.description ?? "").split("\n")[0],
             tags: catalogTags(entry.tags, manifest),
             ...(hasThumb ? { thumbnail: `${base}thumb.webp` } : {}),
@@ -196,6 +200,7 @@ export function updateIndex(current, { published, liveIds, adopted = new Set(), 
             kind: previous.kind,
             name: previous.name,
             creator: previous.creator,
+            ...(previous.authors ? { authors: previous.authors } : {}),
             summary: previous.summary,
             tags: previous.tags,
             ...(previous.thumbnail ? { thumbnail: previous.thumbnail } : {}),
