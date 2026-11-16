@@ -2,7 +2,7 @@
 // and which entries it checks, with the pull request's files and head faked.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { gate, githubPullRequest } from "./pr-gate.mjs";
+import { gate, githubPullRequest, SDK_BOT, whoOpened } from "./pr-gate.mjs";
 
 const repoEntry = (id) => `id: ${id}\nrepo: https://github.com/someone/${id}\ntag: v1.0.0\n`;
 const keptEntry = (id) => `id: ${id}\npath: packs/${id}\n`;
@@ -220,6 +220,112 @@ describe("gate: a maintainer", () => {
       entries.map((e) => e.id),
       ["fan-a", "fan-c"],
     );
+  });
+});
+
+describe("gate: Dependabot's SDK bump", () => {
+  const tree = {
+    "packs/fan-a.yaml": keptEntry("fan-a"),
+    "packs/fan-b.yaml": repoEntry("fan-b"),
+    "packs/fan-c.yaml": keptEntry("fan-c"),
+  };
+
+  it("checks every path entry when it changes the root manifests", async () => {
+    const { entries, errors } = await gate({
+      files: changed("package.json", "package-lock.json"),
+      maintainer: true,
+      sdkBump: true,
+      ...head(tree),
+    });
+    assert.deepEqual(errors, []);
+    assert.deepEqual(
+      entries.map((e) => [e.id, e.kept]),
+      [
+        ["fan-a", true],
+        ["fan-c", true],
+      ],
+    );
+  });
+
+  it("is refused when it changes anything else", async () => {
+    const others = ["packs/fan-a.yaml", "packs/fan-a/pack.json", "scripts/pr-gate.mjs", ".github/dependabot.yml"];
+    for (const other of others) {
+      const { entries, errors } = await gate({
+        files: changed("package.json", "package-lock.json", other),
+        maintainer: true,
+        sdkBump: true,
+        ...head(tree),
+      });
+      assert.deepEqual(entries, []);
+      assert.equal(errors.length, 1, other);
+      assert.match(errors[0], /only package\.json and package-lock\.json/);
+      assert.ok(errors[0].endsWith(other), errors[0]);
+    }
+  });
+
+  it("counts a rename's old name too", async () => {
+    const { errors } = await gate({
+      files: [{ filename: "package.json", previous_filename: "scripts/x.mjs", status: "renamed" }],
+      maintainer: true,
+      sdkBump: true,
+      ...head(tree),
+    });
+    assert.equal(errors.length, 1);
+    assert.match(errors[0], /scripts\/x\.mjs/);
+  });
+});
+
+describe("whoOpened", () => {
+  const permissions = { quincarter: "admin", helper: "write", fan: "read" };
+  const lookups = [];
+  const permission = async (user) => {
+    lookups.push(user);
+    return permissions[user] ?? "none";
+  };
+
+  it("a maintainer's pull request", async () => {
+    assert.deepEqual(await whoOpened({ author: "quincarter", sender: "helper", permission }), {
+      maintainer: true,
+      sdkBump: false,
+    });
+  });
+
+  it("a submission", async () => {
+    assert.deepEqual(await whoOpened({ author: "fan", sender: "fan", permission }), {
+      maintainer: false,
+      sdkBump: false,
+    });
+    assert.deepEqual(await whoOpened({ author: "fan", sender: "quincarter", permission }), {
+      maintainer: false,
+      sdkBump: false,
+    });
+  });
+
+  it("Dependabot's bump, run by Dependabot or re-run by a maintainer; Dependabot is never looked up", async () => {
+    lookups.length = 0;
+    assert.deepEqual(await whoOpened({ author: SDK_BOT, sender: SDK_BOT, permission }), {
+      maintainer: true,
+      sdkBump: true,
+    });
+    assert.deepEqual(await whoOpened({ author: SDK_BOT, sender: "quincarter", permission }), {
+      maintainer: true,
+      sdkBump: true,
+    });
+    assert.deepEqual(lookups, ["quincarter"]);
+  });
+
+  it("Dependabot's pull request triggered by someone without write access is a submission", async () => {
+    assert.deepEqual(await whoOpened({ author: SDK_BOT, sender: "fan", permission }), {
+      maintainer: false,
+      sdkBump: false,
+    });
+  });
+
+  it("Dependabot as the sender of someone else's pull request counts for nothing", async () => {
+    assert.deepEqual(await whoOpened({ author: "quincarter", sender: SDK_BOT, permission }), {
+      maintainer: false,
+      sdkBump: false,
+    });
   });
 });
 

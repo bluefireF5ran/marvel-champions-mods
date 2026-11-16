@@ -1,0 +1,29 @@
+# Opens a pull request when a new version of the mod SDK is on npm (the game repo publishes it on every release),
+# bumping the root package.json and package-lock.json that every pack kept here builds with. The check (check.yml)
+# then rebuilds and re-checks every `path:` entry with it, as for a maintainer's bump: scripts/pr-gate.mjs lets a
+# Dependabot pull request through only when it changes nothing but those two files. Nothing is pushed to main;
+# merging is the maintainer's call, and it republishes the packs kept here (publish.yml).
+#
+# Only the SDK: it is this repo's one dependency, and `allow` keeps it that way if another is ever added.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+      time: "16:00"
+      timezone: Etc/UTC
+    allow:
+      - dependency-name: "@champions-digital-game/mod-sdk"
+    # A group, so the bump stays one pull request: while it is open, Dependabot's scheduled run refreshes the open
+    # group pull request with the latest version of what it already holds (the SDK), rather than opening another. A
+    # lone, ungrouped update is closed as superseded and replaced by a new pull request instead. If the open pull
+    # request ever lags behind npm, comment `@dependabot recreate` on it.
+    groups:
+      mod-sdk:
+        patterns:
+          - "@champions-digital-game/mod-sdk"
+    # One bump at a time: each one rebuilds every pack kept here, and its publish should finish before the next.
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: "SDK"
