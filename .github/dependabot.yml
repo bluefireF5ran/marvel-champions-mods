@@ -17,8 +17,8 @@ updates:
       - dependency-name: "@champions-digital-game/mod-sdk"
     # A group, so the bump stays one pull request: while it is open, Dependabot's scheduled run refreshes the open
     # group pull request with the latest version of what it already holds (the SDK), rather than opening another. A
-    # lone, ungrouped update is closed as superseded and replaced by a new pull request instead. If the open pull request
-    # ever lags behind npm, comment `@dependabot recreate` on it.
+    # lone, ungrouped update is closed as superseded and replaced by a new pull request instead. If the open pull
+    # request ever lags behind npm, comment `@dependabot recreate` on it.
     groups:
       mod-sdk:
         patterns:
