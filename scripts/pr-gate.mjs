@@ -8,6 +8,8 @@
  *     anything but `packs/<id>.yaml`, more than one pack (deletions and renames count: one withdrawal on its own is
  *     allowed, more than one, or one next to a new or changed entry, is not), or a `path:` entry (packs kept here
  *     are maintainer-only);
+ *   - lets Dependabot's SDK bump (.github/dependabot.yml) change the root package.json and package-lock.json, and
+ *     nothing else, and checks it as a maintainer's bump;
  *   - lists the entries to check: every added or changed `packs/<id>.yaml`, the entry of every `packs/<id>/` folder a
  *     maintainer changed, and every `path:` entry when the root package.json / package-lock.json changed;
  *   - fails closed: an entry file or pack folder that changed but whose entry can't be read at the pull request's head
@@ -35,20 +37,35 @@ const ROOT_MANIFEST = /^package(-lock)?\.json$/;
 const KEPT_HERE = /^path:/m;
 /** Repo permissions that make someone a maintainer. */
 export const MAINTAINER_PERMISSIONS = new Set(["admin", "maintain", "write"]);
+/** The account that opens the SDK bumps (.github/dependabot.yml). It is not a collaborator, so it has no permission. */
+export const SDK_BOT = "dependabot[bot]";
 
 /**
  * Decides what a pull request may change and which entries to check.
  *
  *   files: [{ filename, status, previous_filename? }] (the pull request's files, from the API)
  *   maintainer: whether the author and whoever triggered the run are maintainers
+ *   sdkBump: whether this is Dependabot's SDK bump (its author is SDK_BOT, and whoever else triggered the run is a
+ *     maintainer). It may change the root package.json and package-lock.json and nothing else; within that, it is
+ *     checked as a maintainer's bump is: every `path:` entry, rebuilt with the new SDK.
  *   readEntry(path): resolves an entry file's text at the pull request's head, or null when it is not there
  *   listEntries(): resolves every packs/<id>.yaml path at the pull request's head
  *
  * Resolves `{ entries: [{ id, file, text, kept }], errors }`.
  */
-export async function gate({ files, maintainer, readEntry, listEntries }) {
+export async function gate({ files, maintainer, sdkBump = false, readEntry, listEntries }) {
   const errors = [];
   const paths = [...new Set(files.flatMap((f) => [f.filename, f.previous_filename].filter(Boolean)))];
+
+  if (sdkBump) {
+    const others = paths.filter((p) => !ROOT_MANIFEST.test(p));
+    if (others.length > 0) {
+      const list = others.join(", ");
+      errors.push(`an SDK bump changes only package.json and package-lock.json; this one also changes ${list}`);
+      return { entries: [], errors };
+    }
+    maintainer = true;
+  }
 
   if (!maintainer) {
     for (const p of paths) {
@@ -147,6 +164,22 @@ function onePack(files, candidates) {
   return [];
 }
 
+/**
+ * Who the pull request is from, for gate(): `{ maintainer, sdkBump }`. `permission(user)` resolves a user's permission
+ * on this repo. A maintainer pull request is one whose author and whoever triggered the run are both maintainers.
+ * Dependabot's SDK bump is one whose author is SDK_BOT: Dependabot itself is not looked up (it has no permission), but
+ * anyone else who triggered the run must be a maintainer, or the pull request is held to a submission's rules.
+ */
+export async function whoOpened({ author, sender, permission }) {
+  const bot = author === SDK_BOT;
+  let maintainer = true;
+  for (const user of new Set([author, sender])) {
+    if (bot && user === SDK_BOT) continue;
+    if (!MAINTAINER_PERMISSIONS.has(await permission(user))) maintainer = false;
+  }
+  return { maintainer, sdkBump: bot && maintainer };
+}
+
 const run = (file, args) =>
   new Promise((resolve) => {
     execFile(file, args, { maxBuffer: 64 * 1024 * 1024 }, (error, stdout, stderr) =>
@@ -224,16 +257,25 @@ async function main() {
   if (files.length !== Number(CHANGED_FILES)) {
     throw new Error(`the API listed ${files.length} changed files, the pull request has ${CHANGED_FILES}`);
   }
-  let maintainer = true;
-  for (const user of new Set([AUTHOR, SENDER])) {
-    const permission = await pull.permission(user);
-    console.log(`${user}: ${permission} on ${REPO}`);
-    if (!MAINTAINER_PERMISSIONS.has(permission)) maintainer = false;
-  }
-  console.log(maintainer ? "Maintainer pull request." : "Submission: only packs/<id>.yaml may change.");
+  const { maintainer, sdkBump } = await whoOpened({
+    author: AUTHOR,
+    sender: SENDER,
+    permission: async (user) => {
+      const permission = await pull.permission(user);
+      console.log(`${user}: ${permission} on ${REPO}`);
+      return permission;
+    },
+  });
+  console.log(
+    sdkBump
+      ? "Dependabot's SDK bump: only package.json and package-lock.json may change."
+      : maintainer
+        ? "Maintainer pull request."
+        : "Submission: only packs/<id>.yaml may change.",
+  );
 
   const { readEntry, listEntries } = pull;
-  const { entries, errors } = await gate({ files, maintainer, readEntry, listEntries });
+  const { entries, errors } = await gate({ files, maintainer, sdkBump, readEntry, listEntries });
   if (errors.length > 0) throw new Error(errors.join("\n"));
 
   fs.mkdirSync(path.join(out, "entries"), { recursive: true });
