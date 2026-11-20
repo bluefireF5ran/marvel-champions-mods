@@ -1,0 +1,10 @@
+id: the-rose-bf
+path: packs/the-rose-bf
+creator: "BigDarsh & Bluefire"
+editors: [bluefireF5ran]
+permission:
+  by: "BigDarsh & Bluefire"
+  evidence: "packs/the-rose-bf/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-20"
+tags: [scenario]
+summary: "Kingpin outlawed heroes. The Rose cashes in."

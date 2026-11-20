@@ -1,0 +1,35 @@
+{
+  "id": "x.the-rose-bf.13",
+  "name": "Silent Pruning",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "13",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 1,
+  "starIcon": true,
+  "traits": [],
+  "keywords": [
+    {
+      "name": "incite",
+      "value": 1
+    }
+  ],
+  "text": {
+    "printed": "Incite 1.\nWhen Revealed: Give the villain a tough status card and 1 facedown boost card. Discard each upgrade attached to a scheme. If no upgrade was discarded this way, place 1 Fisk counter on a Fisk environment.\n[star] Boost: Place 1 Fisk counter on a Fisk environment.",
+    "current": "Incite 1.\nWhen Revealed: Give the villain a tough status card and 1 facedown boost card. Discard each upgrade attached to a scheme. If no upgrade was discarded this way, place 1 Fisk counter on a Fisk environment.\n[star] Boost: Place 1 Fisk counter on a Fisk environment."
+  },
+  "flavor": "\"Justice? A convenient illusion.\" —The Rose",
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.13.when-revealed"
+    },
+    {
+      "id": "x.the-rose-bf.13.boost"
+    }
+  ]
+}

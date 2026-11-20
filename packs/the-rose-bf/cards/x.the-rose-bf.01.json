@@ -1,0 +1,94 @@
+{
+  "id": "x.the-rose-bf.01",
+  "name": "The Rose",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "1/2/3",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "villain",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "sides": [
+    {
+      "side": "A",
+      "name": "The Rose",
+      "stages": [
+        {
+          "stageNumber": 1,
+          "hp": {
+            "base": 0,
+            "perPlayer": 14
+          },
+          "atk": 2,
+          "sch": 1,
+          "text": {
+            "printed": "When Defeated: Advance the main scheme to stage 3A.",
+            "current": "When Defeated: Advance the main scheme to stage 3A."
+          },
+          "traits": [
+            "CRIMINAL"
+          ],
+          "keywords": [],
+          "abilities": [
+            {
+              "id": "x.the-rose-bf.01.when-defeated-i"
+            }
+          ]
+        },
+        {
+          "stageNumber": 2,
+          "hp": {
+            "base": 0,
+            "perPlayer": 16
+          },
+          "atk": 2,
+          "sch": 2,
+          "text": {
+            "printed": "When Revealed: Search the encounter deck and discard pile for a Fisk attachment and reveal it. (Shuffle.)\nWhen Defeated: In expert mode, advance the main scheme to stage 3A.",
+            "current": "When Revealed: Search the encounter deck and discard pile for a Fisk attachment and reveal it. (Shuffle.)\nWhen Defeated: In expert mode, advance the main scheme to stage 3A."
+          },
+          "traits": [
+            "CRIMINAL"
+          ],
+          "keywords": [],
+          "abilities": [
+            {
+              "id": "x.the-rose-bf.01.when-revealed-ii"
+            },
+            {
+              "id": "x.the-rose-bf.01.when-defeated-ii"
+            }
+          ]
+        },
+        {
+          "stageNumber": 3,
+          "hp": {
+            "base": 0,
+            "perPlayer": 19
+          },
+          "atk": 2,
+          "sch": 2,
+          "text": {
+            "printed": "Steady.\nWhen Revealed: Search the encounter deck and discard pile for a Fisk attachment and reveal it. (Shuffle.)",
+            "current": "Steady.\nWhen Revealed: Search the encounter deck and discard pile for a Fisk attachment and reveal it. (Shuffle.)"
+          },
+          "traits": [
+            "CRIMINAL"
+          ],
+          "keywords": [
+            {
+              "name": "steady"
+            }
+          ],
+          "abilities": [
+            {
+              "id": "x.the-rose-bf.01.when-revealed-iii"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

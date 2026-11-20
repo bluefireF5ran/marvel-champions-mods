@@ -1,0 +1,30 @@
+{
+  "id": "x.the-rose-bf.14",
+  "name": "Nowhere to Hide",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "14",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 2,
+  "starIcon": true,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: The villain attacks you (even if you are in alter-ego form). Either remove a confuse status card from the villain or place 1 Fisk counter on a Fisk environment.\n[star] Boost: Place 1 Fisk counter on a Fisk environment.",
+    "current": "When Revealed: The villain attacks you (even if you are in alter-ego form). Either remove a confuse status card from the villain or place 1 Fisk counter on a Fisk environment.\n[star] Boost: Place 1 Fisk counter on a Fisk environment."
+  },
+  "flavor": "\"Masks and names change nothing. Your fate was sealed the moment you interfered.\" —The Rose",
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.14.when-revealed"
+    },
+    {
+      "id": "x.the-rose-bf.14.boost"
+    }
+  ]
+}

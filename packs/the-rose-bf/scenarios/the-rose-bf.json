@@ -1,0 +1,36 @@
+{
+  "id": "the-rose-bf-the-rose",
+  "name": "The Rose",
+  "packCode": "the-rose-bf",
+  "villainCardId": "x.the-rose-bf.01",
+  "mainSchemeCardId": "x.the-rose-bf.04a",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "recommendedModularSetIds": [
+    "sinister_syndicate",
+    "state_of_emergency",
+    "streets_of_mayhem"
+  ],
+  "standardEncounterSetIds": [
+    "standard"
+  ],
+  "expertEncounterSetIds": [
+    "expert"
+  ],
+  "villainStages": {
+    "standard": [
+      1,
+      2
+    ],
+    "expert": [
+      2,
+      3
+    ]
+  },
+  "modularSetCount": 3,
+  "setAsideCardIds": [
+    "x.the-rose-bf.10"
+  ],
+  "setAsideModularSetCount": 1
+}
