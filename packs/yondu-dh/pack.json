@@ -1,10 +1,10 @@
 {
   "id": "yondu-dh",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "kind": "hero",
   "name": "Yondu",
   "authors": ["DesignHacker & BlueHG (nemesis set)"],
-  "description": "Fan-made hero pack by DesignHacker & BlueHG (nemesis set): Yondu.",
+  "description": "Whistle, and the Yaka Arrow does the rest.\nYondu Udonta fights with one weapon and a whistle. Attach the Yaka Arrow to an enemy, whistle it from target to target, summon it back from anywhere and let the Ravagers do the dirty work. Includes his authors' Aggression starter deck. 22 cards. English and Spanish. Pairs with The Galaxy's Most Wanted.",
   "tags": ["Guardians", "Cosmic", "Aggression"],
   "wave": "cycle3",
   "unlock": "open",

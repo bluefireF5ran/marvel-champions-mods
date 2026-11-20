@@ -17,8 +17,8 @@
     "handSize": 5,
     "keywords": [],
     "text": {
-      "printed": "D'ast Whistlin' — Response: After the Yaka Arrow upgrade is attached to or removed from an enemy, deal 1 damage to that enemy.\nResponse: After the Yaka Arrow upgrade is attached to your identity, heal 1 damage from Yondu.",
-      "current": "D'ast Whistlin' — Response: After the Yaka Arrow upgrade is attached to or removed from an enemy, deal 1 damage to that enemy.\nResponse: After the Yaka Arrow upgrade is attached to your identity, heal 1 damage from Yondu."
+      "printed": "D'ast Whistlin' — Response: After the Yaka Arrow upgrade is attached to or removed from an enemy, deal 1 damage to that enemy.\nA Whistle of Relief — Response: After the Yaka Arrow upgrade is attached to your identity, heal 1 damage from Yondu.",
+      "current": "D'ast Whistlin' — Response: After the Yaka Arrow upgrade is attached to or removed from an enemy, deal 1 damage to that enemy.\nA Whistle of Relief — Response: After the Yaka Arrow upgrade is attached to your identity, heal 1 damage from Yondu."
     },
     "abilities": [
       {
