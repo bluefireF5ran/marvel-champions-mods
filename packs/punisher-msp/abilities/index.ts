@@ -30,6 +30,7 @@ import {
   anAttackableEnemy,
   aScheme,
   attack,
+  attacksGainKeywords,
   cards,
   chooseCards,
   chooseOne,
@@ -41,6 +42,7 @@ import {
   coveredByEngineRule,
   dealDamage,
   definePackAbilities,
+  discardCardsCost,
   divide,
   each,
   enemyActivates,
@@ -62,6 +64,7 @@ import {
   ifThen,
   isAttached,
   losesIcon,
+  modifyAttack,
   moveCards,
   moveCounters,
   named,
@@ -80,7 +83,6 @@ import {
   removeUpToCounters,
   resource,
   response,
-  retargetAttack,
   rule,
   self,
   setup,
@@ -109,7 +111,6 @@ import {
   YOUR_IDENTITY,
   zone,
   changeForm,
-  discard,
   eachPlayer,
   chosenPlayer,
   ownerOf,
@@ -222,13 +223,13 @@ export default definePackAbilities({
   // =========================================================================
 
   // "Hero Interrupt (defense): When an enemy attacks a friendly character, choose an enemy → damage from that attack is
-  // dealt to the chosen enemy instead." The attack is turned on the chosen enemy (Crossfire's retarget, `hood` 24026):
-  // its damage lands there.
+  // dealt to the chosen enemy instead." Psychic Misdirection (34033): the attack and its defender stay as they are and
+  // only its damage goes to the chosen enemy (`modifyAttack({ damageTo })`).
   "x.punisher-msp.04.many-men-interrupt": heroInterrupt(
     on.enemyAttacks(query("enemy")),
     { label: "defense" },
     chooseTarget("enemy", query("enemy")),
-    retargetAttack(chosen("enemy")),
+    modifyAttack({ damageTo: chosen("enemy") }),
   ),
 
   // =========================================================================
@@ -253,6 +254,9 @@ export default definePackAbilities({
     { label: "attack", cost: [exhaustThis, removeCounter("ammo", 1)] },
     divide("damage", 3, query("enemy")),
   ),
+  // "This attack gains ranged": the attack its own ability makes (each enemy given a share is attacked) has ranged, as
+  // Hawkeye's Bow grants it (`attacksGainKeywords` with `via` this card), so a retaliating enemy deals no damage back.
+  "x.punisher-msp.06.uzi-9mm-smg-constant": constant(attacksGainKeywords(["ranged"], { via: { self: true } })),
   // Double-Barreled Shotgun: "Hero Action (attack): Exhaust this card and remove 2 ammo counters from it → deal 2 damage
   // to an enemy. Stun that enemy."
   "x.punisher-msp.07.double-barreled-shotgun-action": heroAction(
@@ -335,12 +339,12 @@ export default definePackAbilities({
   ),
   // "Hero Action: Exhaust High Slayer and discard an ally you control → deal damage to an enemy equal to that ally's
   // printed ATK."
+  // The ally is discarded as the cost, before the arrow's text resolves; the damage reads the bound card's printed ATK
+  // (`discardCardsCost` binds it to "discarded", as Noble Sacrifice / Bulldozer read theirs).
   "x.punisher-msp.13.high-slayer-action": heroAction(
-    { cost: exhaustThis },
-    chooseTarget("ally", YOUR_ALLIES),
+    { cost: [exhaustThis, discardCardsCost(YOUR_ALLIES)] },
     chooseTarget("enemy", query("enemy")),
-    dealDamage(printedStatOf(chosen("ally"), "atk"), chosen("enemy")),
-    discard(chosen("ally")),
+    dealDamage(printedStatOf(chosen("discarded"), "atk"), chosen("enemy")),
   ),
 
   // Angel of Vengeance: "Hero Response: After The Punisher makes a basic thwart, ready this card." Wonder Man's basic

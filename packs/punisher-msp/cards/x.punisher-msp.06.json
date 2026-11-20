@@ -33,6 +33,9 @@
   "abilities": [
     {
       "id": "x.punisher-msp.06.uzi-9mm-smg-action"
+    },
+    {
+      "id": "x.punisher-msp.06.uzi-9mm-smg-constant"
     }
   ]
 }
