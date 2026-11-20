@@ -1,0 +1,36 @@
+{
+  "id": "x.punisher-msp.19",
+  "name": "Jigsaw",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "19",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "minion",
+  "atk": 2,
+  "sch": 2,
+  "hp": 7,
+  "encounterSetIds": [
+    "punisher-msp-nemesis"
+  ],
+  "boostIcons": 2,
+  "traits": [
+    "CRIMINAL"
+  ],
+  "keywords": [
+    {
+      "name": "quickstrike"
+    }
+  ],
+  "text": {
+    "printed": "Quickstrike.\nForced Response: After Jigsaw activates, deal 1 damage to the friendly character with the fewest remaining hit points.\n(The Punisher's nemesis minion.)",
+    "current": "Quickstrike.\nForced Response: After Jigsaw activates, deal 1 damage to the friendly character with the fewest remaining hit points.\n(The Punisher's nemesis minion.)"
+  },
+  "flavor": "\"You want crazy? I'll show you crazy.\"",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.19.jigsaw-forced-response"
+    }
+  ],
+  "nemesisMinion": true
+}

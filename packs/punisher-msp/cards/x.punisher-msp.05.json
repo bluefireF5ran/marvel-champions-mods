@@ -1,0 +1,27 @@
+{
+  "id": "x.punisher-msp.05",
+  "name": "Locked and Loaded",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "5",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "resource",
+  "producesIcons": {
+    "wild": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Response: After you spend this card, place 2 all-purpose counters on Stash House or an upgrade you control.",
+    "current": "Response: After you spend this card, place 2 all-purpose counters on Stash House or an upgrade you control."
+  },
+  "flavor": "\"Always reload before they get up.\" —Frank Castle",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.05.locked-and-loaded-response"
+    }
+  ]
+}

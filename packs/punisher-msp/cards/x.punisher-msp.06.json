@@ -1,0 +1,41 @@
+{
+  "id": "x.punisher-msp.06",
+  "name": "Uzi 9mm SMG",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "6",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "WEAPON"
+  ],
+  "keywords": [
+    {
+      "name": "restricted"
+    },
+    {
+      "name": "uses",
+      "count": 3,
+      "counterType": "ammo"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Restricted. Uses (3 ammo counters).\nHero Action (attack): Exhaust Uzi 9mm SMG and remove 1 ammo counter from it → deal a total of 3 damage divided among enemies as you choose. This attack gains ranged.",
+    "current": "Restricted. Uses (3 ammo counters).\nHero Action (attack): Exhaust Uzi 9mm SMG and remove 1 ammo counter from it → deal a total of 3 damage divided among enemies as you choose. This attack gains ranged."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.06.uzi-9mm-smg-action"
+    },
+    {
+      "id": "x.punisher-msp.06.uzi-9mm-smg-constant"
+    }
+  ]
+}

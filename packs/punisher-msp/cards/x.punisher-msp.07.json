@@ -1,0 +1,38 @@
+{
+  "id": "x.punisher-msp.07",
+  "name": "Double-Barreled Shotgun",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "7",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "WEAPON"
+  ],
+  "keywords": [
+    {
+      "name": "restricted"
+    },
+    {
+      "name": "uses",
+      "count": 2,
+      "counterType": "ammo"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Restricted.\nUses (2 ammo counters).\nHero Action (attack): Exhaust this card and remove 2 ammo counters from it → deal 2 damage to an enemy. Stun that enemy.",
+    "current": "Restricted.\nUses (2 ammo counters).\nHero Action (attack): Exhaust this card and remove 2 ammo counters from it → deal 2 damage to an enemy. Stun that enemy."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.07.double-barreled-shotgun-action"
+    }
+  ]
+}

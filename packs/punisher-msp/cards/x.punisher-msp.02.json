@@ -1,0 +1,30 @@
+{
+  "id": "x.punisher-msp.02",
+  "name": "\"Knock, Knock. You're Dead.\"",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "2",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 3,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "ATTACK"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Hero Action (attack): Deal 6 damage to an enemy. If you control at least 2 Weapon upgrades, deal 8 damage instead and place 1 all-purpose counter on an upgrade you control.",
+    "current": "Hero Action (attack): Deal 6 damage to an enemy. If you control at least 2 Weapon upgrades, deal 8 damage instead and place 1 all-purpose counter on an upgrade you control."
+  },
+  "flavor": "\"If you're guilty, you're dead.\" —Frank Castle",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.02.knock-knock-youre-dead-action"
+    }
+  ]
+}

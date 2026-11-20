@@ -1,0 +1,10 @@
+id: punisher-msp
+path: packs/punisher-msp
+creator: "MissSugarPink"
+editors: [bluefireF5ran]
+permission:
+  by: "MissSugarPink"
+  evidence: "packs/punisher-msp/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-17"
+tags: [hero]
+summary: "Pick a loadout. Load the guns. Make them stay down."

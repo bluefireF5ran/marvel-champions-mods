@@ -1,0 +1,38 @@
+{
+  "id": "x.punisher-msp.08",
+  "name": "Modified M4 Carbine",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "8",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 3,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "WEAPON"
+  ],
+  "keywords": [
+    {
+      "name": "restricted"
+    },
+    {
+      "name": "uses",
+      "count": 2,
+      "counterType": "ammo"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Restricted. Uses (2 ammo counters).\nHero Action (attack): Exhaust this card and remove 1 ammo counter from it → choose:\n• Deal 4 damage to an enemy.\n• Choose a player. Deal 2 damage to the villain and each minion engaged with that player.",
+    "current": "Restricted. Uses (2 ammo counters).\nHero Action (attack): Exhaust this card and remove 1 ammo counter from it → choose:\n• Deal 4 damage to an enemy.\n• Choose a player. Deal 2 damage to the villain and each minion engaged with that player."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.08.modified-m4-carbine-action"
+    }
+  ]
+}

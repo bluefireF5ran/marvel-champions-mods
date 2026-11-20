@@ -1,0 +1,36 @@
+{
+  "id": "x.punisher-msp.12",
+  "name": "Warzone",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "12",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "specialCost": "dash",
+  "resourceIcons": {},
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOADOUT",
+    "WEAPON"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Permanent.\nYou can control 1 additional upgrade that has the restricted keyword.\nHero Action: Exhaust Warzone, remove 1 all-purpose counter from a Weapon you control → play an Attack event from your discard pile, paying its costs.",
+    "current": "Permanent.\nYou can control 1 additional upgrade that has the restricted keyword.\nHero Action: Exhaust Warzone, remove 1 all-purpose counter from a Weapon you control → play an Attack event from your discard pile, paying its costs."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.12.warzone-constant"
+    },
+    {
+      "id": "x.punisher-msp.12.warzone-action"
+    }
+  ]
+}

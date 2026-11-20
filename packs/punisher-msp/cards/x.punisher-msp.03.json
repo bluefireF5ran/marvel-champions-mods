@@ -1,0 +1,29 @@
+{
+  "id": "x.punisher-msp.03",
+  "name": "Dismantled Operation",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "3",
+  "quantityInSet": 3,
+  "unique": false,
+  "type": "event",
+  "cost": 2,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "THWART"
+  ],
+  "keywords": [],
+  "deckLimit": 3,
+  "text": {
+    "printed": "Hero Action (thwart): Remove 3 threat from a scheme. Choose a side scheme. That scheme loses each [acceleration], [amplify], [crisis], and [hazard] icon until the end of the round. If any icons were lost this way, place 1 all-purpose counter on an upgrade you control.",
+    "current": "Hero Action (thwart): Remove 3 threat from a scheme. Choose a side scheme. That scheme loses each [acceleration], [amplify], [crisis], and [hazard] icon until the end of the round. If any icons were lost this way, place 1 all-purpose counter on an upgrade you control."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.03.dismantled-operation-action"
+    }
+  ]
+}

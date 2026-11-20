@@ -1,0 +1,145 @@
+{
+  "id": "punisher-msp-aggression",
+  "name": "The Punisher - Aggression - Starter Deck",
+  "packCode": "punisher-msp",
+  "identityCardId": "x.punisher-msp.01a",
+  "aspects": [
+    "aggression"
+  ],
+  "provenance": {
+    "verified": false,
+    "sources": [
+      "The curators' starter deck (punisher_msp/decks/punisher-msp-aggression.json in mc-digital-custom-packs, commit c131319): An Aggression deck for The Punisher, 40 cards: his 15 hero cards, 15 Aggression and 10 basics. More guns for his Weapon tricks (Plasma Pistol, Sidearm, S.H.I.E.L.D. Sidearm, Side Holster), Fusillade and Firepower to cash them in. The Loadout chosen at Setup is not part of the deck. Built from the user's Black Panther list (2026-11-20) with Black Panther's hero cards taken out. The five Loadouts are added (45 cards): they ship in the hero set, and Frank Castle's Setup takes them from the deck."
+    ]
+  },
+  "cards": [
+    {
+      "cardId": "01055",
+      "quantity": 1
+    },
+    {
+      "cardId": "01088",
+      "quantity": 1
+    },
+    {
+      "cardId": "01089",
+      "quantity": 1
+    },
+    {
+      "cardId": "01090",
+      "quantity": 1
+    },
+    {
+      "cardId": "05023",
+      "quantity": 1
+    },
+    {
+      "cardId": "06015",
+      "quantity": 3
+    },
+    {
+      "cardId": "10018",
+      "quantity": 1
+    },
+    {
+      "cardId": "20021",
+      "quantity": 1
+    },
+    {
+      "cardId": "20022",
+      "quantity": 3
+    },
+    {
+      "cardId": "20026",
+      "quantity": 3
+    },
+    {
+      "cardId": "23035",
+      "quantity": 1
+    },
+    {
+      "cardId": "40019",
+      "quantity": 1
+    },
+    {
+      "cardId": "40025",
+      "quantity": 1
+    },
+    {
+      "cardId": "54013",
+      "quantity": 1
+    },
+    {
+      "cardId": "54014",
+      "quantity": 3
+    },
+    {
+      "cardId": "54019",
+      "quantity": 1
+    },
+    {
+      "cardId": "54020",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.02",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.punisher-msp.03",
+      "quantity": 3
+    },
+    {
+      "cardId": "x.punisher-msp.04",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.punisher-msp.05",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.punisher-msp.06",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.07",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.08",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.09",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.10",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.11",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.12",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.13",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.14",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.15",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.punisher-msp.16",
+      "quantity": 1
+    }
+  ]
+}

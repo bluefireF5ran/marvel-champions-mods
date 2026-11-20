@@ -1,0 +1,46 @@
+{
+  "id": "punisher-msp",
+  "version": "0.1.0",
+  "kind": "hero",
+  "name": "The Punisher",
+  "authors": [
+    "MissSugarPink"
+  ],
+  "description": "Pick a loadout. Load the guns. Make them stay down.\nFrank Castle walks into every fight with a plan: choose one of five Loadouts at setup, from the Warzone arsenal to the War Machine Armor, and build the game around it. All-purpose counters feed his weapons, and 'Til They Stay Down readies them again. Haunted by his past and hunted by Jigsaw, he is the most tactical gunfight in the game. Includes an Aggression starter deck. 27 cards. English and Spanish. Pairs with Fear No Evil.",
+  "tags": [
+    "Vigilante",
+    "Weapons",
+    "Aggression"
+  ],
+  "wave": "cycle11",
+  "unlock": "open",
+  "cover": "cover.webp",
+  "license": "Fan-made, non-commercial; see CREDITS.md",
+  "requires": {
+    "app": ">=0.51.0",
+    "packs": []
+  },
+  "languages": {
+    "base": "en",
+    "available": [
+      "en",
+      "es"
+    ],
+    "text": "en"
+  },
+  "permission": {
+    "status": "granted",
+    "by": "MissSugarPink",
+    "date": "2026-11-17",
+    "evidence": "BluefireF5ran's curated repository records the grant (mod.json `permission`): https://github.com/bluefireF5ran/mc-digital-custom-packs/blob/c131319ef5bafe0687c64a1b0bb901e394975122/punisher_msp/mod.json. MissSugarPink gave permission by Discord direct message (2026-11-17) for everything he tags Released, translation included; the message itself is not kept in this repository. Pack request: https://github.com/quincarter/marvel-champions-mods/issues/39",
+    "scope": "inclusion and translation",
+    "languages": [
+      "en",
+      "es"
+    ]
+  },
+  "templateCredit": "Hitch",
+  "translators": {
+    "es": "Francisco Merchán"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.13",
+  "name": "High Slayer",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "13",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "specialCost": "dash",
+  "resourceIcons": {},
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOADOUT"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Permanent.\nThe Punisher gains the Mystic trait. Increase your ally limit by 1.\nHero Action: Exhaust High Slayer and discard an ally you control → deal damage to an enemy equal to that ally's printed ATK.",
+    "current": "Permanent.\nThe Punisher gains the Mystic trait. Increase your ally limit by 1.\nHero Action: Exhaust High Slayer and discard an ally you control → deal damage to an enemy equal to that ally's printed ATK."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.13.high-slayer-constant"
+    },
+    {
+      "id": "x.punisher-msp.13.high-slayer-action"
+    }
+  ]
+}

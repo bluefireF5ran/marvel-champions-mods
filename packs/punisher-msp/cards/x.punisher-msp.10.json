@@ -1,0 +1,30 @@
+{
+  "id": "x.punisher-msp.10",
+  "name": "Good Cup of Coffee",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "10",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "support",
+  "cost": 1,
+  "resourceIcons": {
+    "wild": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "COFFEE"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Alter-Ego Action: Exhaust Good Cup of Coffee → heal 2 damage from your identity. Any player may trigger this ability.",
+    "current": "Alter-Ego Action: Exhaust Good Cup of Coffee → heal 2 damage from your identity. Any player may trigger this ability."
+  },
+  "flavor": "\"Nothing in this world a good cup of coffee won't fix. Want a cup?\" —Frank Castle",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.10.good-cup-of-coffee-action"
+    }
+  ]
+}

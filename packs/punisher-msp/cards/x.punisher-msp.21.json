@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.21",
+  "name": "Jigsaw Goon",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "21",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "minion",
+  "atk": 2,
+  "sch": 1,
+  "hp": 4,
+  "encounterSetIds": [
+    "punisher-msp-nemesis"
+  ],
+  "boostIcons": 2,
+  "traits": [
+    "CRIMINAL"
+  ],
+  "keywords": [
+    {
+      "name": "guard"
+    }
+  ],
+  "text": {
+    "printed": "Guard. (While this minion is engaged with you, you cannot attack the villain.)\nForced Response: After The Punisher attacks a different enemy, Jigsaw Goon attacks The Punisher.",
+    "current": "Guard. (While this minion is engaged with you, you cannot attack the villain.)\nForced Response: After The Punisher attacks a different enemy, Jigsaw Goon attacks The Punisher."
+  },
+  "flavor": "\"I don't care! Find Castle!\" —Jigsaw",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.21.jigsaw-goon-forced-response"
+    }
+  ]
+}

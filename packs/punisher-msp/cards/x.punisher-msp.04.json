@@ -1,0 +1,30 @@
+{
+  "id": "x.punisher-msp.04",
+  "name": "Many Men",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "4",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 1,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "DEFENSE"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Hero Interrupt (defense): When an enemy attacks a friendly character, choose an enemy → damage from that attack is dealt to the chosen enemy instead.",
+    "current": "Hero Interrupt (defense): When an enemy attacks a friendly character, choose an enemy → damage from that attack is dealt to the chosen enemy instead."
+  },
+  "flavor": "\"Bad place to be standing.\" —Frank Castle",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.04.many-men-interrupt"
+    }
+  ]
+}
