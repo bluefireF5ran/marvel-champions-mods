@@ -20,6 +20,8 @@
  * aspect of the card paid for (`generatesFor` with `aspect`).
  */
 import {
+  controllerOf,
+  setAside,
   playFromDiscard,
   playFromHandReducingCost,
   resource,
@@ -135,6 +137,9 @@ const LOADOUT_UPGRADE = query("upgrade", { trait: LOADOUT });
 const STASH_HOUSE = query("support", { name: "Stash House" });
 const YOUR_STASH_HOUSE = query("support", { name: "Stash House", controller: "you" });
 const YOUR_ALLIES = query("ally", { controller: "you" });
+/** "The Frank Castle player": whoever controls this pack's identity, not the player an encounter card is revealed to. */
+const FRANK_CASTLE_PLAYER = controllerOf(each(query("identity", { printedId: "x.punisher-msp.01a" as never })));
+const FRANK_CASTLES_WEAPONS = query("upgrade", { trait: WEAPON, controlledBy: FRANK_CASTLE_PLAYER });
 const YOUR_WEAPONS_WITH_COUNTERS = query("upgrade", { trait: WEAPON, controller: "you", hasCounter: ANY_COUNTER });
 const YOUR_UPGRADES_WITH_COUNTERS = query("upgrade", { controller: "you", hasCounter: ANY_COUNTER });
 
@@ -157,12 +162,11 @@ export default definePackAbilities({
   // =========================================================================
 
   // "Setup: Choose one Loadout upgrade and put it into play. Then, remove the remaining Loadout upgrade cards from the
-  // game." Valkyrie's Setup (25001b) for the zones: deck and opening hand.
+  // game." The game sets each Permanent card aside before setup (#890 item 16), so the Loadouts are taken from there.
   "x.punisher-msp.01b.setup": setup(
-    chooseCards("loadout", zone(["deck", "hand"], you, { filter: LOADOUT_UPGRADE }), { min: 1, max: 1 }),
+    chooseCards("loadout", setAside(you, LOADOUT_UPGRADE), { min: 1, max: 1 }),
     putIntoPlay(chosen("loadout"), you),
-    moveCards(zone(["deck", "hand"], you, { filter: LOADOUT_UPGRADE }), "removedFromGame"),
-    shuffleDeck(),
+    moveCards(setAside(you, LOADOUT_UPGRADE), "removedFromGame"),
   ),
   // "Action: Exhaust your identity → search your deck for a Weapon upgrade and add it to your hand. (Shuffle.)"
   "x.punisher-msp.01b.frank-castle-action": alterEgoAction(
@@ -420,8 +424,9 @@ export default definePackAbilities({
   // 18 Captured (side scheme, nemesis)
   // =========================================================================
 
-  // "When Revealed: Tuck each Weapon upgrade controlled by the Frank Castle player under here." Silk's tuck.
-  "x.punisher-msp.18.when-revealed": whenRevealed(tuckCards(cards(each(YOUR_WEAPONS)), self)),
+  // "When Revealed: Tuck each Weapon upgrade controlled by the Frank Castle player under here." Silk's tuck. The Frank
+  // Castle player's, whoever Captured is revealed to (PR #45 review).
+  "x.punisher-msp.18.when-revealed": whenRevealed(tuckCards(cards(each(FRANK_CASTLES_WEAPONS)), self)),
   // "When Defeated: Put each upgrade tucked here into play under its owner's control."
   "x.punisher-msp.18.when-defeated": whenDefeated(
     forEachCard("tucked", tuckedUnder(self), putIntoPlay(chosen("tucked"), ownerOf(chosen("tucked")))),
