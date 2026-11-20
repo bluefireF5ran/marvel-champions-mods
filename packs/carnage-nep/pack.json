@@ -1,10 +1,10 @@
 {
   "id": "carnage-nep",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "kind": "hero",
   "name": "Carnage",
   "authors": ["Neptune"],
-  "description": "Fan-made hero pack by Neptune: Carnage.",
+  "description": "The symbiote wants blood. Cletus obliges.\nCletus Kasady and his symbiote play rough: attack events from any aspect, a kit built on violence and the Twisted Killers modular set for your scenarios. Comes with his own Aggression starter deck and new art for 11 basics. 30 cards. English and Spanish. Pairs with Sinister Motives.",
   "tags": ["Symbiote", "Spider-Verse", "Aggression"],
   "wave": "cycle5",
   "unlock": "open",
