@@ -1,10 +1,10 @@
 {
   "id": "mephisto-nep",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "kind": "scenario",
   "name": "Mephisto",
   "authors": ["Neptune (Typhon00)"],
-  "description": "Fan-made scenario pack by Neptune (Typhon00): a battle for your soul against Mephisto, with the Blackheart, Corruptive Offers, Damned and Mother of Demons encounter sets and new art for the Standard and Expert sets.",
+  "description": "Every bargain has a price. He wants your soul.\nMephisto offers deals: Bargains that help you now and bring him closer later. Fill Damnation with your own cards and you lose. Five encounter sets, including Blackheart, the Damned and the Mother of Demons, plus new art for the Standard and Expert sets. 56 cards. English and Spanish.",
   "tags": ["Demons", "Mystic", "Nemesis"],
   "wave": "cycle9",
   "unlock": "open",
