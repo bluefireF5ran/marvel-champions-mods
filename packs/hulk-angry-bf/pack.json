@@ -1,0 +1,46 @@
+{
+  "id": "hulk-angry-bf",
+  "version": "0.1.0",
+  "kind": "house-rule",
+  "name": "Don't Make Me Angry!",
+  "authors": [
+    "Abis Mal & Bluefire"
+  ],
+  "description": "Hulk smashes, and his cards come back.\nAn optional house rule for the official Hulk: \"Don't Make Me Angry!\" starts in play (Permanent. Setup.). When Enraged, Experimental Research or any other ability discards one of Hulk's identity-specific cards, tuck it under here (twice per phase), then play or spend it as if it were in your hand. Add the card to a Hulk deck to use the rule; official decks stay legal without it. Includes a Protection starter deck. 1 card. English and Spanish.",
+  "tags": [
+    "Hulk",
+    "Balance"
+  ],
+  "unlock": "open",
+  "cover": "cover.webp",
+  "license": "Fan-made, non-commercial; see CREDITS.md",
+  "requires": {
+    "app": ">=0.51.0",
+    "packs": []
+  },
+  "languages": {
+    "base": "en",
+    "available": [
+      "en",
+      "es"
+    ],
+    "text": "en"
+  },
+  "houseRule": {},
+  "permission": {
+    "status": "granted",
+    "by": "Bluefire",
+    "date": "2026-11-18",
+    "evidence": "The authors' own house rule, submitted by one of them (BluefireF5ran); curated source: https://github.com/bluefireF5ran/mc-digital-custom-packs/blob/c131319ef5bafe0687c64a1b0bb901e394975122/hulk_angry_bf/mod.json (permission: status \"own\").",
+    "scope": "inclusion: the authors' own work, in English and Spanish",
+    "languages": [
+      "en",
+      "es"
+    ],
+    "note": "Designed by Abis Mal and Bluefire; Bluefire co-authored it and submits it."
+  },
+  "templateCredit": "Hitch",
+  "translators": {
+    "es": "Bluefire"
+  }
+}
