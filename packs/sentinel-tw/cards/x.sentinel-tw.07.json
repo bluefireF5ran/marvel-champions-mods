@@ -1,0 +1,32 @@
+{
+  "id": "x.sentinel-tw.07",
+  "name": "Hardwire Access",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "7",
+  "quantityInSet": 3,
+  "unique": false,
+  "type": "event",
+  "cost": 1,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [
+    "THWART"
+  ],
+  "keywords": [],
+  "deckLimit": 3,
+  "text": {
+    "printed": "[star] As an additional cost to play this event, exhaust Head (Intact) or destroy it. (See insert.)\nHero Action (thwart): Remove 3 threat from among schemes in play, plus X, where X is the number of Exposed status cards in play (to a maximum of 6 threat).",
+    "current": "[star] As an additional cost to play this event, exhaust Head (Intact) or destroy it. (See insert.)\nHero Action (thwart): Remove 3 threat from among schemes in play, plus X, where X is the number of Exposed status cards in play (to a maximum of 6 threat)."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.07.hardwire-access-constant"
+    },
+    {
+      "id": "x.sentinel-tw.07.hardwire-access-action"
+    }
+  ]
+}

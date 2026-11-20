@@ -1,0 +1,31 @@
+{
+  "id": "x.sentinel-tw.16",
+  "name": "Rogue Asset",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "16",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "side_scheme",
+  "encounterSetIds": [
+    "sentinel-tw-nemesis"
+  ],
+  "startingThreat": {
+    "base": 3,
+    "perPlayer": 0
+  },
+  "icons": [],
+  "boostIcons": 3,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "Component upgrades (Intact side up), and Tech upgrades gain the Hacked trait.",
+    "current": "Component upgrades (Intact side up), and Tech upgrades gain the Hacked trait."
+  },
+  "flavor": "The rogue Sentinel holds proof of a buried conspiracy. Now, every trace of it must be erased.",
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.16.rogue-asset-constant"
+    }
+  ]
+}

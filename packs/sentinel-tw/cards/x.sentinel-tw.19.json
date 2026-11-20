@@ -1,0 +1,29 @@
+{
+  "id": "x.sentinel-tw.19",
+  "name": "Hostile Override",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "19",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "sentinel-tw-nemesis"
+  ],
+  "boostIcons": 0,
+  "starIcon": true,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: If you control at least one Hacked upgrade, deal damage to a friendly character equal to your ATK value, or place threat on the main scheme equal to your THW value. If you control no Hacked upgrades, you are confused. [star] Boost: You are confused.",
+    "current": "When Revealed: If you control at least one Hacked upgrade, deal damage to a friendly character equal to your ATK value, or place threat on the main scheme equal to your THW value. If you control no Hacked upgrades, you are confused. [star] Boost: You are confused."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.19.when-revealed"
+    },
+    {
+      "id": "x.sentinel-tw.19.boost"
+    }
+  ]
+}

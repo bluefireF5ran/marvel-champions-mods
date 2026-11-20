@@ -1,0 +1,30 @@
+{
+  "id": "x.sentinel-tw.12",
+  "name": "Reinforced Plating",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "12",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 1,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "[star] As an additional cost to play this upgrade, exhaust Torso (Intact).\nHero Action: Discard Reinforced Plating → flip 1 Component (Destroyed side up) upgrade to its Intact side. Gain a tough status card.",
+    "current": "[star] As an additional cost to play this upgrade, exhaust Torso (Intact).\nHero Action: Discard Reinforced Plating → flip 1 Component (Destroyed side up) upgrade to its Intact side. Gain a tough status card."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.12.reinforced-plating-constant"
+    },
+    {
+      "id": "x.sentinel-tw.12.reinforced-plating-action"
+    }
+  ]
+}

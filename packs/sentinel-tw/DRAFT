@@ -1,0 +1,10 @@
+This pack is a draft: it is neither tested with the other community packs nor published until this file is removed.
+
+Why: eleven abilities need engine support the game does not have yet (see abilities/index.ts and the README):
+- The Exposed status card and "Expose X" (Head (Intact), Exterminate, Hardwire Access, Targeting Protocol).
+- Destroy as a cost: "exhaust or destroy [Component]" as an additional cost to play (Exterminate, Hardwire Access,
+  Rocket Punch, Threat Suppression).
+- A support attached to a side scheme and still controlled by its player (Juston Seyfert, three abilities).
+Also requested: setup cards such as the four Components kept out of the deck and its 40-50 count (today they ship in
+the hero set and the starter deck lists them: 44 cards).
+Every other ability is scripted; with those stubbed, `mc-pack test` plays 8/8 games without an engine error.

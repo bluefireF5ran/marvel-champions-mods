@@ -1,0 +1,121 @@
+{
+  "id": "sentinel-tw-justice",
+  "name": "Sentinel - Justice - Starter Deck",
+  "packCode": "sentinel-tw",
+  "identityCardId": "x.sentinel-tw.01a",
+  "aspects": [
+    "justice"
+  ],
+  "provenance": {
+    "verified": false,
+    "sources": [
+      "The curators' starter deck (sentinel_tw/decks/sentinel-justice.json in mc-digital-custom-packs, commit c131319): A Justice deck for Sentinel, 40 cards: his 15 hero cards, 18 Justice and 7 basics; the four Components start in play from Setup and are not part of the deck. Reboot (with T-Wrecks' Sentinel art) brings back what Ablative Protocol burns. Built from the user's Vision list (2026-11-20) with Vision's hero cards taken out. The four Components are added (44 cards): they ship in the hero set, and the alter-ego's Setup takes them from the deck."
+    ]
+  },
+  "cards": [
+    {
+      "cardId": "01062",
+      "quantity": 2
+    },
+    {
+      "cardId": "01088",
+      "quantity": 1
+    },
+    {
+      "cardId": "01089",
+      "quantity": 1
+    },
+    {
+      "cardId": "01090",
+      "quantity": 1
+    },
+    {
+      "cardId": "01091",
+      "quantity": 1
+    },
+    {
+      "cardId": "04047",
+      "quantity": 1
+    },
+    {
+      "cardId": "04049",
+      "quantity": 3
+    },
+    {
+      "cardId": "14030",
+      "quantity": 1
+    },
+    {
+      "cardId": "15012",
+      "quantity": 3
+    },
+    {
+      "cardId": "20013",
+      "quantity": 3
+    },
+    {
+      "cardId": "26024",
+      "quantity": 3
+    },
+    {
+      "cardId": "34020",
+      "quantity": 2
+    },
+    {
+      "cardId": "51019",
+      "quantity": 2
+    },
+    {
+      "cardId": "58021",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.02a",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.03a",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.04a",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.05a",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.06",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.sentinel-tw.07",
+      "quantity": 3
+    },
+    {
+      "cardId": "x.sentinel-tw.08",
+      "quantity": 3
+    },
+    {
+      "cardId": "x.sentinel-tw.09",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.sentinel-tw.10",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.11",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.sentinel-tw.12",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.sentinel-tw.13",
+      "quantity": 1
+    }
+  ]
+}

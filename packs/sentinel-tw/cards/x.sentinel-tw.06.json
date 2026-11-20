@@ -1,0 +1,32 @@
+{
+  "id": "x.sentinel-tw.06",
+  "name": "Exterminate",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "6",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 2,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [
+    "ATTACK"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "[star] As an additional cost to play this event, exhaust or destroy Arms (Intact) and any one other Component upgrade (Intact side up). (See insert.)\nHero Action (attack): Deal 7 damage to an enemy. This attack gains ranged, piercing, and overkill. Expose 2 enemies.",
+    "current": "[star] As an additional cost to play this event, exhaust or destroy Arms (Intact) and any one other Component upgrade (Intact side up). (See insert.)\nHero Action (attack): Deal 7 damage to an enemy. This attack gains ranged, piercing, and overkill. Expose 2 enemies."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.06.exterminate-constant"
+    },
+    {
+      "id": "x.sentinel-tw.06.exterminate-action"
+    }
+  ]
+}

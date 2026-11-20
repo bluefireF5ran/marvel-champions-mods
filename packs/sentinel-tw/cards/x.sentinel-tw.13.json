@@ -1,0 +1,29 @@
+{
+  "id": "x.sentinel-tw.13",
+  "name": "Targeting Protocol",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "13",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 1,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [
+    "TECH"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action: Exhaust this card → expose 2 enemies or remove threat from a scheme equal to the number of exposed status cards in play (to a maximum of 3).",
+    "current": "Hero Action: Exhaust this card → expose 2 enemies or remove threat from a scheme equal to the number of exposed status cards in play (to a maximum of 3)."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.13.targeting-protocol-action"
+    }
+  ]
+}

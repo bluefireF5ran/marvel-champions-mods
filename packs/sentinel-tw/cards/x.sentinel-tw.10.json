@@ -1,0 +1,35 @@
+{
+  "id": "x.sentinel-tw.10",
+  "name": "Juston Seyfert",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "10",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "support",
+  "cost": 1,
+  "resourceIcons": {
+    "wild": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [
+    "PERSONA"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Action: Attach to a side scheme.\nHero Action: Exhaust Juston Seyfert → remove 1 threat from attached side scheme.\nForced Response: After attached side scheme is defeated, put Juston Seyfert in play under your control. Ready Sentinel or up to 2 Component upgrades.",
+    "current": "Action: Attach to a side scheme.\nHero Action: Exhaust Juston Seyfert → remove 1 threat from attached side scheme.\nForced Response: After attached side scheme is defeated, put Juston Seyfert in play under your control. Ready Sentinel or up to 2 Component upgrades."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.10.juston-seyfert-action"
+    },
+    {
+      "id": "x.sentinel-tw.10.juston-seyfert-hero-action"
+    },
+    {
+      "id": "x.sentinel-tw.10.juston-seyfert-forced-response"
+    }
+  ]
+}

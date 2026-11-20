@@ -1,0 +1,30 @@
+{
+  "id": "x.sentinel-tw.11",
+  "name": "Propulsion Array",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "11",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "[star] As an additional cost to play this upgrade, exhaust Legs (Intact).\nHero Action: Shuffle this card into your deck. Choose one:\n• Exhaust 1 Component (Intact side up) upgrade → ready Sentinel.\n• Exhaust Sentinel → ready up to 2 Component (Intact side up) upgrades.",
+    "current": "[star] As an additional cost to play this upgrade, exhaust Legs (Intact).\nHero Action: Shuffle this card into your deck. Choose one:\n• Exhaust 1 Component (Intact side up) upgrade → ready Sentinel.\n• Exhaust Sentinel → ready up to 2 Component (Intact side up) upgrades."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.11.propulsion-array-constant"
+    },
+    {
+      "id": "x.sentinel-tw.11.propulsion-array-action"
+    }
+  ]
+}

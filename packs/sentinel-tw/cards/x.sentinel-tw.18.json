@@ -1,0 +1,25 @@
+{
+  "id": "x.sentinel-tw.18",
+  "name": "Viral Assault",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "18",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "sentinel-tw-nemesis"
+  ],
+  "boostIcons": 3,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: You may discard 1 Hacked upgrade you control. If you do not, take 1 damage for each Hacked upgrade you control. If you control no Hacked upgrades, search the encounter deck and discard pile for the Rogue Asset side scheme and put it into play. If Rogue Asset is already in play, this card gains surge.",
+    "current": "When Revealed: You may discard 1 Hacked upgrade you control. If you do not, take 1 damage for each Hacked upgrade you control. If you control no Hacked upgrades, search the encounter deck and discard pile for the Rogue Asset side scheme and put it into play. If Rogue Asset is already in play, this card gains surge."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.18.when-revealed"
+    }
+  ]
+}

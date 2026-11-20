@@ -1,0 +1,56 @@
+{
+  "id": "sentinel-tw",
+  "version": "0.1.0",
+  "kind": "hero",
+  "name": "Sentinel",
+  "authors": [
+    "T-Wrecks"
+  ],
+  "description": "A giant robot that breaks apart to protect a boy.\nSentinel starts with four Components in play: Head, Arms, Torso and Legs. Each one is a tool, and each one is armor: take a hit and flip a Component to its Destroyed side instead. Expose enemies, crush them with Rocket Punch and Exterminate, then rebuild with Reinforced Plating. With Juston Seyfert at his side and Mark VII-A on his trail, every point of damage is a choice. Includes a Justice starter deck and his art for Reboot and Size Advantage. 26 cards. English and Spanish. Pairs with Mutant Genesis.",
+  "tags": [
+    "X-Men",
+    "Components",
+    "Justice"
+  ],
+  "wave": "cycle6",
+  "unlock": "open",
+  "cover": "cover.webp",
+  "license": "Fan-made, non-commercial; see CREDITS.md",
+  "requires": {
+    "app": ">=0.1.0",
+    "packs": []
+  },
+  "languages": {
+    "base": "en",
+    "available": [
+      "en",
+      "es"
+    ],
+    "text": "en"
+  },
+  "permission": {
+    "status": "granted",
+    "by": "T-Wrecks",
+    "date": "2026-11-17",
+    "evidence": "BluefireF5ran's curated repository records the grant (mod.json `permission`): https://github.com/bluefireF5ran/mc-digital-custom-packs/blob/c131319ef5bafe0687c64a1b0bb901e394975122/sentinel_tw/mod.json. T-Wrecks asked by Discord direct message (2026-11-17) for Spider-Punisher and Sentinel to be included; the message itself is not kept in this repository.",
+    "scope": "inclusion and translation",
+    "languages": [
+      "en",
+      "es"
+    ]
+  },
+  "templateCredit": "Hitch",
+  "translators": {
+    "es": "Francisco Merchán"
+  },
+  "altArt": {
+    "en": {
+      "26024": "alt-art/en/26024.webp",
+      "62034": "alt-art/en/62034.webp"
+    },
+    "es": {
+      "26024": "alt-art/es/26024.webp",
+      "62034": "alt-art/es/62034.webp"
+    }
+  }
+}
