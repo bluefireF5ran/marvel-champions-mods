@@ -1,9 +1,0 @@
-This pack is a draft: it is neither tested with the other community packs nor published until this file is removed.
-
-Why (see abilities/index.ts and the README):
-- The mini-boss: a pack scenario cannot use `setAsideModularSetCount` yet, so the modular set Twisted Allegiance takes
-  its minion from (Running Interference, Tombstone) is not set aside at setup.
-- Three abilities: Hero Resistance and Rose's Greenhouse's "overdefeated side scheme" (more threat removed than it
-  had), and Rose's Greenhouse's "already has steady or stalwart" against its own grant.
-Every other ability is scripted; with those three stubbed, `mc-pack test` plays 16/16 games (standard and expert)
-without an engine error.

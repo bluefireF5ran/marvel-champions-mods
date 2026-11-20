@@ -8,11 +8,12 @@ Hide x2. Store shelf: Fear No Evil
 
 **Modular sets** (the authors' choice for the store, 2026-11-20), by the rules sheet's roles: a minion set, **Sinister
 Syndicate** (5 minions); a side scheme set, **State of Emergency** (4 side schemes); a third set, **Streets of Mayhem**
-(Setting environments, which 1B finds). Mini-boss, set aside: **Running Interference** (Tombstone, 9 hit points), once
-a pack scenario can set a modular set aside (`setAsideModularSetCount`). Its paper default is Fear No Evil's
+(Setting environments, which 1B finds). Mini-boss, set aside: **Running Interference** (Tombstone, 9 hit points): the scenario sets one modular set aside at setup
+(`setAsideModularSetCount: 1`), for Twisted Allegiance to take its minion from. Its paper default is Fear No Evil's
 (Tracksuit Mafia, Cops, Disasters; Tombstone or The Owl), which packs cannot recommend until wave 11 opens to them.
 
-**Draft** (the `DRAFT` file): see `DRAFT` for what the game still needs.
+Needs the game at 0.51.0 or later (`requires.app`): overdefeated side schemes, the keyword check that leaves Rose's
+Greenhouse's own grant out, and a pack scenario's set-aside modular set.
 
 ## How it was made
 

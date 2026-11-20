@@ -11,12 +11,9 @@
  * Fisk counters: the scenario's own counter type, `"fisk"`, on the two Fisk environments (07, 08); Hero Resistance (09)
  * has no Fisk trait and only removes them.
  *
- * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
- * - 09 Hero Resistance and 12 Rose's Greenhouse's Response: "after a side scheme is overdefeated (more threat was
- *   removed from it than it had)". A thwart's excess over the threat a scheme had is not recorded (the excess-damage
- *   half of Hero Resistance is: `defeatExcessDamage`, Bull in a China Shop 60135b).
- * - 12 Rose's Greenhouse's constant: "gains steady. If it already has steady or stalwart, it gets +4[per_hero] hit points
- *   instead": reading "already has" apart from the grant itself (a keyword the card would grant is not "already").
+ * Overdefeated side schemes (09, 12): `overdefeated` reads the excess threat the defeating removal attempted
+ * (`defeatExcessThreat`, #890 item 8); "already has steady or stalwart" (12) leaves Rose's Greenhouse's own grant out
+ * (`keywordNotFromSelf`, #890 item 9). Both since SDK 0.51.0.
  */
 import {
   addCounters,
@@ -32,7 +29,16 @@ import {
   chosen,
   constant,
   countersOn,
-  coveredByEngineRule,
+  allOf,
+  anyOf,
+  defeatedWithExcessDamage,
+  exists,
+  heroResponse,
+  not,
+  oncePerRound,
+  overdefeated,
+  perHero,
+  response,
   definePackAbilities,
   discard,
   each,
@@ -89,9 +95,18 @@ const ELITE = trait("Elite");
 
 const FISK_COUNTER = "fisk";
 const FISK_ENVIRONMENT = query("environment", { trait: FISK });
+const FISK_ENVIRONMENT_WITH_COUNTERS = query("environment", { trait: FISK, hasCounter: FISK_COUNTER });
 const FISK_ATTACHMENT = query("attachment", { trait: FISK });
 const INFLUENCED_MINION = query("minion", { trait: INFLUENCED });
 const ATTACHED_MINION = query("minion", { hostOfSelf: true });
+/** "If it already has steady or stalwart": not counting Rose's Greenhouse's own grant (#890 item 9). */
+const VILLAIN_ALREADY_STEADY_OR_STALWART = query("villain", {
+  hostOfSelf: true,
+  anyOf: [
+    { withKeyword: "steady", keywordNotFromSelf: true },
+    { withKeyword: "stalwart", keywordNotFromSelf: true },
+  ],
+});
 const UPGRADE_ON_A_SCHEME = query("upgrade", { host: each(query(["mainScheme", "sideScheme"])) });
 
 /** "Place 1 Fisk counter on a Fisk environment" (the first player chooses it for an encounter card). */
@@ -226,7 +241,20 @@ export default definePackAbilities({
       ...revealTopmost(query("minion")),
     ]),
   ),
-  // Hero Resistance: not scripted (see the header).
+  // Hero Resistance: "Response: After excess damage is dealt to a minion, or after a side scheme is overdefeated (more
+  // threat was removed from it than it had), remove 1 Fisk counter from a Fisk environment. (Limit once per round.)"
+  // One ability on either event (`on.either`, Stryfe's 40168a), so the limit is shared; excess damage only exists on a
+  // defeat (RRG 1.8 "Excess Damage", p. 19), read as Bull in a China Shop (60135b) reads it. Only usable while a Fisk
+  // environment has a Fisk counter to remove.
+  "x.the-rose-bf.09.hero-resistance-response": response(
+    on.either(on.defeated(query("minion")), on.schemeDefeated(query("sideScheme"))),
+    {
+      while: allOf(anyOf(defeatedWithExcessDamage, overdefeated), exists(FISK_ENVIRONMENT_WITH_COUNTERS)),
+      limit: oncePerRound,
+    },
+    chooseTarget("fiskEnvironment", FISK_ENVIRONMENT_WITH_COUNTERS),
+    removeCountersFrom(chosen("fiskEnvironment"), FISK_COUNTER, 1),
+  ),
 
   // =========================================================================
   // 10 Twisted Allegiance (attachment, set aside)
@@ -278,7 +306,24 @@ export default definePackAbilities({
   // 12 Rose's Greenhouse (attachment)
   // =========================================================================
 
-  // Constant and Response: not scripted (see the header). "[star] Boost: Reveal this card."
+  // "Attach to the villain." is data. "Attached villain gains steady. If it already has steady or stalwart, it gets
+  // +4[per_hero] hit points instead." "Already" leaves this card's own grant out (`keywordNotFromSelf`), so the steady
+  // it gives never turns itself into the hit points.
+  "x.the-rose-bf.12.roses-greenhouse-constant": constant(
+    gainsKeyword({ name: "steady" }, query("villain", { hostOfSelf: true }), {
+      while: not(exists(VILLAIN_ALREADY_STEADY_OR_STALWART)),
+    }),
+    gets("hp", perHero(4), query("villain", { hostOfSelf: true }), {
+      while: exists(VILLAIN_ALREADY_STEADY_OR_STALWART),
+    }),
+  ),
+  // "Hero Response: After you overdefeat a side scheme (remove more threat from it than it had), discard this card."
+  "x.the-rose-bf.12.roses-greenhouse-response": heroResponse(
+    on.schemeDefeated(query("sideScheme"), { byYou: true }),
+    { while: overdefeated },
+    discard(self),
+  ),
+  // "[star] Boost: Reveal this card."
   "x.the-rose-bf.12.boost": boost(revealCard(self)),
 
   // =========================================================================
