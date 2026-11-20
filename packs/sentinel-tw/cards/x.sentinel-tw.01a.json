@@ -28,6 +28,12 @@
       {
         "id": "x.sentinel-tw.01a.ablative-protocol",
         "label": "Ablative Protocol"
+      },
+      {
+        "id": "x.sentinel-tw.01a.expose-constant"
+      },
+      {
+        "id": "x.sentinel-tw.01a.expose-forced-response"
       }
     ]
   },
@@ -53,6 +59,12 @@
       },
       {
         "id": "x.sentinel-tw.01b.sentinel-action-2"
+      },
+      {
+        "id": "x.sentinel-tw.01b.expose-constant"
+      },
+      {
+        "id": "x.sentinel-tw.01b.expose-forced-response"
       }
     ]
   },

@@ -6,8 +6,9 @@ set (Mark VII-A, Rogue Asset, Disabled, Viral Assault, Hostile Override). His Re
 are alternate art for those official cards. See `CREDITS.md` and `PERMISSION.md`. Store shelf: Mutant Genesis
 (`wave: cycle6`). Starter deck: Justice, 44 cards (40 plus the four Components).
 
-**Draft** (the `DRAFT` file) until the game adds the engine features listed there and at the top of
-`abilities/index.ts`.
+Needs the game at 0.51.0 or later (`requires.app`): the Exposed status card, "exhaust or destroy" as an additional
+cost, Juston Seyfert on a side scheme, and the Components set aside as Permanent cards (see the top of
+`abilities/index.ts`).
 
 **Components.** They ship in the hero set (the importer takes only hero cards of the identity's set), so they are deck
 cards: the alter-ego's Setup takes them from the deck and the opening hand and puts them into play, as Valkyrie's Setup

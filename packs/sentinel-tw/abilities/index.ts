@@ -17,18 +17,40 @@
  * card blocks the whole boosted instance unless the attack has piercing). "Expose 2 enemies": 1 Exposed on each of up to
  * 2 enemies (T-Wrecks, 2026-11).
  *
- * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
- * - The **Exposed** status card (stun, confuse and tough are the only ones): 02a Head (Intact), 06 Exterminate's action,
- *   07 Hardwire Access's action (X = Exposed status cards in play), 13 Targeting Protocol.
- * - **Destroy as a cost** ("exhaust or destroy [Component] →" as an additional cost to play): 06 Exterminate, 07 Hardwire
- *   Access, 08 Rocket Punch, 09 Threat Suppression. A cost that flips another card you control, with its 2 unpreventable
- *   damage, has no shape yet.
- * - **A support attached to a side scheme**, still controlled by its player (10 Juston Seyfert: "Action: Attach to a
- *   side scheme", his Hero Action on the attached scheme, and his return to play when it is defeated).
+ * Since SDK 0.51.0 (#890 items 10-12):
+ * - **Exposed** is carried as `exposed` counters on enemies. The insert's rule ("When a character with one or more
+ *   Exposed status cards is attacked, discard all Exposed status cards from that character. That attack deals 1
+ *   additional damage for each Exposed status card discarded this way") lives on Sentinel's identity, both faces, so it
+ *   holds while Sentinel is in play: `attacksDealAdditionalDamage(…, { perCounterOnTarget: "exposed" })` and a forced
+ *   response that removes them after the attack.
+ * - **Destroy as a cost**: "exhaust or destroy [Component]" is `eitherCost(exhaust, [flip, 2 unpreventable damage])`
+ *   in `additionalCostToPlay`; Exterminate's two Components are four branches (each exhausted or destroyed).
+ * - **Juston Seyfert** attaches to a side scheme and stays under your control; he comes back with
+ *   `staysWhenHostLeaves: "defeated"`.
  * - 01a Ablative Protocol's cost is the destroy itself ("flip 1 Component … → take 2 unpreventable damage instead"):
- *   scripted here as an interrupt that flips a Component and replaces the damage, which is the same result.
+ *   scripted as an interrupt that flips a Component and replaces the damage, which is the same result.
  */
 import {
+  allOf,
+  setAside,
+  action,
+  addCounters,
+  attachCard,
+  attacksDealAdditionalDamage,
+  countersOn,
+  divide,
+  eitherCost,
+  eventTarget,
+  flipCardsCost,
+  forcedInterrupt,
+  host,
+  min,
+  removeCountersFrom,
+  removeThreat,
+  setVar,
+  sum,
+  takeDamageCost,
+  varOf,
   additionalCostToPlay,
   alterEgoAction,
   anAttackableEnemy,
@@ -120,10 +142,44 @@ const YOUR_READY_INTACT_COMPONENTS = query("upgrade", {
 const YOUR_READY_IDENTITY = query("identity", { controller: "you", exhausted: false });
 const ROGUE_ASSET = query("sideScheme", { name: "Rogue Asset" });
 
-/** Destroy (insert): take 2 unpreventable damage and flip the Component to its Destroyed side. */
+const EXPOSED = "exposed";
+const ENEMY = query("enemy");
+const EXPOSED_ENEMY = query("enemy", { hasCounter: EXPOSED });
+const ARMS_INTACT = yourIntact("Arms (Intact)");
+const OTHER_INTACT_COMPONENT = query("upgrade", {
+  trait: COMPONENT,
+  controller: "you",
+  anyTrait: [INTACT],
+  not: { name: "Arms (Intact)" },
+});
+const armsPick = (slot: string) => ({ slot, query: ARMS_INTACT, min: 1, max: 1 });
+const otherPick = (slot: string) => ({ slot, query: OTHER_INTACT_COMPONENT, min: 1, max: 1 });
+
+/** "Expose N enemies": 1 Exposed status card (an `exposed` counter) on each of up to N different enemies. */
+const expose = (n: number) => [
+  chooseTarget("exposedEnemies", ENEMY, { count: n, upTo: true }),
+  addCounters(EXPOSED, 1, chosen("exposedEnemies")),
+];
+/** "The number of Exposed status cards in play", into the var `exposedInPlay`. */
+const countExposedInPlay = () => [
+  setVar("exposedInPlay", 0),
+  forEachCard(
+    "exposedEnemy",
+    each(EXPOSED_ENEMY),
+    setVar("exposedInPlay", sum(varOf("exposedInPlay"), countersOn(chosen("exposedEnemy"), EXPOSED))),
+  ),
+];
+/** "Exhaust [Component] or destroy it (see insert)": exhaust it, or flip it and take 2 unpreventable damage. */
+const exhaustOrDestroy = (component: ReturnType<typeof query>) =>
+  eitherCost(exhaustCardsCost(component), [flipCardsCost(component), takeDamageCost(2, { unpreventable: true })]);
+
+/**
+ * Destroy (insert): take 2 unpreventable damage and flip the Component to its Destroyed side. The flip goes first, so
+ * an interrupt to that damage (Ablative Protocol again) sees the Component already destroyed and cannot loop on it.
+ */
 const destroy = (component: Parameters<typeof flipCard>[0]) => [
-  dealDamage(2, yourIdentity, { unpreventable: true }),
   flipCard(component),
+  dealDamage(2, yourIdentity, { unpreventable: true }),
 ];
 
 /**
@@ -146,12 +202,27 @@ export default definePackAbilities({
     chooseTarget("component", YOUR_INTACT_COMPONENTS),
     instead(...destroy(chosen("component"))),
   ),
-  // "Setup: Put each Component upgrade (Intact side up) into play." From the deck and the opening hand, as Valkyrie's
-  // Setup reads Death-Glow (25001b).
+  // Expose (insert), on both faces: "That attack deals 1 additional damage for each Exposed status card discarded this
+  // way" (part of the one instance, T-Wrecks 2026-11-11), then "discard all Exposed status cards from that character".
+  "x.sentinel-tw.01a.expose-constant": constant(
+    attacksDealAdditionalDamage(1, { target: ENEMY, perCounterOnTarget: EXPOSED }),
+  ),
+  "x.sentinel-tw.01a.expose-forced-response": forcedResponse(
+    { on: "characterAttacked", targetIs: EXPOSED_ENEMY },
+    removeCountersFrom(eventTarget, EXPOSED, countersOn(eventTarget, EXPOSED)),
+  ),
+  "x.sentinel-tw.01b.expose-constant": constant(
+    attacksDealAdditionalDamage(1, { target: ENEMY, perCounterOnTarget: EXPOSED }),
+  ),
+  "x.sentinel-tw.01b.expose-forced-response": forcedResponse(
+    { on: "characterAttacked", targetIs: EXPOSED_ENEMY },
+    removeCountersFrom(eventTarget, EXPOSED, countersOn(eventTarget, EXPOSED)),
+  ),
+  // "Setup: Put each Component upgrade (Intact side up) into play." The game sets each Permanent card aside before setup
+  // (#890 item 16), so the Components are taken from there.
   "x.sentinel-tw.01b.setup": setup(
-    chooseCards("components", zone(["deck", "hand"], you, { filter: query("upgrade", { trait: COMPONENT }) }), { min: 4, max: 4 }),
+    chooseCards("components", setAside(you, query("upgrade", { trait: COMPONENT })), { min: 4, max: 4 }),
     forEachCard("component", chosen("components"), putIntoPlay(chosen("component"), you)),
-    shuffleDeck(),
   ),
   // "Action: Search your deck and discard pile for Juston Seyfert and add him to your hand. (Limit once per round.)"
   "x.sentinel-tw.01b.sentinel-action": alterEgoAction(
@@ -173,7 +244,9 @@ export default definePackAbilities({
   // 02-05 Components (Permanent is data)
   // =========================================================================
 
-  // Head (Intact): not scripted (Exposed). Head (Destroyed): "Your Thwart events cost 1 additional resource to play."
+  // Head (Intact): "Hero Action: Exhaust Head (Intact) → expose 2 enemies."
+  "x.sentinel-tw.02a.head-intact-action": heroAction({ cost: exhaustThis, while: exists(ENEMY) }, ...expose(2)),
+  // Head (Destroyed): "Your Thwart events cost 1 additional resource to play."
   "x.sentinel-tw.02b.head-destroyed-constant": constant(
     costModifier({ delta: 1, appliesTo: { controller: "you", categories: ["event"], trait: THWART } }),
   ),
@@ -199,8 +272,47 @@ export default definePackAbilities({
   "x.sentinel-tw.05b.legs-destroyed-constant": constant(gets("handSize", -1, YOUR_IDENTITY)),
 
   // =========================================================================
-  // 06-09 Events: their star costs and the Exposed parts are not scripted (see the header)
+  // 06-09 Events
   // =========================================================================
+
+  // Exterminate: "[star] As an additional cost to play this event, exhaust or destroy Arms (Intact) and any one other
+  // Component upgrade (Intact side up)." Each one is exhausted or destroyed on its own (ruling 2026-11-19): four
+  // branches; destroying both is 4 unpreventable damage.
+  "x.sentinel-tw.06.exterminate-constant": additionalCostToPlay(
+    eitherCost(
+      { exhaustCards: [armsPick("exhausted"), otherPick("exhaustedOther")] },
+      [
+        exhaustCardsCost(ARMS_INTACT, { slot: "exhausted" }),
+        flipCardsCost(OTHER_INTACT_COMPONENT, { slot: "flippedOther" }),
+        takeDamageCost(2, { unpreventable: true }),
+      ],
+      [
+        flipCardsCost(ARMS_INTACT, { slot: "flipped" }),
+        exhaustCardsCost(OTHER_INTACT_COMPONENT, { slot: "exhaustedOther" }),
+        takeDamageCost(2, { unpreventable: true }),
+      ],
+      [{ flipCards: [armsPick("flipped"), otherPick("flippedOther")] }, takeDamageCost(4, { unpreventable: true })],
+    ),
+  ),
+  // "Hero Action (attack): Deal 7 damage to an enemy. This attack gains ranged, piercing, and overkill. Expose 2
+  // enemies."
+  "x.sentinel-tw.06.exterminate-action": heroAction(
+    { label: "attack" },
+    anAttackableEnemy("enemy"),
+    attack(7, chosen("enemy"), { keywords: ["ranged", "piercing", "overkill"] }),
+    ...expose(2),
+  ),
+  // Hardwire Access: "[star] As an additional cost to play this event, exhaust Head (Intact) or destroy it."
+  "x.sentinel-tw.07.hardwire-access-constant": additionalCostToPlay(exhaustOrDestroy(yourIntact("Head (Intact)"))),
+  // "Hero Action (thwart): Remove 3 threat from among schemes in play, plus X, where X is the number of Exposed status
+  // cards in play (to a maximum of 6 threat)." Inconspicuous's division (`divide`).
+  "x.sentinel-tw.07.hardwire-access-action": heroAction(
+    { label: "thwart" },
+    ...countExposedInPlay(),
+    divide("threat", min(sum(3, varOf("exposedInPlay")), 6), query("scheme")),
+  ),
+  // Rocket Punch: "[star] As an additional cost to play this event, exhaust Arms (Intact) or destroy it."
+  "x.sentinel-tw.08.rocket-punch-constant": additionalCostToPlay(exhaustOrDestroy(ARMS_INTACT)),
 
   // Rocket Punch: "Hero Action (attack): Deal 5 damage to an enemy. This attack gains overkill."
   "x.sentinel-tw.08.rocket-punch-action": heroAction(
@@ -208,15 +320,52 @@ export default definePackAbilities({
     anAttackableEnemy("enemy"),
     attack(5, chosen("enemy"), { keywords: ["overkill"] }),
   ),
+  // Threat Suppression: "[star] As an additional cost to play this event, exhaust Legs (Intact) or destroy it."
+  "x.sentinel-tw.09.threat-suppression-constant": additionalCostToPlay(exhaustOrDestroy(yourIntact("Legs (Intact)"))),
   // Threat Suppression: "Hero Action (attack): Deal 1 damage to up to 3 different enemies and stun up to 2 of those
   // enemies."
   "x.sentinel-tw.09.threat-suppression-action": heroAction(
     { label: "attack" },
-    chooseCards("hit", zone("play", undefined, { filter: query("enemy") }), { min: 1, max: 3 }),
+    chooseTarget("hit", query("enemy"), { count: 3, upTo: true }),
     forEachCard("enemy", chosen("hit"), attack(1, chosen("enemy"))),
-    chooseCards("stunned", zone("play", undefined, { filter: query("enemy", { inSlot: "hit" }) }), { min: 0, max: 2 }),
-    forEachCard("enemy", chosen("stunned"), stun(chosen("enemy"))),
+    chooseTarget("stunned", query("enemy", { inSlot: "hit" }), { count: 2, upTo: true }),
+    stun(chosen("stunned")),
   ),
+
+  // =========================================================================
+  // 10 Juston Seyfert (support)
+  // =========================================================================
+
+  // "Action: Attach to a side scheme." He moves onto the scheme like an upgrade attached to a scheme (Overwatch 30019)
+  // and stays a support under your control (ruling 2026-11-19). Once attached he stays there: the Action is for a
+  // Juston in your play area.
+  "x.sentinel-tw.10.juston-seyfert-action": action(
+    { while: allOf(exists(query("sideScheme")), not(valueAtLeast(refCount(host), 1))) },
+    chooseTarget("scheme", query("sideScheme")),
+    attachCard(self, chosen("scheme")),
+  ),
+  // "Hero Action: Exhaust Juston Seyfert → remove 1 threat from attached side scheme."
+  "x.sentinel-tw.10.juston-seyfert-hero-action": heroAction(
+    { cost: exhaustThis, while: valueAtLeast(refCount(host), 1) },
+    removeThreat(1, host),
+  ),
+  // "Forced Response: After attached side scheme is defeated, put Juston Seyfert in play under your control. Ready
+  // Sentinel or up to 2 Component upgrades." Heard as the scheme is defeated, with him still attached (Wrist Navigator,
+  // 27189a); `staysWhenHostLeaves: "defeated"` returns him to your play area instead of the discard pile.
+  "x.sentinel-tw.10.juston-seyfert-forced-response": {
+    ...forcedInterrupt(
+      on.attachedCardDefeated(),
+      chooseOne(
+        option("Ready Sentinel", ready(yourIdentity)),
+        option(
+          "Ready up to 2 Component upgrades",
+          chooseTarget("readied", YOUR_COMPONENTS, { count: 2, upTo: true }),
+          ready(chosen("readied")),
+        ),
+      ),
+    ),
+    staysWhenHostLeaves: "defeated",
+  },
 
   // =========================================================================
   // 11 Propulsion Array, 12 Reinforced Plating (upgrades)
@@ -243,11 +392,8 @@ export default definePackAbilities({
         "Exhaust Sentinel to ready up to 2 Intact Components",
         { when: exists(YOUR_READY_IDENTITY) },
         exhaust(yourIdentity),
-        chooseCards("readied", zone("play", you, { filter: query("upgrade", { trait: COMPONENT, anyTrait: [INTACT] }) }), {
-          min: 0,
-          max: 2,
-        }),
-        forEachCard("readyComponent", chosen("readied"), ready(chosen("readyComponent"))),
+        chooseTarget("readied", YOUR_INTACT_COMPONENTS, { count: 2, upTo: true }),
+        ready(chosen("readied")),
       ),
     ),
   ),
@@ -263,6 +409,26 @@ export default definePackAbilities({
   ),
 
   // =========================================================================
+  // 13 Targeting Protocol (upgrade)
+  // =========================================================================
+
+  // "Hero Action: Exhaust this card → expose 2 enemies or remove threat from a scheme equal to the number of exposed
+  // status cards in play (to a maximum of 3)."
+  "x.sentinel-tw.13.targeting-protocol-action": heroAction(
+    { cost: exhaustThis },
+    chooseOne(
+      option("Expose 2 enemies", { when: exists(ENEMY) }, ...expose(2)),
+      option(
+        "Remove threat equal to the Exposed status cards in play",
+        { when: exists(EXPOSED_ENEMY) },
+        ...countExposedInPlay(),
+        chooseTarget("scheme", query("scheme")),
+        removeThreat(min(varOf("exposedInPlay"), 3), chosen("scheme")),
+      ),
+    ),
+  ),
+
+  // =========================================================================
   // 14 Prime Directive (obligation)
   // =========================================================================
 
@@ -275,6 +441,9 @@ export default definePackAbilities({
     chooseOne(
       option(
         "Deal 3 damage to another friendly character (Mutant if able)",
+        // Offered only while there is another friendly character to take it (PR #46 review): with none, the 3 threat
+        // is the only choice.
+        { when: exists(query(["hero", "ally"], { excluding: yourIdentity })) },
         ifThen(
           exists(query(["hero", "ally"], { trait: MUTANT, excluding: yourIdentity })),
           chooseTarget("victim", query(["hero", "ally"], { trait: MUTANT, excluding: yourIdentity })),
@@ -333,7 +502,7 @@ export default definePackAbilities({
     ifThen(
       exists(YOUR_HACKED_UPGRADES),
       [
-        chooseCards("discarded", zone("play", you, { filter: query("upgrade", { trait: HACKED }) }), { min: 0, max: 1 }),
+        chooseTarget("discarded", YOUR_HACKED_UPGRADES, { count: 1, upTo: true }),
         ifThen(
           valueAtLeast(refCount(chosen("discarded")), 1),
           discard(chosen("discarded")),

@@ -1,0 +1,10 @@
+id: sentinel-tw
+path: packs/sentinel-tw
+creator: "T-Wrecks"
+editors: [bluefireF5ran]
+permission:
+  by: "T-Wrecks"
+  evidence: "packs/sentinel-tw/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-17"
+tags: [hero]
+summary: "A giant robot that breaks apart to protect a boy."
