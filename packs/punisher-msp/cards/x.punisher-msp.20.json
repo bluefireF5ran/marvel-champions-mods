@@ -1,0 +1,28 @@
+{
+  "id": "x.punisher-msp.20",
+  "name": "Too Ugly to Die",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "20",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "punisher-msp-nemesis"
+  ],
+  "boostIcons": 2,
+  "traits": [
+    "COCKROACH"
+  ],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: Change to hero form. If Jigsaw is in play, he activates against you. Otherwise, find Jigsaw and reveal him.",
+    "current": "When Revealed: Change to hero form. If Jigsaw is in play, he activates against you. Otherwise, find Jigsaw and reveal him."
+  },
+  "flavor": "\"So the guy, the guy who kills so many, so often... me he decides not to kill.\" —Jigsaw",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.20.when-revealed"
+    }
+  ]
+}

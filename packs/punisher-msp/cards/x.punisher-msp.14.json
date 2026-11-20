@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.14",
+  "name": "Angel of Vengeance",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "14",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "specialCost": "dash",
+  "resourceIcons": {},
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOADOUT"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Permanent.\nHero Response: After The Punisher makes a basic thwart, ready this card.\nHero Response: After you play a Thwart event, exhaust Angel of Vengeance → draw 1 card.",
+    "current": "Permanent.\nHero Response: After The Punisher makes a basic thwart, ready this card.\nHero Response: After you play a Thwart event, exhaust Angel of Vengeance → draw 1 card."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.14.angel-of-vengeance-response"
+    },
+    {
+      "id": "x.punisher-msp.14.angel-of-vengeance-hero-response"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "x.punisher-msp.09",
+  "name": "Stash House",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "9",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "support",
+  "cost": 2,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOCATION"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Resource: Exhaust Stash House → generate a [wild] resource.\nAction: Exhaust Stash House → remove up to 2 all-purpose counters from here and place them on an upgrade you control. Any player may trigger this ability.",
+    "current": "Resource: Exhaust Stash House → generate a [wild] resource.\nAction: Exhaust Stash House → remove up to 2 all-purpose counters from here and place them on an upgrade you control. Any player may trigger this ability."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.09.stash-house-resource"
+    },
+    {
+      "id": "x.punisher-msp.09.stash-house-action"
+    }
+  ]
+}

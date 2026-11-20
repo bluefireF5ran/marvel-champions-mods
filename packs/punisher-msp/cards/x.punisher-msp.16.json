@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.16",
+  "name": "Avengers' Cache",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "16",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "specialCost": "dash",
+  "resourceIcons": {},
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOADOUT"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Permanent.\nEach identity gets +1 hand size.\nResource: Exhaust Avengers' Cache → generate a [wild] resource for a 'Pool card.",
+    "current": "Permanent.\nEach identity gets +1 hand size.\nResource: Exhaust Avengers' Cache → generate a [wild] resource for a 'Pool card."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.16.avengers-cache-constant"
+    },
+    {
+      "id": "x.punisher-msp.16.avengers-cache-resource"
+    }
+  ]
+}

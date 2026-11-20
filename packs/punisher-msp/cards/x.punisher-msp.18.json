@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.18",
+  "name": "Captured",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "18",
+  "quantityInSet": 1,
+  "unique": false,
+  "amplifyIcons": 1,
+  "type": "side_scheme",
+  "encounterSetIds": [
+    "punisher-msp-nemesis"
+  ],
+  "startingThreat": {
+    "base": 0,
+    "perPlayer": 2
+  },
+  "icons": [],
+  "boostIcons": 3,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: Tuck each Weapon upgrade controlled by the Frank Castle player under here.\nWhen Defeated: Put each upgrade tucked here into play under its owner's control.",
+    "current": "When Revealed: Tuck each Weapon upgrade controlled by the Frank Castle player under here.\nWhen Defeated: Put each upgrade tucked here into play under its owner's control."
+  },
+  "flavor": "Jigsaw doesn't just want Castle dead, he wants him helpless.",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.18.when-revealed"
+    },
+    {
+      "id": "x.punisher-msp.18.when-defeated"
+    }
+  ]
+}

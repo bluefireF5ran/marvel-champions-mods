@@ -1,0 +1,33 @@
+{
+  "id": "x.punisher-msp.17",
+  "name": "Haunting Memories",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "17",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "obligation",
+  "encounterSetIds": [],
+  "boostIcons": 2,
+  "traits": [],
+  "keywords": [
+    {
+      "name": "uses",
+      "count": 3,
+      "counterType": "haunted"
+    }
+  ],
+  "text": {
+    "printed": "Give to the Frank Castle player.\nUses (3 haunted counters).\nYou cannot thwart.\nForced Response: After you play an Attack event or defeat an enemy, remove 1 haunted counter from here.",
+    "current": "Give to the Frank Castle player.\nUses (3 haunted counters).\nYou cannot thwart.\nForced Response: After you play an Attack event or defeat an enemy, remove 1 haunted counter from here."
+  },
+  "flavor": "\"No, no, no, no, no, no, no, no, wait, wait, wait, wait!\" —Frank Castle",
+  "abilities": [
+    {
+      "id": "x.punisher-msp.17.haunting-memories-constant"
+    },
+    {
+      "id": "x.punisher-msp.17.haunting-memories-forced-response"
+    }
+  ]
+}

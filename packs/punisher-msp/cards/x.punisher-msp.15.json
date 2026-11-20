@@ -1,0 +1,35 @@
+{
+  "id": "x.punisher-msp.15",
+  "name": "War Machine Armor",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "15",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 0,
+  "specialCost": "dash",
+  "resourceIcons": {},
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "LOADOUT"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Permanent.\nThe Punisher gains the Aerial trait and gets +1 DEF. You get +2 hit points.\nHero Response: After you defend against an attack, exhaust this card → play an event with an \"Action\" ability from your hand (paying its costs), or resolve an \"Action\" ability on a card you control.",
+    "current": "Permanent.\nThe Punisher gains the Aerial trait and gets +1 DEF. You get +2 hit points.\nHero Response: After you defend against an attack, exhaust this card → play an event with an \"Action\" ability from your hand (paying its costs), or resolve an \"Action\" ability on a card you control."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.15.war-machine-armor-constant"
+    },
+    {
+      "id": "x.punisher-msp.15.war-machine-armor-response"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "x.punisher-msp.01a",
+  "name": "The Punisher",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "1A/1B",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "hero_identity",
+  "hp": 9,
+  "hero": {
+    "faceName": "The Punisher",
+    "traits": [
+      "SOLDIER",
+      "VIGILANTE"
+    ],
+    "atk": 2,
+    "thw": 2,
+    "def": 1,
+    "handSize": 5,
+    "keywords": [],
+    "text": {
+      "printed": "'Til They Stay Down — Action: Remove 1 all-purpose counter from an upgrade you control → ready that upgrade. (Limit once per round.)",
+      "current": "'Til They Stay Down — Action: Remove 1 all-purpose counter from an upgrade you control → ready that upgrade. (Limit once per round.)"
+    },
+    "flavor": "\"God helps those who help themselves.\"",
+    "abilities": [
+      {
+        "id": "x.punisher-msp.01a.til-they-stay-down",
+        "label": "'Til They Stay Down"
+      }
+    ]
+  },
+  "alterEgo": {
+    "faceName": "Frank Castle",
+    "traits": [
+      "OUTLAW",
+      "SOLDIER"
+    ],
+    "rec": 3,
+    "handSize": 6,
+    "keywords": [],
+    "text": {
+      "printed": "Setup: Choose one Loadout upgrade and put it into play. Then, remove the remaining Loadout upgrade cards from the game.\nAction: Exhaust your identity → search your deck for a Weapon upgrade and add it to your hand. (Shuffle.)",
+      "current": "Setup: Choose one Loadout upgrade and put it into play. Then, remove the remaining Loadout upgrade cards from the game.\nAction: Exhaust your identity → search your deck for a Weapon upgrade and add it to your hand. (Shuffle.)"
+    },
+    "abilities": [
+      {
+        "id": "x.punisher-msp.01b.setup"
+      },
+      {
+        "id": "x.punisher-msp.01b.frank-castle-action"
+      }
+    ]
+  },
+  "obligationCardId": "x.punisher-msp.17",
+  "nemesisEncounterSetId": "punisher-msp-nemesis"
+}

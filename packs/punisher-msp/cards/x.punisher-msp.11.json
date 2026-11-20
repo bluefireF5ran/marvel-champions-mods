@@ -1,0 +1,32 @@
+{
+  "id": "x.punisher-msp.11",
+  "name": "Microchip",
+  "setCode": "punisher-msp",
+  "cycleId": "punisher-msp",
+  "collectorNumber": "11",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "support",
+  "cost": 2,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.punisher-msp.01a",
+  "traits": [
+    "PERSONA"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action: Exhaust Microchip → place 1 all-purpose counter on an upgrade you control.\nAction: Exhaust Microchip → remove up to 2 all-purpose counters from an upgrade you control and place them on Stash House.",
+    "current": "Hero Action: Exhaust Microchip → place 1 all-purpose counter on an upgrade you control.\nAction: Exhaust Microchip → remove up to 2 all-purpose counters from an upgrade you control and place them on Stash House."
+  },
+  "abilities": [
+    {
+      "id": "x.punisher-msp.11.microchip-action"
+    },
+    {
+      "id": "x.punisher-msp.11.microchip-action-2"
+    }
+  ]
+}
