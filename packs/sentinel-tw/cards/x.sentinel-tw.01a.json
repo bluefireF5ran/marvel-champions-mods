@@ -1,0 +1,73 @@
+{
+  "id": "x.sentinel-tw.01a",
+  "name": "Sentinel",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "1A/1B",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "hero_identity",
+  "hp": 14,
+  "hero": {
+    "faceName": "Sentinel",
+    "traits": [
+      "ANDROID",
+      "GIANT"
+    ],
+    "atk": 1,
+    "thw": 2,
+    "def": 2,
+    "handSize": 4,
+    "keywords": [],
+    "text": {
+      "printed": "Ablative Protocol — Interrupt: When you would take any amount of damage, flip 1 Component upgrade (Intact side) to its Destroyed side → take 2 unpreventable damage instead.",
+      "current": "Ablative Protocol — Interrupt: When you would take any amount of damage, flip 1 Component upgrade (Intact side) to its Destroyed side → take 2 unpreventable damage instead."
+    },
+    "flavor": "\"Primary directive: protect Juston Seyfert.\"",
+    "abilities": [
+      {
+        "id": "x.sentinel-tw.01a.ablative-protocol",
+        "label": "Ablative Protocol"
+      },
+      {
+        "id": "x.sentinel-tw.01a.expose-constant"
+      },
+      {
+        "id": "x.sentinel-tw.01a.expose-forced-response"
+      }
+    ]
+  },
+  "alterEgo": {
+    "faceName": "Sentinel",
+    "traits": [
+      "ANDROID",
+      "GIANT"
+    ],
+    "rec": 3,
+    "handSize": 5,
+    "keywords": [],
+    "text": {
+      "printed": "Setup: Put each Component upgrade (Intact side up) into play.\nAction: Search your deck and discard pile for Juston Seyfert and add him to your hand. (Limit once per round.)\nAction: Discard 1 card from your hand → flip each Component (Destroyed side) upgrade to its Intact side.",
+      "current": "Setup: Put each Component upgrade (Intact side up) into play.\nAction: Search your deck and discard pile for Juston Seyfert and add him to your hand. (Limit once per round.)\nAction: Discard 1 card from your hand → flip each Component (Destroyed side) upgrade to its Intact side."
+    },
+    "abilities": [
+      {
+        "id": "x.sentinel-tw.01b.setup"
+      },
+      {
+        "id": "x.sentinel-tw.01b.sentinel-action"
+      },
+      {
+        "id": "x.sentinel-tw.01b.sentinel-action-2"
+      },
+      {
+        "id": "x.sentinel-tw.01b.expose-constant"
+      },
+      {
+        "id": "x.sentinel-tw.01b.expose-forced-response"
+      }
+    ]
+  },
+  "obligationCardId": "x.sentinel-tw.14",
+  "nemesisEncounterSetId": "sentinel-tw-nemesis"
+}

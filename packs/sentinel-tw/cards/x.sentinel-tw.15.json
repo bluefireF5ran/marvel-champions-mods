@@ -1,0 +1,32 @@
+{
+  "id": "x.sentinel-tw.15",
+  "name": "Mark VII-A",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "15",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "minion",
+  "atk": 2,
+  "sch": 2,
+  "hp": 5,
+  "encounterSetIds": [
+    "sentinel-tw-nemesis"
+  ],
+  "boostIcons": 3,
+  "traits": [
+    "ELITE",
+    "SENTINEL"
+  ],
+  "keywords": [],
+  "text": {
+    "printed": "[star] Forced Response: After Mark VII-A makes an undefended attack against you, flip a Component upgrade (Intact side up) to its Destroyed side. If you cannot, discard 1 upgrade you control.\n(Sentinel's nemesis minion.)",
+    "current": "[star] Forced Response: After Mark VII-A makes an undefended attack against you, flip a Component upgrade (Intact side up) to its Destroyed side. If you cannot, discard 1 upgrade you control.\n(Sentinel's nemesis minion.)"
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.15.mark-vii-a-forced-response"
+    }
+  ],
+  "nemesisMinion": true
+}

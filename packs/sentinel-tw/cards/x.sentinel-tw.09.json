@@ -1,0 +1,32 @@
+{
+  "id": "x.sentinel-tw.09",
+  "name": "Threat Suppression",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "9",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 1,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.sentinel-tw.01a",
+  "traits": [
+    "ATTACK"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "[star] As an additional cost to play this event, exhaust Legs (Intact) or destroy it. (See insert.)\nHero Action (attack): Deal 1 damage to up to 3 different enemies and stun up to 2 of those enemies.",
+    "current": "[star] As an additional cost to play this event, exhaust Legs (Intact) or destroy it. (See insert.)\nHero Action (attack): Deal 1 damage to up to 3 different enemies and stun up to 2 of those enemies."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.09.threat-suppression-constant"
+    },
+    {
+      "id": "x.sentinel-tw.09.threat-suppression-action"
+    }
+  ]
+}

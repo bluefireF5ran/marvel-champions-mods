@@ -1,0 +1,26 @@
+{
+  "id": "x.sentinel-tw.14",
+  "name": "Prime Directive",
+  "setCode": "sentinel-tw",
+  "cycleId": "sentinel-tw",
+  "collectorNumber": "14",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "obligation",
+  "encounterSetIds": [],
+  "boostIcons": 3,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "Give to the Sentinel player.\nForced Action: Choose one:\n• Deal 3 damage to another friendly character (Mutant if able) → discard this card.\n• Place 3 threat on the main scheme → discard this card.",
+    "current": "Give to the Sentinel player.\nForced Action: Choose one:\n• Deal 3 damage to another friendly character (Mutant if able) → discard this card.\n• Place 3 threat on the main scheme → discard this card."
+  },
+  "abilities": [
+    {
+      "id": "x.sentinel-tw.14.prime-directive-constant"
+    },
+    {
+      "id": "x.sentinel-tw.14.prime-directive-forced-action"
+    }
+  ]
+}
