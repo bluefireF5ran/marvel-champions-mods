@@ -1,10 +1,10 @@
 {
   "id": "lost-traits-bf",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "kind": "house-rule",
   "name": "Lost Traits",
   "authors": ["Bluefire"],
-  "description": "Optional house rule by Bluefire (idea: Borja): thirteen official heroes and alter-egos gain one trait another card of the same character already has (Web-Warrior, Avenger, Aerial, Defender, Mutant), or Martial Artist for heroes whose lore is built on it. Nothing else changes. Turn it on per game in Table setup; the rebuilt card faces show while it is on.",
+  "description": "13 official heroes regain a trait they should have.\nSpider-Man is a Web-Warrior, Hulk is a Defender and Black Widow is a Martial Artist: other cards of the same character already say so. This optional rule adds that one missing trait to thirteen official heroes and alter-egos, with rebuilt card faces. Turn it on per game. Nothing else changes.",
   "tags": ["Traits", "Balance"],
   "unlock": "open",
   "cover": "cover.webp",

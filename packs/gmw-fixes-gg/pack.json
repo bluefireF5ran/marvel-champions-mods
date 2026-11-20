@@ -1,10 +1,10 @@
 {
   "id": "gmw-fixes-gg",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "kind": "house-rule",
   "name": "GMW Fixes",
   "authors": ["Gideon's Gaming", "Bluefire"],
-  "description": "Gideon's Gaming's fixes for The Galaxy's Most Wanted, rebuilt as full cards by Bluefire. Installing it offers the Balanced version when a Galaxy's Most Wanted campaign starts (Collector I-III and The Grand Collection, Nebula's Ship, the Milano, Interception Imminent and Take What Is Mine), and its rebuilt faces show in Balanced games.",
+  "description": "The Galaxy's Most Wanted, with the community fixes.\nGideon's Gaming's well-known fixes for The Galaxy's Most Wanted campaign, rebuilt as full English and Spanish cards: the Collector, the Milano, Nebula's Ship and their schemes. Choose the Balanced version when a GMW campaign starts.",
   "tags": ["Balance", "Galaxy's Most Wanted", "Campaign"],
   "wave": "cycle3",
   "unlock": "open",
