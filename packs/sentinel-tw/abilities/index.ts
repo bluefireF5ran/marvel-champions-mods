@@ -32,30 +32,29 @@ import {
   additionalCostToPlay,
   alterEgoAction,
   anAttackableEnemy,
+  anyOf,
   attack,
+  boost,
   cards,
   chooseCards,
   chooseOne,
   chooseTarget,
   chosen,
   confuse,
-  costModifier,
   constant,
+  costModifier,
   countOf,
-  coveredByEngineRule,
   dealDamage,
   definePackAbilities,
   discard,
-  discardThis,
   discardFromHandCost,
+  discardThis,
   each,
-  encounterCards,
   exhaust,
   exhaustCardsCost,
   exhaustThis,
-  exhaustYourHero,
   exists,
-  firstPlayer,
+  findCard,
   flipCard,
   forcedAction,
   forcedResponse,
@@ -74,14 +73,12 @@ import {
   on,
   oncePerRound,
   option,
-  packObligation,
   placeThreat,
   putIntoPlay,
   query,
   ready,
   reduceNextCardCost,
   refCount,
-  rule,
   self,
   setup,
   shuffleDeck,
@@ -92,10 +89,9 @@ import {
   valueAtLeast,
   when,
   whenRevealed,
-  boost,
   you,
-  yourIdentity,
   YOUR_IDENTITY,
+  yourIdentity,
   zone,
 } from "@mc/mod-sdk";
 
@@ -115,6 +111,13 @@ const YOUR_INTACT_COMPONENTS = query("upgrade", { trait: COMPONENT, controller: 
 const YOUR_DESTROYED_COMPONENTS = query("upgrade", { trait: COMPONENT, controller: "you", anyTrait: [DESTROYED] });
 const yourIntact = (name: string) => query("upgrade", { name, controller: "you" });
 const YOUR_HACKED_UPGRADES = query("upgrade", { trait: HACKED, controller: "you" });
+const YOUR_READY_INTACT_COMPONENTS = query("upgrade", {
+  trait: COMPONENT,
+  controller: "you",
+  anyTrait: [INTACT],
+  exhausted: false,
+});
+const YOUR_READY_IDENTITY = query("identity", { controller: "you", exhausted: false });
 const ROGUE_ASSET = query("sideScheme", { name: "Rogue Asset" });
 
 /** Destroy (insert): take 2 unpreventable damage and flip the Component to its Destroyed side. */
@@ -123,11 +126,12 @@ const destroy = (component: Parameters<typeof flipCard>[0]) => [
   flipCard(component),
 ];
 
-/** "Search the encounter deck and discard pile for the Rogue Asset side scheme and put it into play." */
-const rogueAssetIntoPlay = () => [
-  chooseCards("asset", encounterCards(["deck", "discard"], ROGUE_ASSET), { min: 0, max: 1, chooser: firstPlayer }),
-  putIntoPlay(chosen("asset")),
-];
+/**
+ * "Search the encounter deck and discard pile for the Rogue Asset side scheme and put it into play." Mandatory: a Find
+ * (`findCard`, Protect Humanity 59004's shape) takes it wherever it is and shuffles each deck it looked through (RRG 1.8
+ * "Search", p. 39); with no Rogue Asset to find, nothing happens.
+ */
+const rogueAssetIntoPlay = () => [findCard(ROGUE_ASSET, "play")];
 
 export default definePackAbilities({
   // =========================================================================
@@ -222,18 +226,23 @@ export default definePackAbilities({
   "x.sentinel-tw.11.propulsion-array-constant": additionalCostToPlay(exhaustCardsCost(yourIntact("Legs (Intact)"))),
   // "Hero Action: Shuffle this card into your deck. Choose one: • Exhaust 1 Component (Intact side up) upgrade → ready
   // Sentinel. • Exhaust Sentinel → ready up to 2 Component (Intact side up) upgrades."
+  // Each option's arrow cost is checked before anything resolves: the action is usable only while one of them can be
+  // paid (a ready Intact Component, or a ready Sentinel), and an option is offered only while its own cost can be.
   "x.sentinel-tw.11.propulsion-array-action": heroAction(
+    { while: anyOf(exists(YOUR_READY_INTACT_COMPONENTS), exists(YOUR_READY_IDENTITY)) },
     moveCards(cards(self), "deck"),
     shuffleDeck(),
     chooseOne(
       option(
         "Exhaust 1 Intact Component to ready Sentinel",
-        chooseTarget("component", query("upgrade", { trait: COMPONENT, controller: "you", anyTrait: [INTACT], exhausted: false })),
+        { when: exists(YOUR_READY_INTACT_COMPONENTS) },
+        chooseTarget("component", YOUR_READY_INTACT_COMPONENTS),
         exhaust(chosen("component")),
         ready(yourIdentity),
       ),
       option(
         "Exhaust Sentinel to ready up to 2 Intact Components",
+        { when: exists(YOUR_READY_IDENTITY) },
         exhaust(yourIdentity),
         chooseCards("readied", zone("play", you, { filter: query("upgrade", { trait: COMPONENT, anyTrait: [INTACT] }) }), {
           min: 0,
