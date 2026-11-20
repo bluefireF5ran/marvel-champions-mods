@@ -1,10 +1,10 @@
 {
   "id": "punisher-pk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "kind": "scenario",
   "name": "The Punisher",
   "authors": ["PermaKarma"],
-  "description": "Fan-made scenario pack by PermaKarma: The Punisher wages a one-man war on crime, and the minions in your way are his targets as much as yours.",
+  "description": "Frank Castle's war on crime, with you in the way.\nThe Punisher isn't your enemy, exactly. He is a villain who attacks the minions in your way as much as he attacks you, while Rachel Cole-Alves and the Maggia make the war on crime even messier. Plays best with the Sinister Syndicate. 26 cards, rebuilt in English and Spanish. Pairs with Fear No Evil.",
   "tags": ["Street level", "Vigilante", "Minions"],
   "wave": "cycle11",
   "unlock": "open",
