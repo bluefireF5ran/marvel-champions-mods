@@ -3,7 +3,7 @@ path: packs/throg-ptt
 creator: "Patatasaurio & Caurel"
 editors: [bluefireF5ran]
 permission:
-  by: "Patatasaurio & Caurel"
+  by: "Patatasaurio"
   evidence: "packs/throg-ptt/PERMISSION.md (and pack.json permission)"
   date: "2026-11-13"
 tags: [hero]
