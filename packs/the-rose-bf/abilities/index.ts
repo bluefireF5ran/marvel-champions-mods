@@ -8,7 +8,8 @@
  * of Hero Resistance in print: here its own card, set aside at setup), 11 Anti-Hulk Cannon, 12 Rose's Greenhouse, 13
  * Silent Pruning, 14 Nowhere to Hide.
  *
- * Fisk counters: the scenario's own counter type, `"fisk"`, on the three Fisk environments.
+ * Fisk counters: the scenario's own counter type, `"fisk"`, on the two Fisk environments (07, 08); Hero Resistance (09)
+ * has no Fisk trait and only removes them.
  *
  * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
  * - 09 Hero Resistance and 12 Rose's Greenhouse's Response: "after a side scheme is overdefeated (more threat was
@@ -19,9 +20,11 @@
  */
 import {
   addCounters,
+  addToVictoryDisplay,
   advanceMainScheme,
   attachCard,
   cards,
+  countOf,
   boost,
   chooseCards,
   chooseOne,
@@ -41,6 +44,9 @@ import {
   findCard,
   firstPlayer,
   forcedInterrupt,
+  setVar,
+  varOf,
+  when,
   forcedResponse,
   forEachCard,
   gainsKeyword,
@@ -72,7 +78,6 @@ import {
   whenRevealed,
   you,
   zone,
-  exists,
   named,
 } from "@mc/mod-sdk";
 
@@ -87,6 +92,7 @@ const FISK_ENVIRONMENT = query("environment", { trait: FISK });
 const FISK_ATTACHMENT = query("attachment", { trait: FISK });
 const INFLUENCED_MINION = query("minion", { trait: INFLUENCED });
 const ATTACHED_MINION = query("minion", { hostOfSelf: true });
+const UPGRADE_ON_A_SCHEME = query("upgrade", { host: each(query(["mainScheme", "sideScheme"])) });
 
 /** "Place 1 Fisk counter on a Fisk environment" (the first player chooses it for an encounter card). */
 const fiskCounterOnAnEnvironment = (n = 1) => [
@@ -103,15 +109,17 @@ const revealAFiskAttachment = () => [
 ];
 /**
  * "Reveal the topmost [card] of the encounter deck (shuffle), or the topmost [card] of the encounter discard pile if
- * there is none." Cape-Killer's topmost pick (`cw` 56?, `topmostOnly`), deck first.
+ * there is none." Cape-Killer's topmost pick (`cw` 56?, `topmostOnly`), deck first. Each pick is forced (`min: 1`): with
+ * a match in the deck it is revealed, never skipped for the discard pile; with none, the pick binds nothing (the
+ * engine's `chooseCards` asks for no more than there are) and the discard pile's topmost is revealed (PR #47 review).
  */
 const revealTopmost = (q: ReturnType<typeof query>) => [
-  chooseCards("top", encounterCards(["deck"], q, { topmostOnly: true }), { min: 0, max: 1 }),
+  chooseCards("top", encounterCards(["deck"], q, { topmostOnly: true }), { min: 1, max: 1 }),
   ifThen(
     valueAtLeast(refCount(chosen("top")), 1),
     [revealCard(chosen("top"), firstPlayer), shuffleEncounterDeck()],
     [
-      chooseCards("topDiscard", encounterCards(["discard"], q, { topmostOnly: true }), { min: 0, max: 1 }),
+      chooseCards("topDiscard", encounterCards(["discard"], q, { topmostOnly: true }), { min: 1, max: 1 }),
       revealCard(chosen("topDiscard"), firstPlayer),
     ],
   ),
@@ -233,6 +241,11 @@ export default definePackAbilities({
     attachCard(self, chosen("boss")),
     shuffleInSetAsideModularSet(),
   ),
+  // "Victory 1." on an attachment is "Forced Interrupt: When the attached card is defeated, add this card to the victory
+  // display" (RRG 1.8 "Victory X", p. 46). Written out as this card's own ability: Permanent stops effects from other
+  // sets only (RRG 1.8 "Permanent", p. 32), and the keyword alone does not pass that test for a Permanent attachment,
+  // which then left the game with its host and never scored (PR #47 review). Spider-Tracer's trigger (01007).
+  "x.the-rose-bf.10.victory-forced-interrupt": forcedInterrupt(when.defeated("host"), addToVictoryDisplay(cards(self))),
   // "Attached minion's printed hit points are 14. It gains villainous, guard, and the Influenced and Elite traits." The
   // printed value set as Ultron's facedown Drones' stats (`setBase`).
   "x.the-rose-bf.10.twisted-allegiance-constant": constant(
@@ -274,14 +287,14 @@ export default definePackAbilities({
 
   // "When Revealed: Give the villain a tough status card and 1 facedown boost card. Discard each upgrade attached to a
   // scheme. If no upgrade was discarded this way, place 1 Fisk counter on a Fisk environment."
+  // "No upgrade was discarded this way" is read after the discard: the upgrades on schemes before it, against those
+  // still there after (one whose leaving is prohibited stays and was not discarded; PR #47 review).
   "x.the-rose-bf.13.when-revealed": whenRevealed(
     giveTough(theVillain),
     giveBoostCard(theVillain, 1),
-    ifThen(
-      exists(query("upgrade", { host: each(query(["mainScheme", "sideScheme"])) })),
-      discard(each(query("upgrade", { host: each(query(["mainScheme", "sideScheme"])) }))),
-      fiskCounterOnAnEnvironment(),
-    ),
+    setVar("upgradesOnSchemes", countOf(UPGRADE_ON_A_SCHEME)),
+    discard(each(UPGRADE_ON_A_SCHEME)),
+    ifThen(valueAtLeast(countOf(UPGRADE_ON_A_SCHEME), varOf("upgradesOnSchemes")), fiskCounterOnAnEnvironment()),
   ),
   // "[star] Boost: Place 1 Fisk counter on a Fisk environment."
   "x.the-rose-bf.13.boost": boost(...fiskCounterOnAnEnvironment()),

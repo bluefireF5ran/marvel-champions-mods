@@ -1,8 +1,9 @@
 # The Rose (`the-rose-bf`)
 
 A fan-made villain scenario by BigDarsh and Bluefire (Hitch templates): The Rose I-III, main scheme Public Enemy Number
-One (1A-3B), the three Fisk environments (Collateral Chaos, Lawless Justice, Hero Resistance), Twisted Allegiance,
-Anti-Hulk Cannon, Rose's Greenhouse, Silent Pruning x2 and Nowhere to Hide x2. Store shelf: Fear No Evil
+One (1A-3B), the two Fisk environments (Collateral Chaos, Lawless Justice), Hero Resistance (the environment that
+removes their Fisk counters), Twisted Allegiance, Anti-Hulk Cannon, Rose's Greenhouse, Silent Pruning x2 and Nowhere to
+Hide x2. Store shelf: Fear No Evil
 (`wave: cycle11`). See `CREDITS.md` and `PERMISSION.md`.
 
 **Modular sets** (the authors' choice for the store, 2026-11-20), by the rules sheet's roles: a minion set, **Sinister
