@@ -6,16 +6,10 @@
  *
  * Ability ids are `<card code>.<slug>`, as the importer wrote them.
  *
- * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
- * - 01a Web-Sling: "After you ready your cards at the end of the player phase, for each 2 upgrades you readied this
- *   way …". The ready step announces nothing (RRG 1.8 "Ready", p. 36; `cardReadied` is only for an effect's ready),
- *   so neither the moment nor the count of upgrades it readied can be read.
- * - 02 Enhanced Combat Sense's star: "exhaust any number of Weapon or Tech upgrades you control to generate that many
- *   [wild] resources while paying for this card", then "for each upgrade you exhausted to pay for this card". A card in
- *   hand granting in-play cards a resource usable only for itself has no shape yet (`generatesFor` belongs to the
- *   resource ability's own card).
- * - 06 With Great Firepower's resource: "generate a [wild] resource for an upgrade ability". `generatesFor` restricts a
- *   resource to paying for a card; a resource usable only for an ability's cost on an upgrade has no shape yet.
+ * Since SDK 0.51.0 (#890 items 1-3): Web-Sling hears the end-of-phase ready step (`on.yourCardsReadiedAtPhaseEnd`,
+ * its cards in slot `readied.cards`); Enhanced Combat Sense's star is a resource that works from the hand and pays
+ * for its own card (`inHand`), its count `paid.ability.<id>`; With Great Firepower's resource pays only an upgrade's
+ * ability cost (`forAbility`).
  */
 import {
   after,
@@ -32,8 +26,8 @@ import {
   chosen,
   confuse,
   constant,
-  coveredByEngineRule,
   countOf,
+  coveredByEngineRule,
   dealDamage,
   definePackAbilities,
   discard,
@@ -76,6 +70,10 @@ import {
   ready,
   refCount,
   removeThreat,
+  repeatTimes,
+  resource,
+  response,
+  scaled,
   retargetAttack,
   revealCard,
   self,
@@ -110,6 +108,16 @@ const YOUR_WEAPON_OR_TECH = query("upgrade", { anyTrait: [WEAPON, TECH], control
 const YOUR_WEB_SHOOTERS = query("upgrade", { trait: WEB_SHOOTER, controller: "you" });
 const YOUR_EXHAUSTED_UPGRADES = query("upgrade", { controller: "you", exhausted: true });
 const YOUR_ALLIES = query("ally", { controller: "you" });
+const ENHANCED_COMBAT_SENSE_RESOURCE = "x.spider-punisher-tw.02.enhanced-combat-sense-constant";
+const UPGRADES_READIED = query("upgrade", { inSlot: "readied.cards" });
+
+/** "Deal 1 damage to an enemy or remove 1 threat from a scheme." */
+const damageOrThreat = () =>
+  chooseOne(
+    option("Deal 1 damage to an enemy", chooseTarget("enemy", query("enemy")), dealDamage(1, chosen("enemy"))),
+    option("Remove 1 threat from a scheme", chooseTarget("scheme", query("scheme")), removeThreat(1, chosen("scheme"))),
+  );
+
 const NON_ELITE_MINION = query("minion", { withoutTrait: ELITE });
 
 export default definePackAbilities({
@@ -122,7 +130,14 @@ export default definePackAbilities({
   "x.spider-punisher-tw.01a.spider-punisher-constant": constant(
     attacksGainKeywords(["ranged"], { attacker: YOUR_IDENTITY, via: WEB_SHOOTER_UPGRADE }),
   ),
-  // Web-Sling: not scripted (see the header).
+  // Web-Sling: "Response: After you ready your cards at the end of the player phase, for each 2 upgrades you readied
+  // this way, deal 1 damage to an enemy or remove 1 threat from a scheme (to a maximum of 3)." The ready step's own
+  // announcement (#890 item 1); usable once at least 2 upgrades were readied.
+  "x.spider-punisher-tw.01a.web-sling": response(
+    on.yourCardsReadiedAtPhaseEnd(),
+    { while: valueAtLeast(countOf(UPGRADES_READIED), 2) },
+    repeatTimes(min(scaled(countOf(UPGRADES_READIED), { divide: { by: 2, round: "down" } }), 3), damageOrThreat()),
+  ),
 
   // =========================================================================
   // 01b Peter Parker (alter-ego)
@@ -141,12 +156,20 @@ export default definePackAbilities({
   // 02 Enhanced Combat Sense (event)
   // =========================================================================
 
-  // Star: not scripted (see the header). "Hero Interrupt: When an encounter card is revealed from the encounter deck,
-  // cancel all of its effects and discard it." Enhanced Spider-Sense (01004) for the timing; the per-upgrade damage or
-  // threat removal waits for the star's payment record.
+  // "[star] You can exhaust any number of Weapon or Tech upgrades you control to generate that many [wild] resources
+  // while paying for this card." A resource of the card in hand that pays for itself alone (#890 item 2).
+  "x.spider-punisher-tw.02.enhanced-combat-sense-constant": resource(
+    { kind: "amount", resource: "wild", amount: countOf(query("upgrade", { inSlot: "exhausted" })) },
+    { inHand: true, cost: exhaustCardsCost(YOUR_WEAPON_OR_TECH, { max: "any" }) },
+  ),
+  // "Hero Interrupt: When an encounter card is revealed from the encounter deck, cancel all of its effects and discard
+  // it. For each upgrade you exhausted to pay for this card, deal 1 damage to an enemy or remove 1 threat from a
+  // scheme." Enhanced Spider-Sense (01004) for the timing; the count is what the star's resource generated in this
+  // card's payment (`paid.ability.<id>`).
   "x.spider-punisher-tw.02.enhanced-combat-sense-interrupt": heroInterrupt(
     when.encounterCardRevealedFromEncounterDeck(),
     cancelRevealedCard(),
+    repeatTimes(varOf(`paid.ability.${ENHANCED_COMBAT_SENSE_RESOURCE}`), damageOrThreat()),
   ),
 
   // =========================================================================
@@ -210,7 +233,13 @@ export default definePackAbilities({
   // 06 With Great Firepower (upgrade)
   // =========================================================================
 
-  // Resource: not scripted (see the header). "Alter-Ego Action: Exhaust this card → play a Weapon or Tech upgrade from
+  // "Hero Resource: Exhaust this card → generate a [wild] resource for an upgrade ability." Only for an ability's cost on
+  // an upgrade, never to play one (#890 item 3).
+  "x.spider-punisher-tw.06.with-great-firepower-resource": resource(
+    { wild: 1 },
+    { form: "hero", cost: exhaustThis, generatesFor: query("upgrade"), forAbility: true },
+  ),
+  // "Alter-Ego Action: Exhaust this card → play a Weapon or Tech upgrade from
   // your hand, reducing its cost by 2." Team-Building Exercise (`ant`) for the reduced play.
   "x.spider-punisher-tw.06.with-great-firepower-action": alterEgoAction(
     { cost: exhaustThis },

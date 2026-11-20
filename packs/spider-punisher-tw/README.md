@@ -5,8 +5,8 @@ his Web-Shooter rounds (Armor-Piercing, EMP, High Explosive, Incendiary), the Pu
 nemesis set (Green Goblin, The Goblin's Ultimatum, Reorganized Crime x2, Revealed Identity). See `CREDITS.md` and
 `PERMISSION.md`. Store shelf: Sinister Motives (`wave: cycle5`). Starter deck: Leadership, 42 cards.
 
-**Draft** (the `DRAFT` file) until the game adds three engine features; the list is in `DRAFT` and at the top of
-`abilities/index.ts`.
+Needs the game at 0.51.0 or later (`requires.app`): Web-Sling's end-of-phase ready step, Enhanced Combat Sense's
+resource from the hand, and With Great Firepower's resource for an upgrade ability (see the top of `abilities/index.ts`).
 
 ## How it was made
 
