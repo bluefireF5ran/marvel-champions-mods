@@ -1,0 +1,61 @@
+{
+  "id": "x.spider-punisher-tw.01a",
+  "name": "Spider-Punisher",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "1A/1B",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "hero_identity",
+  "hp": 11,
+  "hero": {
+    "faceName": "Spider-Punisher",
+    "traits": [
+      "EARTH-71928",
+      "WEB-WARRIOR"
+    ],
+    "atk": 2,
+    "thw": 2,
+    "def": 2,
+    "handSize": 5,
+    "statStars": [
+      "atk"
+    ],
+    "keywords": [],
+    "text": {
+      "printed": "[star] Spider-Punisher's attacks from Web-Shooter upgrades gain ranged.\nWeb-Sling — Response: After you ready your cards at the end of the player phase, for each 2 upgrades you readied this way, deal 1 damage to an enemy or remove 1 threat from a scheme (to a maximum of 3).",
+      "current": "[star] Spider-Punisher's attacks from Web-Shooter upgrades gain ranged.\nWeb-Sling — Response: After you ready your cards at the end of the player phase, for each 2 upgrades you readied this way, deal 1 damage to an enemy or remove 1 threat from a scheme (to a maximum of 3)."
+    },
+    "abilities": [
+      {
+        "id": "x.spider-punisher-tw.01a.spider-punisher-constant"
+      },
+      {
+        "id": "x.spider-punisher-tw.01a.web-sling",
+        "label": "Web-Sling"
+      }
+    ]
+  },
+  "alterEgo": {
+    "faceName": "Peter Parker",
+    "traits": [
+      "GENIUS"
+    ],
+    "rec": 3,
+    "handSize": 6,
+    "keywords": [],
+    "text": {
+      "printed": "Vengeance — Action: Search your deck and discard pile for a Web-Shooter upgrade and add it to your hand. (Limit once per phase.)",
+      "current": "Vengeance — Action: Search your deck and discard pile for a Web-Shooter upgrade and add it to your hand. (Limit once per phase.)"
+    },
+    "flavor": "\"It started with Uncle Ben. It ends with them.\"",
+    "abilities": [
+      {
+        "id": "x.spider-punisher-tw.01b.vengeance",
+        "label": "Vengeance"
+      }
+    ]
+  },
+  "obligationCardId": "x.spider-punisher-tw.13",
+  "nemesisEncounterSetId": "spider-punisher-tw-nemesis"
+}

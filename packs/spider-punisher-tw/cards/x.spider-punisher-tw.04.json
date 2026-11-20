@@ -1,0 +1,29 @@
+{
+  "id": "x.spider-punisher-tw.04",
+  "name": "Web Snatch",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "4",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 1,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "TACTIC"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Hero Action: Stun an enemy. Choose:\n• Search your deck and discard pile for an upgrade and add it to your hand. (Shuffle.)\n• Discard an attachment from the villain.",
+    "current": "Hero Action: Stun an enemy. Choose:\n• Search your deck and discard pile for an upgrade and add it to your hand. (Shuffle.)\n• Discard an attachment from the villain."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.04.web-snatch-action"
+    }
+  ]
+}

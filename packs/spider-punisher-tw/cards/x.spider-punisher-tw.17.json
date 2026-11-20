@@ -1,0 +1,31 @@
+{
+  "id": "x.spider-punisher-tw.17",
+  "name": "Revealed Identity",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "17",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "obligation",
+  "encounterSetIds": [
+    "spider-punisher-tw-nemesis"
+  ],
+  "boostIcons": 2,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "Forced Interrupt: When the villain would scheme against you, it attacks you instead. Place 2 threat on the main scheme after that attack.\nHero Action: Spend 2 resources of any type → discard this card.",
+    "current": "Forced Interrupt: When the villain would scheme against you, it attacks you instead. Place 2 threat on the main scheme after that attack.\nHero Action: Spend 2 resources of any type → discard this card."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.17.obligation"
+    },
+    {
+      "id": "x.spider-punisher-tw.17.revealed-identity-forced-interrupt"
+    },
+    {
+      "id": "x.spider-punisher-tw.17.revealed-identity-action"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "x.spider-punisher-tw.09",
+  "name": "EMP Rounds",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "9",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 1,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "TECH",
+    "WEAPON",
+    "WEB-SHOOTER"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action: Spend a [energy] resource and exhaust this card → stun or confuse a minion. You may shuffle this card into your deck to stun or confuse the villain instead.",
+    "current": "Hero Action: Spend a [energy] resource and exhaust this card → stun or confuse a minion. You may shuffle this card into your deck to stun or confuse the villain instead."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.09.emp-rounds-action"
+    }
+  ]
+}

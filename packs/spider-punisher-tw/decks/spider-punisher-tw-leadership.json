@@ -1,0 +1,145 @@
+{
+  "id": "spider-punisher-tw-leadership",
+  "name": "Spider-Punisher - Leadership - Starter Deck",
+  "packCode": "spider-punisher-tw",
+  "identityCardId": "x.spider-punisher-tw.01a",
+  "aspects": [
+    "leadership"
+  ],
+  "provenance": {
+    "verified": false,
+    "sources": [
+      "The curators' starter deck (spider_punisher_tw/decks/spider-punisher-leadership.json in mc-digital-custom-packs, commit c131319): A Leadership deck for Spider-Punisher, 42 cards: his 15 hero cards, 8 Leadership and 19 basics. A team of Web-Warrior allies and S.H.I.E.L.D. support, with Plasma Pistols for his Weapon upgrades. Built from the user's Spider-Man list (2026-11-20) with Miles Morales' hero cards taken out."
+    ]
+  },
+  "cards": [
+    {
+      "cardId": "01071",
+      "quantity": 2
+    },
+    {
+      "cardId": "01088",
+      "quantity": 1
+    },
+    {
+      "cardId": "01089",
+      "quantity": 1
+    },
+    {
+      "cardId": "01090",
+      "quantity": 1
+    },
+    {
+      "cardId": "04016",
+      "quantity": 1
+    },
+    {
+      "cardId": "08031",
+      "quantity": 3
+    },
+    {
+      "cardId": "13019",
+      "quantity": 1
+    },
+    {
+      "cardId": "13024",
+      "quantity": 2
+    },
+    {
+      "cardId": "20022",
+      "quantity": 3
+    },
+    {
+      "cardId": "27017",
+      "quantity": 1
+    },
+    {
+      "cardId": "27023",
+      "quantity": 1
+    },
+    {
+      "cardId": "27048",
+      "quantity": 1
+    },
+    {
+      "cardId": "28018",
+      "quantity": 1
+    },
+    {
+      "cardId": "29027",
+      "quantity": 1
+    },
+    {
+      "cardId": "30021",
+      "quantity": 1
+    },
+    {
+      "cardId": "31022",
+      "quantity": 1
+    },
+    {
+      "cardId": "31029",
+      "quantity": 1
+    },
+    {
+      "cardId": "50055",
+      "quantity": 1
+    },
+    {
+      "cardId": "50056",
+      "quantity": 1
+    },
+    {
+      "cardId": "52021",
+      "quantity": 1
+    },
+    {
+      "cardId": "52032",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.02",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.spider-punisher-tw.03",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.spider-punisher-tw.04",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.spider-punisher-tw.05",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.06",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.07",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.08",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.09",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.10",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.spider-punisher-tw.11",
+      "quantity": 2
+    },
+    {
+      "cardId": "x.spider-punisher-tw.12",
+      "quantity": 1
+    }
+  ]
+}

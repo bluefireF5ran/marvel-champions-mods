@@ -1,0 +1,37 @@
+{
+  "id": "x.spider-punisher-tw.15",
+  "name": "The Goblin's Ultimatum",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "15",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "side_scheme",
+  "encounterSetIds": [
+    "spider-punisher-tw-nemesis"
+  ],
+  "startingThreat": {
+    "base": 2,
+    "perPlayer": 0
+  },
+  "icons": [],
+  "boostIcons": 2,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "Threat cannot be removed from this scheme except by its own ability.\nHero Action: Exhaust your hero, discard 1 upgrade you control, or take 2 damage → remove 1 threat from this scheme.\nForced Response: After the player phase ends, find the Punisher No More obligation and reveal it. Discard this card.",
+    "current": "Threat cannot be removed from this scheme except by its own ability.\nHero Action: Exhaust your hero, discard 1 upgrade you control, or take 2 damage → remove 1 threat from this scheme.\nForced Response: After the player phase ends, find the Punisher No More obligation and reveal it. Discard this card."
+  },
+  "flavor": "Goblin forces Peter to choose between his own life and Stacy's.",
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.15.the-goblins-ultimatum-constant"
+    },
+    {
+      "id": "x.spider-punisher-tw.15.the-goblins-ultimatum-action"
+    },
+    {
+      "id": "x.spider-punisher-tw.15.the-goblins-ultimatum-forced-response"
+    }
+  ]
+}

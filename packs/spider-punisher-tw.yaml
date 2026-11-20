@@ -1,0 +1,10 @@
+id: spider-punisher-tw
+path: packs/spider-punisher-tw
+creator: "T-Wrecks"
+editors: [bluefireF5ran]
+permission:
+  by: "T-Wrecks"
+  evidence: "packs/spider-punisher-tw/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-17"
+tags: [hero]
+summary: "Peter Parker traded webs for bullets."
