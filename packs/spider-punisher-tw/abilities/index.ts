@@ -64,6 +64,7 @@ import {
   moveCards,
   on,
   oncePerPhase,
+  onlySourceRemovesThreat,
   option,
   packObligation,
   placeThreat,
@@ -346,9 +347,9 @@ export default definePackAbilities({
   // 15 The Goblin's Ultimatum (side scheme, nemesis)
   // =========================================================================
 
-  // "Threat cannot be removed from this scheme except by its own ability." The Hood's schemes' `threatCannotBeRemoved`
-  // with `exceptFromSource`: data-driven by the importer's constant id, kept as an engine rule here.
-  "x.spider-punisher-tw.15.the-goblins-ultimatum-constant": coveredByEngineRule(),
+  // "Threat cannot be removed from this scheme except by its own ability." Focus the Senses' (60012)
+  // `onlySourceRemovesThreat`: every removal is stopped but one whose removing card is this scheme (its Hero Action).
+  "x.spider-punisher-tw.15.the-goblins-ultimatum-constant": constant(onlySourceRemovesThreat({ self: true }, { self: true })),
   // "Hero Action: Exhaust your hero, discard 1 upgrade you control, or take 2 damage → remove 1 threat from this scheme."
   "x.spider-punisher-tw.15.the-goblins-ultimatum-action": heroAction(
     { cost: eitherCost(exhaustYourHero, discardCardsCost(query("upgrade", { controller: "you" })), takeDamageCost(2)) },
@@ -369,7 +370,8 @@ export default definePackAbilities({
   // "When Revealed: Search the encounter discard pile for a non-Elite minion and put it into play engaged with you. Give
   // that minion a tough status card. If you cannot, this card gains surge." Ransacked Armory's search (24037).
   "x.spider-punisher-tw.16.when-revealed": whenRevealed(
-    chooseCards("minion", encounterCards(["discard"], NON_ELITE_MINION), { min: 0, max: 1 }),
+    // Mandatory when one is there (`min: 1`); with none in the discard pile the choice is empty and it gains surge.
+    chooseCards("minion", encounterCards(["discard"], NON_ELITE_MINION), { min: 1, max: 1 }),
     ifThen(
       valueAtLeast(refCount(chosen("minion")), 1),
       [putIntoPlay(chosen("minion"), you), giveTough(chosen("minion"))],
