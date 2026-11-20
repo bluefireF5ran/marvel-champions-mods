@@ -1,0 +1,36 @@
+{
+  "id": "x.spider-punisher-tw.14",
+  "name": "Green Goblin",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "14",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "minion",
+  "atk": 2,
+  "sch": 2,
+  "hp": 6,
+  "encounterSetIds": [
+    "spider-punisher-tw-nemesis"
+  ],
+  "boostIcons": 3,
+  "traits": [
+    "ELITE",
+    "GOBLIN"
+  ],
+  "keywords": [
+    {
+      "name": "toughness"
+    }
+  ],
+  "text": {
+    "printed": "Toughness.\nForced Interrupt: When Green Goblin attacks you, he attacks an ally you control instead (if able).\n(Spider-Punisher's nemesis minion.)",
+    "current": "Toughness.\nForced Interrupt: When Green Goblin attacks you, he attacks an ally you control instead (if able).\n(Spider-Punisher's nemesis minion.)"
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.14.green-goblin-forced-interrupt"
+    }
+  ],
+  "nemesisMinion": true
+}

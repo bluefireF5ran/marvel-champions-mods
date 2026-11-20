@@ -1,0 +1,46 @@
+{
+  "id": "spider-punisher-tw",
+  "version": "0.1.0",
+  "kind": "hero",
+  "name": "Spider-Punisher",
+  "authors": [
+    "T-Wrecks"
+  ],
+  "description": "Peter Parker traded webs for bullets.\nOn Earth-71928, Peter Parker picked up the Punisher's war. His Web-Shooters fire Armor-Piercing, EMP, Explosive and Incendiary rounds, and every upgrade he readies at the end of the turn becomes another shot. Exhaust upgrades to take to the air, reload mid-swing and turn your board into an arsenal, while the Green Goblin and a Revealed Identity close in. Includes a Leadership starter deck. 22 cards. English and Spanish. Pairs with Sinister Motives.",
+  "tags": [
+    "Web-Warrior",
+    "Weapons",
+    "Leadership"
+  ],
+  "wave": "cycle5",
+  "unlock": "open",
+  "cover": "cover.webp",
+  "license": "Fan-made, non-commercial; see CREDITS.md",
+  "requires": {
+    "app": ">=0.1.0",
+    "packs": []
+  },
+  "languages": {
+    "base": "en",
+    "available": [
+      "en",
+      "es"
+    ],
+    "text": "en"
+  },
+  "permission": {
+    "status": "granted",
+    "by": "T-Wrecks",
+    "date": "2026-11-17",
+    "evidence": "BluefireF5ran's curated repository records the grant (mod.json `permission`): https://github.com/bluefireF5ran/mc-digital-custom-packs/blob/c131319ef5bafe0687c64a1b0bb901e394975122/spider_punisher_tw/mod.json. T-Wrecks asked by Discord direct message (2026-11-17) for Spider-Punisher and Sentinel to be included; the message itself is not kept in this repository. Pack request: https://github.com/quincarter/marvel-champions-mods/issues/39",
+    "scope": "inclusion and translation",
+    "languages": [
+      "en",
+      "es"
+    ]
+  },
+  "templateCredit": "Hitch",
+  "translators": {
+    "es": "Francisco Merchán"
+  }
+}

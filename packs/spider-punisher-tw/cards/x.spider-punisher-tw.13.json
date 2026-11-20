@@ -1,0 +1,23 @@
+{
+  "id": "x.spider-punisher-tw.13",
+  "name": "Punisher No More",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "13",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "obligation",
+  "encounterSetIds": [],
+  "boostIcons": 2,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "Give to the Peter Parker player.\nYou may flip to alter-ego form. Choose:\n• Discard 2 Web-Shooter upgrades you control. Remove Punisher No More from the game.\n• Exhaust Peter Parker → discard this card.",
+    "current": "Give to the Peter Parker player.\nYou may flip to alter-ego form. Choose:\n• Discard 2 Web-Shooter upgrades you control. Remove Punisher No More from the game.\n• Exhaust Peter Parker → discard this card."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.13.obligation"
+    }
+  ]
+}

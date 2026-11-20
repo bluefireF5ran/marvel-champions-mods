@@ -1,0 +1,29 @@
+{
+  "id": "x.spider-punisher-tw.07",
+  "name": "Concrete Perch",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "7",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "support",
+  "cost": 1,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "LOCATION"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action: Exhaust Concrete Perch and X Weapon or Tech upgrades you control (to a maximum of 4 upgrades) → look at the top X cards of the encounter deck and put them back in any order.",
+    "current": "Hero Action: Exhaust Concrete Perch and X Weapon or Tech upgrades you control (to a maximum of 4 upgrades) → look at the top X cards of the encounter deck and put them back in any order."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.07.concrete-perch-action"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "x.spider-punisher-tw.12",
+  "name": "Swing and Reload",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "12",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 1,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "SKILL"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action: If your identity has the Aerial trait, exhaust this card → ready another upgrade you control.\nHero Interrupt: When you would take any amount of damage, discard this card → prevent that damage.",
+    "current": "Hero Action: If your identity has the Aerial trait, exhaust this card → ready another upgrade you control.\nHero Interrupt: When you would take any amount of damage, discard this card → prevent that damage."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.12.swing-and-reload-action"
+    },
+    {
+      "id": "x.spider-punisher-tw.12.swing-and-reload-interrupt"
+    }
+  ]
+}

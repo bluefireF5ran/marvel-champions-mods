@@ -1,0 +1,31 @@
+{
+  "id": "x.spider-punisher-tw.11",
+  "name": "Incendiary Rounds",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "11",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "wild": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "TECH",
+    "WEAPON",
+    "WEB-SHOOTER"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Hero Action (attack): Spend 1 resource of any type and exhaust this card → deal 3 damage to an enemy. Reduce this damage by 1 for each other enemy in play, to a maximum of 2. Then, deal 1 damage to that many other enemies.",
+    "current": "Hero Action (attack): Spend 1 resource of any type and exhaust this card → deal 3 damage to an enemy. Reduce this damage by 1 for each other enemy in play, to a maximum of 2. Then, deal 1 damage to that many other enemies."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.11.incendiary-rounds-action"
+    }
+  ]
+}

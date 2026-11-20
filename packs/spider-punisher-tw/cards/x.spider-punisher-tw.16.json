@@ -1,0 +1,29 @@
+{
+  "id": "x.spider-punisher-tw.16",
+  "name": "Reorganized Crime",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "16",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "treachery",
+  "encounterSetIds": [
+    "spider-punisher-tw-nemesis"
+  ],
+  "boostIcons": 1,
+  "starIcon": true,
+  "traits": [],
+  "keywords": [],
+  "text": {
+    "printed": "When Revealed: Search the encounter discard pile for a non-Elite minion and put it into play engaged with you. Give that minion a tough status card. If you cannot, this card gains surge. [star] Boost: Reveal this card.",
+    "current": "When Revealed: Search the encounter discard pile for a non-Elite minion and put it into play engaged with you. Give that minion a tough status card. If you cannot, this card gains surge. [star] Boost: Reveal this card."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.16.when-revealed"
+    },
+    {
+      "id": "x.spider-punisher-tw.16.boost"
+    }
+  ]
+}

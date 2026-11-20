@@ -1,0 +1,29 @@
+{
+  "id": "x.spider-punisher-tw.03",
+  "name": "Point Blank",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "3",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 3,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "ATTACK"
+  ],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "Hero Action (attack): Deal 3 damage to an enemy. You may exhaust up to 2 Weapon upgrades you control. For each upgrade exhausted this way, deal 3 damage to that enemy.",
+    "current": "Hero Action (attack): Deal 3 damage to an enemy. You may exhaust up to 2 Weapon upgrades you control. For each upgrade exhausted this way, deal 3 damage to that enemy."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.03.point-blank-action"
+    }
+  ]
+}

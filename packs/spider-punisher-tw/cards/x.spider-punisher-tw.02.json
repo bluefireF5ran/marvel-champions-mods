@@ -1,0 +1,30 @@
+{
+  "id": "x.spider-punisher-tw.02",
+  "name": "Enhanced Combat Sense",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "2",
+  "quantityInSet": 2,
+  "unique": false,
+  "type": "event",
+  "cost": 3,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [],
+  "keywords": [],
+  "deckLimit": 2,
+  "text": {
+    "printed": "[star] You can exhaust any number of Weapon or Tech upgrades you control to generate that many [wild] resources while paying for this card.\nHero Interrupt: When an encounter card is revealed from the encounter deck, cancel all of its effects and discard it. For each upgrade you exhausted to pay for this card, deal 1 damage to an enemy or remove 1 threat from a scheme.",
+    "current": "[star] You can exhaust any number of Weapon or Tech upgrades you control to generate that many [wild] resources while paying for this card.\nHero Interrupt: When an encounter card is revealed from the encounter deck, cancel all of its effects and discard it. For each upgrade you exhausted to pay for this card, deal 1 damage to an enemy or remove 1 threat from a scheme."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.02.enhanced-combat-sense-constant"
+    },
+    {
+      "id": "x.spider-punisher-tw.02.enhanced-combat-sense-interrupt"
+    }
+  ]
+}

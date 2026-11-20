@@ -1,0 +1,30 @@
+{
+  "id": "x.spider-punisher-tw.06",
+  "name": "With Great Firepower",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "6",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Resource: Exhaust this card → generate a [wild] resource for an upgrade ability.\nAlter-Ego Action: Exhaust this card → play a Weapon or Tech upgrade from your hand, reducing its cost by 2.",
+    "current": "Hero Resource: Exhaust this card → generate a [wild] resource for an upgrade ability.\nAlter-Ego Action: Exhaust this card → play a Weapon or Tech upgrade from your hand, reducing its cost by 2."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.06.with-great-firepower-resource"
+    },
+    {
+      "id": "x.spider-punisher-tw.06.with-great-firepower-action"
+    }
+  ]
+}

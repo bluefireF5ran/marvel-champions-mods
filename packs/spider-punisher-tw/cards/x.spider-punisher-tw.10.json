@@ -1,0 +1,32 @@
+{
+  "id": "x.spider-punisher-tw.10",
+  "name": "High Explosive Rounds",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "10",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "physical": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "TECH",
+    "WEAPON",
+    "WEB-SHOOTER"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action (attack): Spend a [physical] resource and exhaust this card → deal 3 damage to an enemy. This attack gains overkill. If this attack defeats an enemy, draw 1 card.",
+    "current": "Hero Action (attack): Spend a [physical] resource and exhaust this card → deal 3 damage to an enemy. This attack gains overkill. If this attack defeats an enemy, draw 1 card."
+  },
+  "flavor": "\"The hunt ends loud.\" —Spider-Punisher",
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.10.high-explosive-rounds-action"
+    }
+  ]
+}

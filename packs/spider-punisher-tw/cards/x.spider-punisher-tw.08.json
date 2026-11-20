@@ -1,0 +1,31 @@
+{
+  "id": "x.spider-punisher-tw.08",
+  "name": "Armor-Piercing Rounds",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "8",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 2,
+  "resourceIcons": {
+    "mental": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "TECH",
+    "WEAPON",
+    "WEB-SHOOTER"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "Hero Action (attack): Spend a [mental] resource and exhaust this card → deal 2 damage to an enemy. If that enemy has a tough status card, deal 5 damage instead. This attack gains piercing.",
+    "current": "Hero Action (attack): Spend a [mental] resource and exhaust this card → deal 2 damage to an enemy. If that enemy has a tough status card, deal 5 damage instead. This attack gains piercing."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.08.armor-piercing-rounds-action"
+    }
+  ]
+}

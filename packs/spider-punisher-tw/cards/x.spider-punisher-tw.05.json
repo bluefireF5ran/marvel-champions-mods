@@ -1,0 +1,32 @@
+{
+  "id": "x.spider-punisher-tw.05",
+  "name": "Neighborhood Watch",
+  "setCode": "spider-punisher-tw",
+  "cycleId": "spider-punisher-tw",
+  "collectorNumber": "5",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "upgrade",
+  "cost": 1,
+  "resourceIcons": {
+    "energy": 1
+  },
+  "aspect": "hero:x.spider-punisher-tw.01a",
+  "traits": [
+    "CONDITION"
+  ],
+  "keywords": [],
+  "deckLimit": 1,
+  "text": {
+    "printed": "While 2 or more upgrades you control are exhausted, your identity gains the Aerial trait.\nHero Action: If your identity has the Aerial trait, exhaust this card → ready Spider-Punisher.",
+    "current": "While 2 or more upgrades you control are exhausted, your identity gains the Aerial trait.\nHero Action: If your identity has the Aerial trait, exhaust this card → ready Spider-Punisher."
+  },
+  "abilities": [
+    {
+      "id": "x.spider-punisher-tw.05.neighborhood-watch-constant"
+    },
+    {
+      "id": "x.spider-punisher-tw.05.neighborhood-watch-action"
+    }
+  ]
+}
