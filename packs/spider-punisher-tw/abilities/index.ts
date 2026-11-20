@@ -177,17 +177,18 @@ export default definePackAbilities({
   // =========================================================================
 
   // "Hero Action (attack): Deal 3 damage to an enemy. You may exhaust up to 2 Weapon upgrades you control. For each
-  // upgrade exhausted this way, deal 3 damage to that enemy." One attack: the optional exhausts are picked first and
-  // the attack deals 3 plus 3 per upgrade exhausted.
+  // upgrade exhausted this way, deal 3 damage to that enemy." In the printed order, each its own instance of damage
+  // (PR #44 review): the attack's 3 first (a tough status card stops only that one), then 3 for each Weapon exhausted.
   "x.spider-punisher-tw.03.point-blank-action": heroAction(
     { label: "attack" },
     anAttackableEnemy("enemy"),
-    chooseCards("weapons", zone("play", you, { filter: query("upgrade", { trait: WEAPON, exhausted: false }) }), {
-      min: 0,
-      max: 2,
+    attack(3, chosen("enemy")),
+    chooseTarget("weapons", query("upgrade", { trait: WEAPON, controller: "you", exhausted: false }), {
+      count: 2,
+      upTo: true,
     }),
     exhaust(chosen("weapons")),
-    attack(sum(3, product(3, refCount(chosen("weapons")))), chosen("enemy")),
+    repeatTimes(refCount(chosen("weapons")), dealDamage(3, chosen("enemy"))),
   ),
 
   // =========================================================================
@@ -318,9 +319,8 @@ export default definePackAbilities({
   "x.spider-punisher-tw.11.incendiary-rounds-action": heroAction(
     { label: "attack", cost: [{ resources: 1 }, exhaustThis] },
     anAttackableEnemy("enemy"),
-    chooseCards("others", zone("play", undefined, { filter: query("enemy", { excluding: chosen("enemy") }) }), {
-      min: min(2, countOf(query("enemy", { excluding: chosen("enemy") }))),
-      max: 2,
+    chooseTarget("others", query("enemy", { excluding: chosen("enemy") }), {
+      count: min(2, countOf(query("enemy", { excluding: chosen("enemy") }))),
     }),
     attack(sum(3, product(-1, refCount(chosen("others")))), chosen("enemy")),
     dealDamage(1, chosen("others")),
@@ -354,7 +354,7 @@ export default definePackAbilities({
   "x.spider-punisher-tw.13.obligation": packObligation("Peter Parker", {
     label: "Discard 2 Web-Shooter upgrades you control. Remove Punisher No More from the game",
     effects: [
-      chooseCards("shooters", zone("play", you, { filter: YOUR_WEB_SHOOTERS }), { min: 2, max: 2 }),
+      chooseTarget("shooters", YOUR_WEB_SHOOTERS, { count: 2 }),
       discard(chosen("shooters")),
       moveCards(cards(self), "removedFromGame"),
     ],
