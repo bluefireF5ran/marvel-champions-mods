@@ -5,6 +5,10 @@ One (1A-3B), the three Fisk environments (Collateral Chaos, Lawless Justice, Her
 Anti-Hulk Cannon, Rose's Greenhouse, Silent Pruning x2 and Nowhere to Hide x2. Store shelf: Fear No Evil
 (`wave: cycle11`). See `CREDITS.md` and `PERMISSION.md`.
 
+**Modular sets:** Streets of Mayhem, City in Chaos and Hell's Kitchen (the authors' choice for the store, 2026-11-20).
+Its paper default is Fear No Evil's Tracksuit Mafia, Cops and Disasters (mini-boss Tombstone or The Owl), which packs
+cannot recommend until wave 11 opens to them.
+
 **Draft** (the `DRAFT` file): see `DRAFT` for what the game still needs.
 
 ## How it was made
