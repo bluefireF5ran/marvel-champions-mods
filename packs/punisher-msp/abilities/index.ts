@@ -16,8 +16,6 @@
  * `"allPurpose"` (a Uses weapon's become ammo), removed as `"any"`.
  *
  * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
- * - 03 Dismantled Operation: a side scheme losing its [acceleration], [amplify], [crisis] and [hazard] icons until the
- *   end of the round, and "if any icons were lost this way" (`losesIcon` exists only as a constant).
  * - 12 Warzone's Hero Action: "play an Attack event from your discard pile, paying its costs". `playFromHand.from` has
  *   no discard origin (hand, set aside, deck, tucked, separate deck).
  * - 15 War Machine Armor's Response: "play an event with an 'Action' ability from your hand (paying its costs), or
@@ -115,6 +113,10 @@ import {
   eachPlayer,
   chosenPlayer,
   ownerOf,
+  setVar,
+  encounterIconsInPlay,
+  sum,
+  product,
 } from "@mc/mod-sdk";
 
 type Trait = NonNullable<Parameters<typeof gainsTrait>[0]>;
@@ -129,6 +131,7 @@ const THWART = trait("Thwart");
 const ALL_PURPOSE = "allPurpose";
 const ANY_COUNTER = "any";
 const YOUR_UPGRADES = query("upgrade", { controller: "you" });
+const DISMANTLED_ICONS = ["acceleration", "amplify", "crisis", "hazard"] as const;
 const YOUR_WEAPONS = query("upgrade", { trait: WEAPON, controller: "you" });
 const LOADOUT_UPGRADE = query("upgrade", { trait: LOADOUT });
 const STASH_HOUSE = query("support", { name: "Stash House" });
@@ -194,9 +197,25 @@ export default definePackAbilities({
   // 03 Dismantled Operation (event)
   // =========================================================================
 
-  // Not scripted (see the header): "That scheme loses each [acceleration], [amplify], [crisis], and [hazard] icon
-  // until the end of the round" is a timed icon loss (`losesIcon` is a constant only), and "if any icons were lost this
-  // way" reads it.
+  // "Hero Action (thwart): Remove 3 threat from a scheme. Choose a side scheme. That scheme loses each [acceleration],
+  // [amplify], [crisis], and [hazard] icon until the end of the round. If any icons were lost this way, place 1
+  // all-purpose counter on an upgrade you control." Shadowcat's timed icon loss (`iceman` 46019): one `gainsIcon` loss
+  // rule per icon until the round's end on the chosen scheme. "If any icons were lost": the four icons in play counted
+  // before and after the loss (`encounterIconsInPlay`).
+  "x.punisher-msp.03.dismantled-operation-action": heroAction(
+    { label: "thwart" },
+    aScheme("scheme"),
+    thwart(3, chosen("scheme")),
+    chooseTarget("side", query("sideScheme")),
+    setVar("iconsBefore", encounterIconsInPlay(DISMANTLED_ICONS)),
+    ...DISMANTLED_ICONS.map((icon) =>
+      applyRuleUntil({ kind: "gainsIcon", icon, target: { inSlot: "side" }, loses: true }, "endOfRound"),
+    ),
+    ifThen(valueAtLeast(sum(varOf("iconsBefore"), product(-1, encounterIconsInPlay(DISMANTLED_ICONS))), 1), [
+      chooseTarget("upgrade", YOUR_UPGRADES),
+      addCounters(ALL_PURPOSE, 1, chosen("upgrade")),
+    ]),
+  ),
 
   // =========================================================================
   // 04 Many Men (event)
