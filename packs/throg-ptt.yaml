@@ -1,0 +1,10 @@
+id: throg-ptt
+path: packs/throg-ptt
+creator: "Patatasaurio & Caurel"
+editors: [bluefireF5ran]
+permission:
+  by: "Patatasaurio & Caurel"
+  evidence: "packs/throg-ptt/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-13"
+tags: [hero]
+summary: "Small frog, mighty hammer: the Frog of Thunder."
