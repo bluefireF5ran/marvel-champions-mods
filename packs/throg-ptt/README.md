@@ -8,10 +8,10 @@ nemesis set (Thanos, An Unexpected Guest, Power Stone, Inevitable Power x2). See
 `es`); the English text and pictures are Francisco Merchán's translation, and the card text in the data is English
 (`languages.text` is `en`, the importer's `textLanguage`).
 
-**This pack is a DRAFT** (the `DRAFT` file): the generic community-packs test and the publish workflow skip it until the
-file is removed. The curated source marks it `waiting_author`: the curators' rules fixes (below) were sent to the
-authors on 2026-10-30 and 2026-11-07 and are not confirmed. The owner decides when to remove the file. Its own tests are
-`packages/mod-sdk/src/throg-ptt.test.ts`.
+**Ready (0.2.0, 2026-11-20).** The `DRAFT` file is gone: Patatasaurio is fine with the curators' rules fixes (below)
+as long as the credits stay (2026-11-19). The store shelf is The Mad Titan's Shadow (`wave: cycle4`: a Guardian beside
+Nebula, Asgard beside Valkyrie, Thanos and the Power Stone in his nemesis set), and the cover is his full-figure hero art
+(curated source commit `c131319`). Its own tests are `packages/mod-sdk/src/throg-ptt.test.ts`.
 
 ## Source layout
 
