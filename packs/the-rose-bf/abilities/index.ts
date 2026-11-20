@@ -263,10 +263,16 @@ export default definePackAbilities({
   // "Permanent. Victory 1." are data. "When Revealed: Put the set-aside mini-boss minion into play engaged with you and
   // attach this card to it. Shuffle the rest of the mini-boss modular set into the encounter deck." The minion of the
   // set-aside modular set (`setAsideModularSetCount: 1`); the rest goes in with The Hood's shuffle-in.
+  // The only set-aside minion is the set-aside modular set's (the scenario sets no other minion aside). With a set
+  // that has none (PR #47 review), nothing can be put into play: Twisted Allegiance has no host and is discarded
+  // (RRG 1.8 "Attachments", p. 7), and the set is still shuffled in.
   "x.the-rose-bf.10.when-revealed": whenRevealed(
     chooseCards("boss", encounterSetAside(query("minion")), { min: 1, max: 1, chooser: firstPlayer }),
-    putIntoPlay(chosen("boss"), you),
-    attachCard(self, chosen("boss")),
+    ifThen(
+      valueAtLeast(refCount(chosen("boss")), 1),
+      [putIntoPlay(chosen("boss"), you), attachCard(self, chosen("boss"))],
+      [discard(self)],
+    ),
     shuffleInSetAsideModularSet(),
   ),
   // "Victory 1." on an attachment is "Forced Interrupt: When the attached card is defeated, add this card to the victory
