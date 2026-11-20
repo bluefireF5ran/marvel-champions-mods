@@ -230,8 +230,7 @@ export default definePackAbilities({
   // paid (a ready Intact Component, or a ready Sentinel), and an option is offered only while its own cost can be.
   "x.sentinel-tw.11.propulsion-array-action": heroAction(
     { while: anyOf(exists(YOUR_READY_INTACT_COMPONENTS), exists(YOUR_READY_IDENTITY)) },
-    moveCards(cards(self), "deck"),
-    shuffleDeck(),
+    moveCards(cards(self), "deckShuffle"),
     chooseOne(
       option(
         "Exhaust 1 Intact Component to ready Sentinel",
