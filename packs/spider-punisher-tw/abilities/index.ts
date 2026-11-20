@@ -256,11 +256,10 @@ export default definePackAbilities({
     chooseOne(
       option("Stun a minion", chooseTarget("minion", query("minion")), stun(chosen("minion"))),
       option("Confuse a minion", chooseTarget("minion", query("minion")), confuse(chosen("minion"))),
-      option("Shuffle this card into your deck to stun the villain", moveCards(cards(self), "deck"), shuffleDeck(), stun(theVillain)),
+      option("Shuffle this card into your deck to stun the villain", moveCards(cards(self), "deckShuffle"), stun(theVillain)),
       option(
         "Shuffle this card into your deck to confuse the villain",
-        moveCards(cards(self), "deck"),
-        shuffleDeck(),
+        moveCards(cards(self), "deckShuffle"),
         confuse(theVillain),
       ),
     ),
