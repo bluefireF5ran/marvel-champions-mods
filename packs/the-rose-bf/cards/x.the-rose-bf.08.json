@@ -1,0 +1,31 @@
+{
+  "id": "x.the-rose-bf.08",
+  "name": "Lawless Justice",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "8",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "environment",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 0,
+  "traits": [
+    "FISK"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "text": {
+    "printed": "Permanent.\nForced Response: After a Fisk counter is placed here, if there are 4 or more Fisk counters here, remove each Fisk counter from here. Reveal the topmost minion of the encounter deck (shuffle), or the topmost minion of the encounter discard pile if there is none.",
+    "current": "Permanent.\nForced Response: After a Fisk counter is placed here, if there are 4 or more Fisk counters here, remove each Fisk counter from here. Reveal the topmost minion of the encounter deck (shuffle), or the topmost minion of the encounter discard pile if there is none."
+  },
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.08.lawless-justice-forced-response"
+    }
+  ]
+}

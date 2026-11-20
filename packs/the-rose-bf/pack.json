@@ -1,0 +1,46 @@
+{
+  "id": "the-rose-bf",
+  "version": "0.1.0",
+  "kind": "scenario",
+  "name": "The Rose",
+  "authors": [
+    "BigDarsh & Bluefire"
+  ],
+  "description": "Kingpin outlawed heroes. The Rose cashes in.\nThe heroes are outlaws now. The Rose works in the shadows of Fisk's city: every Fisk counter on Collateral Chaos, Lawless Justice and Hero Resistance brings his trap closer, and when Mindstorm Uprising hits, the heroes' own allies turn on them. Face an Anti-Hulk Cannon, a mini-boss of your choice twisted to his side and a scheme you can over-defeat. A villain scenario for Standard and Expert, 15 cards. English and Spanish. Pairs with Fear No Evil.",
+  "tags": [
+    "Street level",
+    "Fisk",
+    "Mini-boss"
+  ],
+  "wave": "cycle11",
+  "unlock": "open",
+  "cover": "cover.webp",
+  "license": "Fan-made, non-commercial; see CREDITS.md",
+  "requires": {
+    "app": ">=0.1.0",
+    "packs": []
+  },
+  "languages": {
+    "base": "en",
+    "available": [
+      "en",
+      "es"
+    ],
+    "text": "en"
+  },
+  "permission": {
+    "status": "granted",
+    "by": "BigDarsh & Bluefire",
+    "date": "2026-11-20",
+    "evidence": "The authors' own pack, submitted by one of them (BluefireF5ran); curated source: https://github.com/bluefireF5ran/mc-digital-custom-packs/blob/c131319ef5bafe0687c64a1b0bb901e394975122/the_rose_bf/mod.json",
+    "scope": "inclusion and translation",
+    "languages": [
+      "en",
+      "es"
+    ]
+  },
+  "templateCredit": "Hitch",
+  "translators": {
+    "es": "Francisco Merchán"
+  }
+}

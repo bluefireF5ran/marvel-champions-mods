@@ -1,0 +1,138 @@
+{
+  "id": "x.the-rose-bf.04a",
+  "name": "Public Enemy Number One",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "4A/4B/5A/5B/6A/6B",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "main_scheme",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "stages": [
+    {
+      "stageNumber": 1,
+      "startingThreat": {
+        "base": 0,
+        "perPlayer": 0
+      },
+      "targetThreat": {
+        "base": 0,
+        "perPlayer": 6
+      },
+      "acceleration": {
+        "base": 0,
+        "perPlayer": 1
+      },
+      "icons": [],
+      "text": {
+        "printed": "When Revealed: Search the encounter deck for an environment and put it into play. (Shuffle.)\n[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment.",
+        "current": "When Revealed: Search the encounter deck for an environment and put it into play. (Shuffle.)\n[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment."
+      },
+      "traits": [],
+      "keywords": [],
+      "abilities": [
+        {
+          "id": "x.the-rose-bf.04b.when-revealed"
+        },
+        {
+          "id": "x.the-rose-bf.04b.public-enemy-number-one-forced-response"
+        }
+      ],
+      "aSide": {
+        "text": {
+          "printed": "Setup: Put Collateral Chaos, Lawless Justice and Hero Resistance into play. Set aside the mini-boss modular set.",
+          "current": "Setup: Put Collateral Chaos, Lawless Justice and Hero Resistance into play. Set aside the mini-boss modular set."
+        },
+        "abilities": [
+          {
+            "id": "x.the-rose-bf.04a.setup"
+          }
+        ]
+      }
+    },
+    {
+      "stageNumber": 2,
+      "name": "Shadows of Influence",
+      "startingThreat": {
+        "base": 0,
+        "perPlayer": 0
+      },
+      "targetThreat": {
+        "base": 0,
+        "perPlayer": 8
+      },
+      "acceleration": {
+        "base": 0,
+        "perPlayer": 1
+      },
+      "icons": [],
+      "text": {
+        "printed": "[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment. The first player places 1 additional Fisk counter on a Fisk environment.\nIf this stage is completed, the players lose the game.",
+        "current": "[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment. The first player places 1 additional Fisk counter on a Fisk environment.\nIf this stage is completed, the players lose the game."
+      },
+      "traits": [],
+      "keywords": [],
+      "abilities": [
+        {
+          "id": "x.the-rose-bf.04b.shadows-of-influence-forced-response"
+        }
+      ],
+      "completionLoses": true,
+      "aSide": {
+        "text": {
+          "printed": "When Revealed: Choose:\n• Place 1 Fisk counter on each Fisk environment.\n• Search the encounter deck and discard pile for Anti-Hulk Cannon and reveal it. (Shuffle.)",
+          "current": "When Revealed: Choose:\n• Place 1 Fisk counter on each Fisk environment.\n• Search the encounter deck and discard pile for Anti-Hulk Cannon and reveal it. (Shuffle.)"
+        },
+        "abilities": [
+          {
+            "id": "x.the-rose-bf.04a.when-revealed-2a"
+          }
+        ]
+      }
+    },
+    {
+      "stageNumber": 3,
+      "name": "Mindstorm Uprising",
+      "startingThreat": {
+        "base": 0,
+        "perPlayer": 3
+      },
+      "targetThreat": {
+        "base": 0,
+        "perPlayer": 8
+      },
+      "acceleration": {
+        "base": 0,
+        "perPlayer": 1
+      },
+      "icons": [],
+      "text": {
+        "printed": "When Revealed: Each Influenced minion activates against the player it is engaged with.\n[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment.",
+        "current": "When Revealed: Each Influenced minion activates against the player it is engaged with.\n[star] Forced Response: After resolving step 1 of the villain phase, place 1 Fisk counter on each Fisk environment."
+      },
+      "traits": [],
+      "keywords": [],
+      "abilities": [
+        {
+          "id": "x.the-rose-bf.04b.when-revealed-3b"
+        },
+        {
+          "id": "x.the-rose-bf.04b.mindstorm-uprising-forced-response"
+        }
+      ],
+      "aSide": {
+        "text": {
+          "printed": "When Revealed: Flip the Hero Resistance environment and reveal Twisted Allegiance. Advance to stage 3B.",
+          "current": "When Revealed: Flip the Hero Resistance environment and reveal Twisted Allegiance. Advance to stage 3B."
+        },
+        "abilities": [
+          {
+            "id": "x.the-rose-bf.04a.when-revealed-3a"
+          }
+        ]
+      }
+    }
+  ]
+}

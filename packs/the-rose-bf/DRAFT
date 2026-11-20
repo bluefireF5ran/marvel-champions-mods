@@ -1,0 +1,12 @@
+This pack is a draft: it is neither tested with the other community packs nor published until this file is removed.
+
+Why (see abilities/index.ts and the README):
+- The mini-boss: a pack scenario cannot use `setAsideModularSetCount` yet, so the modular set Twisted Allegiance takes
+  its minion from is not set aside at setup.
+- Its default modular sets are Fear No Evil's (Tracksuit Mafia, Cops, Disasters; mini-boss Tombstone or The Owl), which
+  are not in the SDK's playable pool yet. Until they are, `scenarios/the-rose-bf.json` recommends Streets of Mayhem, City
+  in Chaos and Hell's Kitchen (to be confirmed by the authors).
+- Three abilities: Hero Resistance and Rose's Greenhouse's "overdefeated side scheme" (more threat removed than it
+  had), and Rose's Greenhouse's "already has steady or stalwart" against its own grant.
+Every other ability is scripted; with those three stubbed, `mc-pack test` plays 16/16 games (standard and expert)
+without an engine error.

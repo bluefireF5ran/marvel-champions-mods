@@ -1,0 +1,31 @@
+{
+  "id": "x.the-rose-bf.07",
+  "name": "Collateral Chaos",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "7",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "environment",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 0,
+  "traits": [
+    "FISK"
+  ],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "text": {
+    "printed": "Permanent.\nForced Response: After a Fisk counter is placed here, if there are 6 or more Fisk counters here, remove each Fisk counter from here. Reveal the topmost side scheme of the encounter deck (shuffle), or the topmost side scheme of the encounter discard pile if there is none.",
+    "current": "Permanent.\nForced Response: After a Fisk counter is placed here, if there are 6 or more Fisk counters here, remove each Fisk counter from here. Reveal the topmost side scheme of the encounter deck (shuffle), or the topmost side scheme of the encounter discard pile if there is none."
+  },
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.07.collateral-chaos-forced-response"
+    }
+  ]
+}

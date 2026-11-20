@@ -1,0 +1,41 @@
+{
+  "id": "x.the-rose-bf.12",
+  "name": "Rose's Greenhouse",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "12",
+  "quantityInSet": 1,
+  "unique": false,
+  "type": "attachment",
+  "attachesTo": {
+    "kind": "villain"
+  },
+  "statModifiers": {
+    "sch": 1
+  },
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 0,
+  "starIcon": true,
+  "traits": [
+    "FISK",
+    "LOCATION"
+  ],
+  "keywords": [],
+  "text": {
+    "printed": "Attach to the villain. Attached villain gains steady. If it already has steady or stalwart, it gets +4[per_hero] hit points instead.\nHero Response: After you overdefeat a side scheme (remove more threat from it than it had), discard this card.\n[star] Boost: Reveal this card.",
+    "current": "Attach to the villain. Attached villain gains steady. If it already has steady or stalwart, it gets +4[per_hero] hit points instead.\nHero Response: After you overdefeat a side scheme (remove more threat from it than it had), discard this card.\n[star] Boost: Reveal this card."
+  },
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.12.roses-greenhouse-constant"
+    },
+    {
+      "id": "x.the-rose-bf.12.roses-greenhouse-response"
+    },
+    {
+      "id": "x.the-rose-bf.12.boost"
+    }
+  ]
+}

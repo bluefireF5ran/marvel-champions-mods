@@ -1,0 +1,36 @@
+{
+  "id": "x.the-rose-bf.10",
+  "name": "Twisted Allegiance",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "10",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "attachment",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 0,
+  "traits": [],
+  "keywords": [
+    {
+      "name": "permanent"
+    },
+    {
+      "name": "victory",
+      "value": 1
+    }
+  ],
+  "text": {
+    "printed": "Permanent. Victory 1.\nWhen Revealed: Put the set-aside mini-boss minion into play engaged with you and attach this card to it. Shuffle the rest of the mini-boss modular set into the encounter deck.\nAttached minion's printed hit points are 14. It gains villainous, guard, and the Influenced and Elite traits.",
+    "current": "Permanent. Victory 1.\nWhen Revealed: Put the set-aside mini-boss minion into play engaged with you and attach this card to it. Shuffle the rest of the mini-boss modular set into the encounter deck.\nAttached minion's printed hit points are 14. It gains villainous, guard, and the Influenced and Elite traits."
+  },
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.10.when-revealed"
+    },
+    {
+      "id": "x.the-rose-bf.10.twisted-allegiance-constant"
+    }
+  ]
+}

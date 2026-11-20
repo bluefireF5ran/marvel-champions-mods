@@ -1,0 +1,23 @@
+# The Rose (`the-rose-bf`)
+
+A fan-made villain scenario by BigDarsh and Bluefire (Hitch templates): The Rose I-III, main scheme Public Enemy Number
+One (1A-3B), the three Fisk environments (Collateral Chaos, Lawless Justice, Hero Resistance), Twisted Allegiance,
+Anti-Hulk Cannon, Rose's Greenhouse, Silent Pruning x2 and Nowhere to Hide x2. Store shelf: Fear No Evil
+(`wave: cycle11`). See `CREDITS.md` and `PERMISSION.md`.
+
+**Draft** (the `DRAFT` file): see `DRAFT` for what the game still needs.
+
+## How it was made
+
+`mc-pack import-marvelcdb the_rose_bf --out packs/the-rose-bf --id the-rose-bf` from the curated source
+(https://github.com/bluefireF5ran/mc-digital-custom-packs, commit `c131319`), with two changes for the import:
+
+- **Twisted Allegiance is its own card (10).** In print it is the back of Hero Resistance (an environment that flips
+  to an attachment); the importer takes no double-sided card whose faces have different types. Stage 3A removes Hero
+  Resistance from the game and reveals the set-aside Twisted Allegiance (`setAsideCardIds`), which plays the same. It has
+  no `attachesTo`: it attaches itself from its When Revealed (RRG 1.8 "Reveal", step 2; Old Grudge, `sm` 27172).
+- **Stage abilities and pictures follow the pack format:** villain stages II and III are abilities of card 01
+  (`-ii`, `-iii`), main scheme stages 2A-3B of 04a/04b; pictures `01`, `01b`, `01c` and `04a`-`04f` (§5.1).
+
+Then by hand: `abilities/index.ts` (each ability commented with the base card it copies), `scenarios/the-rose-bf.json`,
+the cover and `pack.json`'s store fields.

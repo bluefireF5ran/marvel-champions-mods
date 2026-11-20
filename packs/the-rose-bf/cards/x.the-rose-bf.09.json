@@ -1,0 +1,29 @@
+{
+  "id": "x.the-rose-bf.09",
+  "name": "Hero Resistance",
+  "setCode": "the-rose-bf",
+  "cycleId": "the-rose-bf",
+  "collectorNumber": "9",
+  "quantityInSet": 1,
+  "unique": true,
+  "type": "environment",
+  "encounterSetIds": [
+    "the-rose-bf-the-rose-bf"
+  ],
+  "boostIcons": 0,
+  "traits": [],
+  "keywords": [
+    {
+      "name": "permanent"
+    }
+  ],
+  "text": {
+    "printed": "Permanent.\nResponse: After excess damage is dealt to a minion, or after a side scheme is overdefeated (more threat was removed from it than it had), remove 1 Fisk counter from a Fisk environment. (Limit once per round.)",
+    "current": "Permanent.\nResponse: After excess damage is dealt to a minion, or after a side scheme is overdefeated (more threat was removed from it than it had), remove 1 Fisk counter from a Fisk environment. (Limit once per round.)"
+  },
+  "abilities": [
+    {
+      "id": "x.the-rose-bf.09.hero-resistance-response"
+    }
+  ]
+}
