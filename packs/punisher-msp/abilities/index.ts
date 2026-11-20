@@ -9,22 +9,21 @@
  *
  * The five Loadouts (12-16) ship in the hero set, so they are in the deck: Frank Castle's Setup takes them from the deck
  * and the opening hand, as Valkyrie's Setup takes Death-Glow (25001b), puts the chosen one into play and removes the
- * rest from the game. In paper they are set aside before shuffling; a way to keep such cards out of the deck is one of
- * this batch's engine requests.
+ * rest from the game. In paper they are set aside before shuffling; Permanent keeps them out of the deck count and the
+ * deck builder lists them in its Setup group (#890 item 16, #896).
  *
  * All-purpose counters (RRG 1.8 "All-Purpose Counter", p. 6) take the type of the card they are on: placed as
  * `"allPurpose"` (a Uses weapon's become ammo), removed as `"any"`.
  *
- * Not scripted yet (the pack's DRAFT file), each an engine request for this batch:
- * - 12 Warzone's Hero Action: "play an Attack event from your discard pile, paying its costs". `playFromHand.from` has
- *   no discard origin (hand, set aside, deck, tucked, separate deck).
- * - 15 War Machine Armor's Response: "play an event with an 'Action' ability from your hand (paying its costs), or
- *   resolve an 'Action' ability on a card you control". The play is Warpath's (42013); resolving another card's printed
- *   Action as an effect has no shape yet, and half the choice would change the card.
- * - 16 Avengers' Cache's resource: "generate a [wild] resource for a 'Pool card". `generatesFor` does not read an
- *   aspect (`ability:generatesFor.aspect` is not a supported feature).
+ * Since SDK 0.51.0 (#890 items 4-6): Warzone plays from the discard pile (`playFromDiscard`), War Machine Armor
+ * resolves an Action ability of a card you control (`useActionAbility`), and Avengers' Cache's resource reads the
+ * aspect of the card paid for (`generatesFor` with `aspect`).
  */
 import {
+  playFromDiscard,
+  playFromHandReducingCost,
+  resource,
+  useActionAbility,
   after,
   alterEgoAction,
   anAttackableEnemy,
@@ -72,7 +71,6 @@ import {
   on,
   oncePerRound,
   option,
-  playFromHandReducingCost,
   printedStatOf,
   putIntoPlay,
   query,
@@ -81,7 +79,6 @@ import {
   removeCountersFrom,
   removeThreat,
   removeUpToCounters,
-  resource,
   response,
   rule,
   self,
@@ -138,6 +135,7 @@ const LOADOUT_UPGRADE = query("upgrade", { trait: LOADOUT });
 const STASH_HOUSE = query("support", { name: "Stash House" });
 const YOUR_STASH_HOUSE = query("support", { name: "Stash House", controller: "you" });
 const YOUR_ALLIES = query("ally", { controller: "you" });
+const YOUR_WEAPONS_WITH_COUNTERS = query("upgrade", { trait: WEAPON, controller: "you", hasCounter: ANY_COUNTER });
 const YOUR_UPGRADES_WITH_COUNTERS = query("upgrade", { controller: "you", hasCounter: ANY_COUNTER });
 
 export default definePackAbilities({
@@ -330,7 +328,15 @@ export default definePackAbilities({
 
   // Warzone: "You can control 1 additional upgrade that has the restricted keyword." The restricted limit (`warm`).
   "x.punisher-msp.12.warzone-constant": constant(rule({ kind: "restrictedLimit", amount: 1 })),
-  // Warzone's Hero Action: not scripted (see the header).
+  // "Hero Action: Exhaust Warzone, remove 1 all-purpose counter from a Weapon you control → play an Attack event from
+  // your discard pile, paying its costs." The counter is removed as 'Til They Stay Down removes its own; the play is from
+  // the discard pile (#890 item 5).
+  "x.punisher-msp.12.warzone-action": heroAction(
+    { cost: exhaustThis, while: exists(YOUR_WEAPONS_WITH_COUNTERS) },
+    chooseTarget("weapon", YOUR_WEAPONS_WITH_COUNTERS),
+    removeCountersFrom(chosen("weapon"), ANY_COUNTER, 1),
+    playFromDiscard(query("event", { trait: ATTACK })),
+  ),
 
   // High Slayer: "The Punisher gains the Mystic trait. Increase your ally limit by 1." The Triskelion (01073).
   "x.punisher-msp.13.high-slayer-constant": constant(
@@ -363,16 +369,39 @@ export default definePackAbilities({
 
 
 
-  // War Machine Armor: "The Punisher gains the Aerial trait and gets +1 DEF. You get +2 hit points." Its Response is
-  // not scripted (see the header).
+  // War Machine Armor: "The Punisher gains the Aerial trait and gets +1 DEF. You get +2 hit points."
   "x.punisher-msp.15.war-machine-armor-constant": constant(
     gainsTrait(AERIAL, YOUR_IDENTITY),
     gets("def", 1, YOUR_IDENTITY),
     gets("hp", 2, YOUR_IDENTITY),
   ),
 
-  // Avengers' Cache: "Each identity gets +1 hand size." Its resource is not scripted (see the header).
+  // "Hero Response: After you defend against an attack, exhaust this card → play an event with an "Action" ability from
+  // your hand (paying its costs), or resolve an "Action" ability on a card you control." Warpath (42013) for the play;
+  // the other half uses one Action ability of a card you control, its cost paid (#890 item 6).
+  "x.punisher-msp.15.war-machine-armor-response": heroResponse(
+    after.defends(YOUR_IDENTITY),
+    { cost: exhaustThis },
+    chooseOne(
+      option(
+        "Play an event with an Action ability from your hand",
+        playFromHandReducingCost(0, you, {
+          filter: query("event", { abilityTiming: ["action", "heroAction"] }),
+          ignoreActionTiming: true,
+        }),
+      ),
+      option("Resolve an Action ability on a card you control", useActionAbility()),
+    ),
+  ),
+
+  // Avengers' Cache: "Each identity gets +1 hand size."
   "x.punisher-msp.16.avengers-cache-constant": constant(gets("handSize", 1, query("identity"))),
+  // "Resource: Exhaust Avengers' Cache → generate a [wild] resource for a 'Pool card." Only while paying for a card of
+  // the 'Pool aspect (`generatesFor` with `aspect`).
+  "x.punisher-msp.16.avengers-cache-resource": resource(
+    { wild: 1 },
+    { cost: exhaustThis, generatesFor: query([], { aspect: "pool" }) },
+  ),
 
   // =========================================================================
   // 17 Haunting Memories (obligation)

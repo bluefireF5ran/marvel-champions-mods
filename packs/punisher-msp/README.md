@@ -6,8 +6,8 @@ War Machine Armor, Avengers' Cache), the Haunting Memories obligation and a 5-ca
 Ugly to Die, Jigsaw Goon x2). Not PermaKarma's Punisher scenario (`punisher-pk`). See `CREDITS.md` and `PERMISSION.md`.
 Store shelf: Fear No Evil (`wave: cycle11`). Starter deck: Aggression, 45 cards (40 plus the five Loadouts).
 
-**Draft** (the `DRAFT` file) until the game adds four engine features; the list is in `DRAFT` and at the top of
-`abilities/index.ts`.
+Needs the game at 0.51.0 or later (`requires.app`): Warzone's play from the discard pile, War Machine Armor's
+"resolve an 'Action' ability", and Avengers' Cache's resource for a 'Pool card (see the top of `abilities/index.ts`).
 
 **Loadouts.** They ship in the hero set (the importer takes only hero cards of the identity's set), so they are deck
 cards: Frank Castle's Setup takes them from the deck and the opening hand, as Valkyrie's Setup takes Death-Glow, puts
