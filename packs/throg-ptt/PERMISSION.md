@@ -1,6 +1,7 @@
 # Permission
 
-Patatasaurio and Caurel, the authors of Throg, gave permission for this pack to be distributed through the mod store.
+Patatasaurio, Throg's principal author, gave permission for us to work with Throg and distribute it through the mod store.
+Caurel worked on the project with him and is credited as co-author (CREDITS.md); the grant is Patatasaurio's.
 
 - Status: granted
 - Scope: inclusion and translation (the Spanish edition and Francisco Merchán's English translation are covered)
@@ -12,9 +13,10 @@ Patatasaurio and Caurel, the authors of Throg, gave permission for this pack to 
   them on 2026-10-30 and 2026-11-07. Patatasaurio answered that he is fine with the curators' changes as long as the
   credits stay (reported by BluefireF5ran, 2026-11-19); the credits are unchanged. The `DRAFT` file is removed.
 
-**Evidence:** PatataSaurio's reply on Discord, 2026-10-28: "Claro, por mi no tengo problema ¡también son mis favoritos!"
-The screenshot shows only the reply, so it does not name the pack it answers. Caurel, the co-author, is not in the
-screenshots; that grant still rests on the homebrew channel and the owner's confirmation above. The screenshots, shared
-by the project owner on 2026-11-15, are not kept in the repository; the registry review can ask the owner for them.
+**Evidence:** Patatasaurio's reply on Discord, 2026-10-28, to our request to work with Throg: "Claro, por mi no tengo
+problema ¡también son mis favoritos!" ("Sure, no problem on my side, they're my favourites too!"). The screenshot shows
+only his reply; the request it answers was ours, about Throg (BluefireF5ran, 2026-11-20). The screenshots, shared by
+the project owner on 2026-11-15, are not kept in the repository; the registry review can ask the owner for them.
+Patatasaurio also accepted the curators' rules fixes, as long as the credits stay (2026-11-19, above).
 
 **Store approval:** granted (`pack.json` `permission`).
