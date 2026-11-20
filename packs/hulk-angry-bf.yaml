@@ -1,0 +1,10 @@
+id: hulk-angry-bf
+path: packs/hulk-angry-bf
+creator: "Abis Mal & Bluefire"
+editors: [bluefireF5ran]
+permission:
+  by: "Bluefire"
+  evidence: "packs/hulk-angry-bf/PERMISSION.md (and pack.json permission)"
+  date: "2026-11-18"
+tags: [house-rule]
+summary: "Hulk smashes, and his cards come back."

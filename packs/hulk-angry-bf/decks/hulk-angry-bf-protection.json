@@ -1,0 +1,141 @@
+{
+  "id": "hulk-angry-bf-protection",
+  "name": "Hulk's Lab Partners - Protection",
+  "packCode": "hulk-angry-bf",
+  "identityCardId": "10001a",
+  "aspects": [
+    "protection"
+  ],
+  "provenance": {
+    "verified": false,
+    "sources": [
+      "The curators' starter deck (hulk_angry_bf/decks/hulk-lab-partners.json in mc-digital-custom-packs, commit c131319): a Protection deck for Hulk with the house rule, 40 cards: Hulk's 15 hero cards, 8 Protection and 17 basics, plus \"Don't Make Me Angry!\", which starts in play from Setup (Permanent) and is not counted."
+    ]
+  },
+  "cards": [
+    {
+      "cardId": "10002",
+      "quantity": 2
+    },
+    {
+      "cardId": "10003",
+      "quantity": 2
+    },
+    {
+      "cardId": "10004",
+      "quantity": 2
+    },
+    {
+      "cardId": "10005",
+      "quantity": 2
+    },
+    {
+      "cardId": "10006",
+      "quantity": 2
+    },
+    {
+      "cardId": "10007",
+      "quantity": 2
+    },
+    {
+      "cardId": "10008",
+      "quantity": 1
+    },
+    {
+      "cardId": "10009",
+      "quantity": 1
+    },
+    {
+      "cardId": "10010",
+      "quantity": 1
+    },
+    {
+      "cardId": "52019",
+      "quantity": 3
+    },
+    {
+      "cardId": "52017",
+      "quantity": 1
+    },
+    {
+      "cardId": "14012",
+      "quantity": 3
+    },
+    {
+      "cardId": "31014",
+      "quantity": 1
+    },
+    {
+      "cardId": "29027",
+      "quantity": 1
+    },
+    {
+      "cardId": "08023",
+      "quantity": 1
+    },
+    {
+      "cardId": "01088",
+      "quantity": 1
+    },
+    {
+      "cardId": "01089",
+      "quantity": 1
+    },
+    {
+      "cardId": "01090",
+      "quantity": 1
+    },
+    {
+      "cardId": "13019",
+      "quantity": 1
+    },
+    {
+      "cardId": "32019",
+      "quantity": 1
+    },
+    {
+      "cardId": "45020",
+      "quantity": 1
+    },
+    {
+      "cardId": "46019",
+      "quantity": 1
+    },
+    {
+      "cardId": "46020",
+      "quantity": 1
+    },
+    {
+      "cardId": "48021",
+      "quantity": 1
+    },
+    {
+      "cardId": "49021",
+      "quantity": 1
+    },
+    {
+      "cardId": "50054",
+      "quantity": 1
+    },
+    {
+      "cardId": "01084",
+      "quantity": 1
+    },
+    {
+      "cardId": "05018",
+      "quantity": 1
+    },
+    {
+      "cardId": "40027",
+      "quantity": 1
+    },
+    {
+      "cardId": "40059",
+      "quantity": 1
+    },
+    {
+      "cardId": "x.hulk-angry-bf.01",
+      "quantity": 1
+    }
+  ]
+}
