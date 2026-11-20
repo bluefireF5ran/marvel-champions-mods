@@ -1,10 +1,10 @@
 {
   "id": "night-thrasher-dh",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "kind": "hero",
   "name": "Night Thrasher",
   "authors": ["DesignHacker"],
-  "description": "Fan-made hero pack by DesignHacker: Night Thrasher.",
+  "description": "Skate tricks, a battle board and a war on crime.\nDwayne Taylor fights on a battle board: a double-sided upgrade that turns his skate tricks into attacks, movement and defense. Chain tricks, use the Tech Deck to borrow Skill cards from other aspects, and keep the New Warriors' leader one move ahead. Includes a Justice starter deck and a masked alter-ego art. 23 cards. English and Spanish. Pairs with The Rise of Red Skull.",
   "tags": ["Street level", "Justice", "New Warriors"],
   "wave": "cycle1",
   "unlock": "open",
